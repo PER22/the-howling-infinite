@@ -21,10 +21,6 @@ app.use(require('./config/checkToken'));
 
 
 app.use('/api/users', require('./routes/api/users'));
-
-// Protect the api routes below from anon users
-const ensureLoggedIn = require('./config/ensureLoggedIn');
-
 app.use('/api/essays', require('./routes/api/essays'));
 // app.use('/api/projects',  require('./routes/api/projects'));
 // app.use('/api/blog', require('./routes/api/post'));

@@ -8,5 +8,4 @@ router.get('/:profileId', profileController.getProfileById);
 router.put('/:profileId', ensureLoggedIn, profileController.updateProfile);
 router.delete('/:profileId', ensureLoggedIn, profileController.deleteProfile);
 
-
 module.exports = router;

@@ -11,8 +11,15 @@ import './App.css';
 //Pages
   //Auth
 import AuthPage from '../Authentication/AuthPage/AuthPage'
+
+  //Home
 import HomePage from '../Home/HomePage';
-import MainPaperPage from '../MainPaper/MainPaperPage';
+
+  //Main Essay
+import ReadMainEssayPage from '../MainEssay/ReadMainEssayPage';
+import EditMainEssayPage from '../MainEssay/EditMainEssayPage';
+
+
 import SideEssaysPage from '../SideEssays/SideEssaysPage';
 import BlogPage from '../Blog/BlogPage';
 import AboutPage from '../About/AboutPage';
@@ -23,7 +30,7 @@ import ContactPage from '../Contact/ContactPage';
 // import NavigationBar from '../../components/NavigationBar/NavigationBar';
 import ResponsiveDrawer from '../../components/ResponsiveDrawer/ResponsiveDrawer'
 import FooterBar from '../../components/FooterBar/FooterBar'
-
+import EditSideEssayPage from '../SideEssays/EditSideEssayPage';
 
 export default function App() {
   const [loggedInUser, setLoggedInUser] = useState(getLoggedInUser());
@@ -35,8 +42,10 @@ export default function App() {
           <Routes>
             <Route path="/auth" exact element={<AuthPage setUser={setLoggedInUser}/>}/>
             <Route path="/" exact element={<HomePage/>} />
-            <Route path="/read" element={<MainPaperPage/>} />
+            <Route path="/read" element={<ReadMainEssayPage/>} />
+            <Route path="/edit" element={<EditMainEssayPage/>} />
             <Route path="/side-essays" element={<SideEssaysPage/>} />
+            <Route path="/side-essays/create" element={<EditSideEssayPage/>} />
             <Route path="/blog" element={<BlogPage/>} />
             <Route path="/about" element={<AboutPage/>} />
             <Route path="/contact" element={<ContactPage/>} />

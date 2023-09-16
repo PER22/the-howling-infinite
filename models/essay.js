@@ -17,9 +17,12 @@ const essaySchema = new Schema({
     ref: 'User',  
     required: true
   },
-  awsFileKey: { 
+  essayS3Key: { 
     type: String,
     required: true
+  },
+  coverPhotoS3Key : {
+    type: String
   }
 }, {
   timestamps: true  // This will automatically add createdAt and updatedAt fields

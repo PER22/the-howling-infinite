@@ -45,7 +45,7 @@ async function create(req, res) {
     // Yes, we can serialize a string
     res.json(token);
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     res.status(500).json(err);
   }
 }

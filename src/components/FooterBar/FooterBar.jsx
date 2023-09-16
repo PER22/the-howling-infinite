@@ -1,4 +1,4 @@
-import "./FooterBar.css"
+
 export default function FooterBar(){
     return (<>
     <nav className="footer-bar">

@@ -31,7 +31,7 @@ export default function SignUpForm({setUser}){
       navigate('/');
     } catch(err) {
       // Invalid signup
-      console.log(err);
+      // console.log(err);
       setFormData((prevState) => ({
         ...prevState,
         error: 'Sign Up Failed - Try Again',

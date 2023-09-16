@@ -15,7 +15,7 @@ async function allProfiles(req, res){
       const profiles = await Profile.find().populate('user');
       res.status(200).json(profiles)
   }catch(err){
-      console.log(err)
+      // console.log(err)
       res.status(400).json(err)
   }
 }
@@ -25,7 +25,7 @@ async function getProfileById(req, res){
         const profile = await Profile.findOne({_id: req.params.profileId}).populate('user');
         res.status(200).json(profile)
     }catch(err){
-        console.log(err)
+        // console.log(err)
         res.status(400).json(err)
     }
 }
@@ -33,8 +33,6 @@ async function getProfileById(req, res){
 async function updateProfile(req, res) {
     try {
         const selectedProfile = await Profile.findOne({_id: req.params.profileId}).populate("user");
-        console.log("selectedProfile.user._id.toHexString(): ", selectedProfile.user._id.toHexString());
-        console.log("req.user._id: ", req.user._id)
         if (selectedProfile.user._id.toHexString() === req.user._id){
           const updatedProfile = await Profile.findOneAndUpdate(
             { _id: req.params.profileId},
@@ -47,7 +45,7 @@ async function updateProfile(req, res) {
         }
         
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       res.status(400).json(err);
     }
 }
@@ -69,7 +67,7 @@ async function deleteProfile(req, res) {
       }
       res.status(200).json({ message: 'Profile deleted.' });
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       res.status(400).json(error);
     }
 }

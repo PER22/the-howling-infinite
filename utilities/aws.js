@@ -1,59 +1,101 @@
-const AWS = require('aws-sdk');
+const {
+        getSignedUrl
+      } = require("@aws-sdk/s3-request-presigner"),
+      {
+        Upload
+      } = require("@aws-sdk/lib-storage"),
+      {
+        GetObjectCommand,
+        S3
+      } = require("@aws-sdk/client-s3");
+const multer = require('multer');
+const multerS3 = require('multer-s3');
 
-const s3 = new AWS.S3(
-    {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        region: process.env.AWS_REGION
-    }
-);
 
-function uploadToS3(key, content) {
-    const params = {
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Key: key,
-        Body: content,
-        ACL: 'public-read'  // This will make the file publicly readable
-    };
-  
-    return new Promise((resolve, reject) => {
-        s3.upload(params, (err, data) => {
-            if (err) reject(err);
-            resolve(data.Location);  // This will give you the file URL after upload
-      });
-    });
+const s3 = new S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_DEFAULT_REGION
+});
+
+async function generateSignedURL(objectKey){
+  const params = {
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: objectKey,
+    Expires: 60 * 20
   }
-  
-function downloadFromS3(key) {
-    const params = {
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Key: key
-    };
-  
-    return new Promise((resolve, reject) => {
-        s3.getObject(params, (err, data) => {
-            if (err) reject(err);
-            resolve(data.Body); // This will give you the file content
-        });
-    });
+  return await getSignedUrl(s3, new GetObjectCommand(params), {
+    expiresIn: params.Expires
+  });
 }
 
-function deleteFromS3(key) {
-    const params = {
-      Bucket: process.env.AWS_BUCKET_NAME,
-      Key: key
-    };
-  
-    return new Promise((resolve, reject) => {
-      s3.deleteObject(params, (err, data) => {
-        if (err) reject(err);
-        resolve(data); // This will give you a response indicating the deletion
-      });
-    });
-  }
-  
-  module.exports = {
-    uploadToS3,
-    downloadFromS3,
-    deleteFromS3
+function extractKeyFromURL(url) {
+  const urlParts = url.split('/');
+  return urlParts.slice(3).join('/');
+}
+
+const uploadImage = multer({
+  storage: multerS3({
+      s3: s3,
+      bucket: process.env.AWS_BUCKET_NAME,
+      metadata: function (req, file, cb) {
+          cb(null, {fieldName: file.fieldname});
+      },
+      key: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname);
+    }
+  })
+});
+
+async function uploadToS3(key, content) {
+  const params = {
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: key,
+    Body: content
   };
+  try {
+    const response = await new Upload({
+      client: s3,
+      params
+    }).done();  // Using the .promise() method to get a promise
+    return extractKeyFromURL(response.Location);
+  } catch (error) {
+    console.error('Error uploading to S3:', error);
+    throw error;  // Rethrow the error so you can handle it in the calling function
+  }
+}
+
+async function downloadFromS3(key) {
+  const params = {
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: key
+  };
+  return new Promise((resolve, reject) => {
+    s3.getObject(params, (err, data) => {
+      if (err) reject(err);
+      resolve(data.Body);
+    });
+  });
+}
+
+async function deleteFromS3(key) {
+  const params = {
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: key
+  };
+
+  return new Promise((resolve, reject) => {
+    s3.deleteObject(params, (err, data) => {
+      if (err) reject(err);
+      resolve(data);
+    });
+  });
+}
+
+module.exports = {
+  uploadImage,
+  uploadToS3,
+  downloadFromS3,
+  deleteFromS3,
+  generateSignedURL
+};
