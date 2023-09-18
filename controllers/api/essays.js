@@ -1,13 +1,20 @@
 const Essay = require('../../models/essay');
 const { uploadToS3, downloadFromS3, deleteFromS3, generateSignedURL } = require('../../utilities/aws');
+const downsize = require("downsize");
+
+// New sanitization function
+const sanitizeTitleForS3 = (title) => {
+    return title.replace(/[^a-zA-Z0-9-_]/g, '-')
+                .replace(/\s+/g, '-')
+                .toLowerCase();
+};
 
 async function createEssay(req, res) {
-    console.log("req.body", req.body);
     try {
         const { title, bodyText, isMain } = req.body;
-
-        // Handle essay text upload
-        const s3key = `essays/${title.replace(/\s+/g, '-').toLowerCase()}.txt`;
+        
+        // Use the sanitization function to generate the s3key
+        const s3key = `essays/${sanitizeTitleForS3(title)}.txt`;
         const fileURL = await uploadToS3(s3key, bodyText);
         
         let coverPhotoS3Key = null;
@@ -33,32 +40,47 @@ async function createEssay(req, res) {
     }
 }
 
-
 async function getEssayById(req, res) {
     try {
         const essay = await Essay.findById(req.params.essayId).populate('author');
         if (!essay) {
             return res.status(404).json({ error: 'Essay not found.' });
         }
-        const essayBody = await downloadFromS3(essay.essayS3Key);
-        res.status(200).json({ essay, bodyText: essayBody.toString() });
+        const essayBody = await new Promise(async (resolve, reject) => {
+            const incomingMsg = await downloadFromS3(essay.essayS3Key);
+            let data = '';
+            incomingMsg.on('data', chunk => data += chunk);
+            incomingMsg.on('end', () => resolve(data));
+            incomingMsg.on('error', err => reject(err));
+        });
+        res.status(200).json({ ...essay.toObject(), bodyText: essayBody.toString() });
     } catch (error) {
         console.error('Error fetching essay:', error);
         res.status(400).json({ error: 'Failed to fetch essay' });
     }
 }
 
-async function getAllSideEssays(req, res) {
+async function getAllSideEssayPreviews(req, res) {
     try {
         const essays = await Essay.find({isMain: false}).populate('author');
         if (!essays || essays.length === 0) {
             return res.status(404).json({ error: 'Essays not found.' });
         }
-        const essayBodies = await Promise.all(essays.map(essay => downloadFromS3(essay.essayS3Key)));
+
+        const essayWholeBodies = await Promise.all(essays.map(essay => {
+            return new Promise(async (resolve, reject) => {
+                const incomingMsg = await downloadFromS3(essay.essayS3Key);
+
+                let data = '';
+                incomingMsg.on('data', chunk => data += chunk);
+                incomingMsg.on('end', () => resolve(data));
+                incomingMsg.on('error', err => reject(err));
+            });
+        }));
         const combinedEssays = essays.map((essay, index) => {
             return {
                 ...essay.toObject(),
-                bodyText: essayBodies[index].toString()
+                bodyText:  downsize(essayWholeBodies[index] , {words: 20, append: "..."})
             };
         });
         res.status(200).json(combinedEssays);
@@ -70,15 +92,52 @@ async function getAllSideEssays(req, res) {
 
 async function getMainEssay(req, res) {
     try {
-        const essay = await Essay.findOne({isMain : true}).populate('author');
+        const essay = await Essay.findOne({ isMain: true }).populate('author');
         if (!essay) {
             return res.status(404).json({ error: 'Essay not found.' });
         }
-        const essayBody = await downloadFromS3(essay.essayS3Key);
-        res.status(200).json({ ...essay.toObject(), bodyText: essayBody.toString() });
+        const essayBody = await new Promise(async (resolve, reject) => {
+            const incomingMsg = await downloadFromS3(essay.essayS3Key);
+            let data = '';
+            incomingMsg.on('data', chunk => data += chunk);
+            incomingMsg.on('end', () => resolve(data));
+            incomingMsg.on('error', err => reject(err));
+        });
+        res.status(200).json({
+            ...essay.toObject(),
+            bodyText: essayBody
+        });
     } catch (error) {
-        console.error('Error fetching essay:', error);
-        res.status(400).json({ error: 'Failed to fetch essay' });
+        console.error('Error fetching main essay:', error);
+        res.status(400).json({ error: 'Failed to fetch main essay' });
+    }
+}
+
+async function getMainEssayPreview(req, res) {
+    try {
+        const essay = await Essay.findOne({isMain: true}).populate('author');
+        if (!essay) {
+            return res.status(404).json({ error: 'Main essay not found.' });
+        }
+
+        // Download the essay body from S3
+        const essayWholeBody = await new Promise(async (resolve, reject) => {
+            const incomingMsg = await downloadFromS3(essay.essayS3Key);
+
+            let data = '';
+            incomingMsg.on('data', chunk => data += chunk);
+            incomingMsg.on('end', () => resolve(data));
+            incomingMsg.on('error', err => reject(err));
+        });
+
+        // Truncate the essay body
+        const truncatedBody = downsize(essayWholeBody, {words: 20, append: "..."});
+
+        res.status(200).json({ ...essay.toObject(), bodyText: truncatedBody });
+
+    } catch (error) {
+        console.error('Error fetching main essay:', error);
+        res.status(400).json({ error: 'Failed to fetch main essay' });
     }
 }
 
@@ -151,13 +210,13 @@ async function getSignedURLForEssayCoverImage(req, res){
         }
 }
 
-
 module.exports = {
     createEssay,
-    getAllSideEssays,
+    getAllSideEssayPreviews,
     getMainEssay,
     getEssayById,
     updateEssayById,
     deleteEssayById,
     getSignedURLForEssayCoverImage,
+    getMainEssayPreview
 };

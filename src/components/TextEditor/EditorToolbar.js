@@ -1,5 +1,7 @@
 import React from "react";
 import { Quill } from "react-quill";
+import ImageUploader from "quill-image-uploader";
+import sendRequest from "../../utilities/send-request";
 
 // Custom Undo button icon component for Quill editor. You can import it directly
 // from 'quill/assets/icons/undo.svg' but I found that a number of loaders do not
@@ -46,9 +48,12 @@ Font.whitelist = [
   "courier-new",
   "georgia",
   "helvetica",
-  "lucida"
+  "lucida",
 ];
 Quill.register(Font, true);
+
+Quill.register("modules/imageUploader", ImageUploader);
+
 
 // Modules object for setting up the Quill editor
 export const modules = {
@@ -63,8 +68,26 @@ export const modules = {
     delay: 500,
     maxStack: 100,
     userOnly: true
+  },
+  imageUploader: {
+    upload: (file) => {
+      return new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append("image", file);
+        sendRequest("/api/essays/uploadImage", "POST", formData)
+        .then((result) => {
+          console.log(result);
+          resolve(result.data.url); 
+        })
+        .catch((error) => {
+          reject("Upload failed");
+          console.error("Error:", error);
+        });      
+      });
+    }
   }
 };
+
 
 // Formats objects for setting up the Quill editor
 export const formats = [
@@ -156,4 +179,4 @@ export const QuillToolbar = () => (
   </div>
 );
 
-export default QuillToolbar;
+export default QuillToolbar;  

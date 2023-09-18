@@ -20,7 +20,8 @@ import ReadMainEssayPage from '../MainEssay/ReadMainEssayPage';
 import EditMainEssayPage from '../MainEssay/EditMainEssayPage';
 
 
-import SideEssaysPage from '../SideEssays/SideEssaysPage';
+import SideEssaysIndexPage from '../SideEssays/SideEssaysIndexPage';
+import SideEssayDetailPage from '../SideEssays/SideEssayDetailPage';
 import BlogPage from '../Blog/BlogPage';
 import AboutPage from '../About/AboutPage';
 import ContactPage from '../Contact/ContactPage';
@@ -44,7 +45,8 @@ export default function App() {
             <Route path="/" exact element={<HomePage/>} />
             <Route path="/read" element={<ReadMainEssayPage/>} />
             <Route path="/edit" element={<EditMainEssayPage/>} />
-            <Route path="/side-essays" element={<SideEssaysPage/>} />
+            <Route path="/side-essays" element={<SideEssaysIndexPage/>} />
+            <Route path="/side-essays/:essayId" element={<SideEssayDetailPage/>} />
             <Route path="/side-essays/create" element={<EditSideEssayPage/>} />
             <Route path="/blog" element={<BlogPage/>} />
             <Route path="/about" element={<AboutPage/>} />

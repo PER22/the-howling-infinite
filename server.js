@@ -4,7 +4,7 @@ const favicon = require('serve-favicon');
 const logger = require('morgan');
 require('dotenv').config();
 require('./config/database');
-
+const cors = require('cors');
 const app = express();
 
 app.use(logger('dev'));
@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true}));
 app.use(favicon(path.join(__dirname, 'build', 'favicon.ico')));
 app.use(express.static(path.join(__dirname, 'build')));
-
+app.use(cors());
 // middleware that adds the user object from a JWT to req.user
 app.use(require('./config/checkToken'));
 

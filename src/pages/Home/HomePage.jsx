@@ -9,9 +9,9 @@ export default function HomePage() {
       try {
         const recievedSideEssays = await sendRequest('/api/essays/sideEssays');
         if(recievedSideEssays){setSideEssays(recievedSideEssays);}
-        //console.log("Side Essays via HomePage.jsx:", recievedSideEssays);
+        // console.log("Side Essays via HomePage.jsx:", recievedSideEssays);
       } catch(err){
-        //console.log("Error fetching side essays: ", err);
+        console.log("Error fetching side essays: ", err);
       }
     }
     fetchSideEssays();
@@ -21,9 +21,9 @@ export default function HomePage() {
   useEffect(()=>{
     async function fetchMainEssay(){
       try {
-        const recievedMainEssay = await sendRequest('/api/essays/mainEssay');
+        const recievedMainEssay = await sendRequest('/api/essays/mainEssayPreview');
         if(recievedMainEssay){setMainEssay(recievedMainEssay);}
-        //console.log("Main Essay:", recievedMainEssay);
+        console.log("Main Essay:", recievedMainEssay);
       } catch(err){
         // console.log("Error fetching main essay: ", err);
       }
