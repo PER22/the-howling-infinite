@@ -65,17 +65,39 @@ async function uploadToS3(key, content) {
   }
 }
 
+async function updateInS3(key, content) {
+  const params = {
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: key,
+      Body: content
+  };
+  return new Promise((resolve, reject) => {
+      s3.putObject(params, (err, data) => {
+          if (err) {
+              console.error('Error updating object in S3:', err);
+              reject(err);
+          } else {
+              resolve(data);
+          }
+      });
+  });
+}
+
 async function downloadFromS3(key) {
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: key
   };
-  return new Promise((resolve, reject) => {
-    s3.getObject(params, (err, data) => {
-      if (err) reject(err);
-      resolve(data.Body);
+  try{
+    return new Promise((resolve, reject) => {
+      s3.getObject(params, (err, data) => {
+        if (err) reject(err);
+        resolve(data.Body);
+      });
     });
-  });
+  }catch(error){
+    console.log("Error: ", error);
+  }
 }
 
 async function deleteFromS3(key) {
@@ -97,5 +119,6 @@ module.exports = {
   uploadToS3,
   downloadFromS3,
   deleteFromS3,
-  generateSignedURL
+  generateSignedURL, 
+  updateInS3
 };

@@ -1,0 +1,40 @@
+.success-message{
+    color: green
+}
+
+.error-message{
+    color: red;
+}
+.success-message{
+    color: green
+}
+
+.error-message{
+    color: red;
+}
+.App {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  
+  .content {
+    flex-grow: 1;
+  }
+  
+  .footer-bar {
+    background-color: #344E41;
+    padding: .5rem;
+    color: white;
+  }
+  
+
+body {
+    background-color: #DAD7CD;
+    min-height: 100vh;
+}
+
+.article-container{
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}

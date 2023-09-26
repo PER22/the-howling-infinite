@@ -2,13 +2,10 @@ import { getToken } from "./users-service";
 export default async function sendRequest(url, method = 'GET', payload=null, headers = {}){
     const options = { method, headers };
     if(payload){
-        //console.log("Payload exists.");
         if (payload instanceof FormData) {
-            //console.log("Payload is a FormData.");
             options.body = payload;
             // Don't manually set Content-Type for FormData. Let the browser do it.
         } else {
-            //console.log("Payload isn't FormData.");
             options.headers['Content-Type'] = 'application/json';
             options.body = JSON.stringify(payload);
         }
@@ -26,7 +23,6 @@ export default async function sendRequest(url, method = 'GET', payload=null, hea
         if (contentType && contentType.includes("application/json")) {
             return res.json();
         } else {
-            console.log("returning text");
             return res.text();
         }
     } else {

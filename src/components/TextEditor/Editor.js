@@ -4,13 +4,13 @@ import EditorToolbar, { modules, formats } from "./EditorToolbar";
 import "react-quill/dist/quill.snow.css";
 // import "./styles.css";
 
-export const Editor = ({ onChange }) => {
-  const [editorContent, setEditorContent] = React.useState('');
+export const Editor = ({ onChange, innerHTML }) => {
+  const [editorContent, setEditorContent] = React.useState(innerHTML);
 
   const handleChange = value => {
     setEditorContent(value);
     if (onChange) {
-      onChange(value);  // Pass the content back to parent
+      onChange(value); 
     }
   };
 

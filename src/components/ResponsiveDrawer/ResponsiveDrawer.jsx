@@ -11,6 +11,8 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Divider  from '@mui/material/Divider';
 import MenuIcon from '@mui/icons-material/Menu';
+import './ResponsiveDrawer.css';
+
 export default function ResponsiveDrawer({setUser, user}) {
     async function handleLogOut() {
       userService.logOut();
@@ -63,7 +65,7 @@ export default function ResponsiveDrawer({setUser, user}) {
 
     return (
       <div>
-        <Button onClick={toggleDrawer(true)}><MenuIcon/></Button>
+        <Button onClick={toggleDrawer(true)} sx={{position: 'fixed', top:'1rem', left: '1rem', backgroundColor: "#588157"}}><MenuIcon sx={{color: 'white',}}/></Button>
         <Drawer
           anchor={drawerAnchor}
           open={open}

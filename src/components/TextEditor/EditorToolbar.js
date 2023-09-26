@@ -76,8 +76,8 @@ export const modules = {
         formData.append("image", file);
         sendRequest("/api/essays/uploadImage", "POST", formData)
         .then((result) => {
-          console.log(result);
-          resolve(result.data.url); 
+          const imageKey = "/api/images/" + result.imageUrl.split(".com/")[1];
+          resolve(imageKey);
         })
         .catch((error) => {
           reject("Upload failed");

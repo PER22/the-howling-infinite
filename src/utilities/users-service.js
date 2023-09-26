@@ -27,11 +27,6 @@ export function getLoggedInUser() {
     return token ? JSON.parse(atob(token.split('.')[1])).user : null;
 }
 
-export function checkToken() {
-    return usersAPI.checkToken()
-      .then(dateStr => new Date(dateStr));
-  }
-
 export function logOut() {
     localStorage.removeItem('token');
 }

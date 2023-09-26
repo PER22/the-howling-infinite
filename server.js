@@ -15,15 +15,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true}));
 app.use(favicon(path.join(__dirname, 'build', 'favicon.ico')));
 app.use(express.static(path.join(__dirname, 'build')));
-app.use(cors());
+// app.use(cors());
 // middleware that adds the user object from a JWT to req.user
 app.use(require('./config/checkToken'));
 
 
 app.use('/api/users', require('./routes/api/users'));
 app.use('/api/essays', require('./routes/api/essays'));
-// app.use('/api/projects',  require('./routes/api/projects'));
-// app.use('/api/blog', require('./routes/api/post'));
+app.use('/api/images', require('./routes/api/images'));
+app.use('/api/comments', require('./routes/api/comments'));
+app.use('/api/blog', require('./routes/api/blog'));
 
 // "catch-all" route that will match all GET requests
 // that don't match an API route defined above

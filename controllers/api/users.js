@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
+const postmark = require("postmark");
 const User = require('../../models/user');
 const Profile = require('../../models/profile')
 const { body, validationResult } = require('express-validator');
@@ -55,7 +57,6 @@ const validateAndSanitizeLogin = [
   body('password').notEmpty().trim().escape(),
 ];
 
-
 async function login(req, res) {
   try {
     // Validate and sanitize the login form data
@@ -78,29 +79,81 @@ async function login(req, res) {
   }
 }
 
-async function getUserByUsername(req,res){
-    try{
-      // Find the user by their username
-      const user = await User.findOne({username: req.params.username});
-      if (!user){ throw new Error(`Failed to find User with username ${req.params.username}`);}
-      res.status(200).json(user);
-    }catch(err){
-      res.status(404).json({error: err})
-    }
-      
-}
-
 function createJWT(user) {
   return jwt.sign(
-    // data payload
     { user },
     process.env.SECRET,
     { expiresIn: '24h' }
   );
 }
 
+async function sendPasswordResetEmail(req, res){
+  try{
+    const user = await User.findOne({email : req.body.email});
+    if(!user){
+      return res.status(404).json({error: `User with email address '${req.body.email}' not found.`});
+    }
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const expirationTime = new Date();
+    expirationTime.setHours(expirationTime.getHours() + 1); // token valid for 1 hour
+    user.passwordResetToken = resetToken;
+    user.passwordResetExpires = expirationTime;
+    await user.save(); // save the updated user document
+
+    var client = new postmark.ServerClient(process.env.POSTMARK_KEY);
+    await client.sendEmail({
+      "From": "preil001@ucr.edu",
+      "To": `${req.body.email}`,
+      "Subject": "Password Reset from The-Howling-Infinite.com",
+      "HtmlBody": `Here is your password reset link: <a href="http://localhost:3000/reset-password?token=${resetToken}">Reset Password</a>`,
+      "TextBody": `Copy and paste this link into your URL bar to reset your password: http://localhost:3000/reset-password?token=${resetToken}`,
+      "MessageStream": "outbound"
+    });
+    return res.status(200).json("Successfully sent password reset email.")
+  }catch(err){
+    return res.status(500).json({error: err});
+  }
+}
+
+async function performPasswordReset(req, res){
+  const { token, newPassword } = req.body;
+
+  try {
+    // Find the user by reset token
+    const user = await User.findOne({ passwordResetToken: token });
+
+    if (!user) {
+      return res.status(400).send('Invalid token.');
+    }
+
+    // Check if token is expired
+    const now = new Date();
+    if (user.passwordResetExpires < now) {
+      return res.status(400).send('Token has expired.');
+    }
+
+    // Hash the new password
+    user.password = await bcrypt.hash(newPassword, user.SALT_ROUNDS || 6);
+
+    // Clear the reset token and expiration date
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+
+    // Save the updated user back to the database
+    await user.save();
+
+    // Send a success response
+    res.status(200).send('Password has been reset successfully.');
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred while resetting the password.');
+  }
+};
+
 module.exports = {
   create,
   login,
-  getUserByUsername
+  sendPasswordResetEmail,
+  performPasswordReset
 };

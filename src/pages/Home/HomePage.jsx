@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import sendRequest from "../../utilities/send-request";
 import EssayPreviewCard from "../../components/EssayPreviewCard/EssayPreviewCard";
+import TitleBar from "../../components/TitleBar/TitleBar";
 
 export default function HomePage() {
   const [sideEssays, setSideEssays] = useState([]);
@@ -9,7 +10,6 @@ export default function HomePage() {
       try {
         const recievedSideEssays = await sendRequest('/api/essays/sideEssays');
         if(recievedSideEssays){setSideEssays(recievedSideEssays);}
-        // console.log("Side Essays via HomePage.jsx:", recievedSideEssays);
       } catch(err){
         console.log("Error fetching side essays: ", err);
       }
@@ -23,16 +23,15 @@ export default function HomePage() {
       try {
         const recievedMainEssay = await sendRequest('/api/essays/mainEssayPreview');
         if(recievedMainEssay){setMainEssay(recievedMainEssay);}
-        console.log("Main Essay:", recievedMainEssay);
       } catch(err){
-        // console.log("Error fetching main essay: ", err);
+        console.log("Error fetching main essay: ", err);
       }
     }
     fetchMainEssay();
   }, []);
 
   return (<>
-    <h1>The-Howling-Infinite.com</h1>
+    <TitleBar title={"The-Howling-Infinite.com"}></TitleBar>
     <p>
       Welcome to a unique exploration into the mind of Lee Oswald, set against the backdrop of one of the most pivotal moments in American history. 
       Crafted with cinematic precision, this multimedia experience integrates film directions, images, and music, inviting you into a profound psychological narrative.

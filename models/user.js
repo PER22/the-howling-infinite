@@ -20,6 +20,8 @@ const userSchema = new Schema({
     minlength: 8,
     required: true
   },
+  passwordResetToken: {type: String},
+  passwordResetExpires: {type: Date},
   profile: { type: Schema.Types.ObjectId, ref: 'Profile' }
 }, {
   timestamps: true,

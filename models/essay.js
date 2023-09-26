@@ -25,7 +25,7 @@ const essaySchema = new Schema({
     type: String
   }
 }, {
-  timestamps: true  // This will automatically add createdAt and updatedAt fields
+  timestamps: true  
 });
 
 module.exports = mongoose.model('Essay', essaySchema);

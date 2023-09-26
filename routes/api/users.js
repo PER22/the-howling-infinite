@@ -6,7 +6,10 @@ const usersCtrl = require('../../controllers/api/users');
 router.post('/', usersCtrl.create);
 // POST /api/users/login
 router.post('/login', usersCtrl.login);
-// GET /api/users/:username
-router.get('/:username', usersCtrl.getUserByUsername);
+// POST /api/users/request-password-reset
+router.post('/request-password-reset', usersCtrl.sendPasswordResetEmail);
+// PUT /api/users/perform-password-reset
+router.put('/perform-password-reset', usersCtrl.performPasswordReset);
+
 
 module.exports = router;

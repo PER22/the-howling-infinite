@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import sendRequest from "../../utilities/send-request";
+import TitleBar from "../../components/TitleBar/TitleBar";
 export default function SideEssayDetailPage(){
     const [sideEssay, setSideEssay]= useState(null);
     const {essayId} = useParams();
@@ -9,7 +10,6 @@ export default function SideEssayDetailPage(){
             async function fetchSideEssay(){
                 try{
                 const response = await sendRequest(`/api/essays/${essayId}`);
-                console.log(response);
                 if(response){
                     setSideEssay(response);
                 }
@@ -23,7 +23,7 @@ export default function SideEssayDetailPage(){
     return (
         <>{sideEssay &&
             <>
-            <h1>{sideEssay.title}</h1>
+             <TitleBar title={sideEssay.title}/>
             <div dangerouslySetInnerHTML={{__html: sideEssay.bodyText}}/>
             </>}
         </>

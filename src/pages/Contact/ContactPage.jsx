@@ -1,3 +1,9 @@
+import TitleBar from "../../components/TitleBar/TitleBar";
+
 export default function ContactPage(){
-    return (<><h1>Contact Page</h1></>);
+    return (
+    <>
+        <TitleBar title = {"Contact Information"}/>
+    </>
+    );
 }
