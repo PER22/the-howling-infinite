@@ -1,22 +1,28 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useLocation } from 'react-router-dom';
+import { TitleContext } from "../../../components/TitleBar/TitleContext";
 import sendRequest from "../../../utilities/send-request";
-import TitleBar from "../../../components/TitleBar/TitleBar";
+
 
 function useQuery() {
     return new URLSearchParams(useLocation().search);
 }
     
 export default function PerformPasswordResetPage() {
+    const { setTitle } = useContext(TitleContext);
+    useEffect(() => {
+        setTitle('Enter New Password');
+    }, [setTitle]);
+
     let query = useQuery();
+    useEffect(() => {
+        setToken(query.get('token'));
+    }, [query]);
+
     const [token, setToken] = useState('');
     const [message, setMessage] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-
-    useEffect(() => {
-        setToken(query.get('token'));
-    }, [query]);
 
     const handlePasswordReset = async (e) => {
         e.preventDefault();
@@ -36,7 +42,6 @@ export default function PerformPasswordResetPage() {
 
     return (
         <>
-          <TitleBar title={"Set A New Password"}></TitleBar>
           <form onSubmit={handlePasswordReset}>
             <label>
               New Password:

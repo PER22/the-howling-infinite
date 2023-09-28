@@ -24,5 +24,3 @@ router.get('/parent/:parentId', commentController.getCommentsByParent);
 router.get('/unapproved', ensureAdmin, commentController.getAllUnapprovedComments);
 
 module.exports = router;
-
-module.exports = router;

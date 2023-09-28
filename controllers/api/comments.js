@@ -2,8 +2,22 @@ const Comment = require('../../models/comment');
 
 
 async function createComment (req, res) {
+  try {
+    const { content, parentId, parentType } = req.body;
+    const author = req.user._id; 
 
-  res.status(201).json({ message: 'Create comment not implemented yet' });
+    const newComment = new Comment({
+      content,
+      author,
+      parent: { id: parentId, type: parentType },
+    });
+
+    await newComment.save();
+
+    return res.status(201).json(newComment);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
 

@@ -1,18 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { TitleContext } from '../../components/TitleBar/TitleContext';
 import sendRequest from '../../utilities/send-request';
 import Editor from '../../components/TextEditor/Editor';
 
 function CreateSideEssayPage() {
-    const [title, setTitle] = useState('');
+    const [essayTitle, setEssayTitle] = useState('');
     const [bodyText, setBodyText] = useState('');
     const [coverPhoto, setCoverPhoto]= useState(null);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const navigate = useNavigate();
+
+    const { setTitle } = useContext(TitleContext);
+    useEffect(() => {
+        setTitle('New Side Essay');
+    }, [setTitle]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData();
-        formData.append('title', title);
+        formData.append('title', essayTitle);
         formData.append('bodyText', bodyText);
         formData.append('isMain', false);
         if (coverPhoto) {
@@ -21,6 +29,9 @@ function CreateSideEssayPage() {
         try {
             const response = await sendRequest('/api/essays', 'POST', formData);
             setSuccess('Side Essay successfully created!');
+            setTimeout(() => {
+                navigate(`/side-essays/${response._id}`);
+              }, 2000);
             setError('');
         } catch (err) {
             setError('Error creating side essay: ' + err.message);
@@ -28,14 +39,13 @@ function CreateSideEssayPage() {
         }
     };
     
-
     return (
         <div>
             <h1>Side Essay</h1> 
             <form onSubmit={handleSubmit}>
                 <div>
                     <label>Title:</label>
-                    <input type="text" value={title} onChange={e => setTitle(e.target.value)} required />
+                    <input type="text" value={essayTitle} onChange={e => setEssayTitle(e.target.value)} required />
                 </div>
                 <div>
                     <label>Body:</label>

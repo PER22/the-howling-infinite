@@ -1,8 +1,15 @@
-import React, { useState } from 'react';
-import TitleBar from '../../../components/TitleBar/TitleBar';
+import React, { useState, useEffect, useContext } from 'react';
+import { TitleContext } from '../../../components/TitleBar/TitleContext';
 import sendRequest from '../../../utilities/send-request';
 import { useNavigate } from 'react-router-dom';
+
 export default function RequestPasswordResetPage(){
+
+    const { setTitle } = useContext(TitleContext);
+    useEffect(() => {
+        setTitle('Request Password Reset');
+    }, [setTitle]);   
+
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
     const [error, setError]=  useState('');
@@ -23,9 +30,10 @@ export default function RequestPasswordResetPage(){
         }
   };
 
+  setTitle("Password Reset Request");
+
   return (
     <>
-      <TitleBar title={"Password Reset Request"}></TitleBar>
       <form onSubmit={handleSubmit}>
         <label>
           Email:

@@ -1,36 +1,42 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { TitleContext } from '../../../components/TitleBar/TitleContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import ConfirmationModal from '../../../components/ConfirmationModal/ConfirmationModal';
-import TitleBar from '../../../components/TitleBar/TitleBar';
 import sendRequest from '../../../utilities/send-request';
 
 
-export default function BlogPostEditPage({ user }) {
+export default function BlogPostEditPage({ user}) {
+  const { setTitle } = useContext(TitleContext);
+
+
   const { postId } = useParams();
-  const [title, setTitle] = useState('');
+  const [postTitle, setPostTitle] = useState('');
   const [article, setArticle] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-
+  
   useEffect(() => {
     const fetchPost = async () => {
       try {
         const postData = await sendRequest(`/api/blog/${postId}`);
-        setTitle(postData.title);
+        setPostTitle(postData.title);
         setArticle(postData.article);
       } catch (error) {
         console.error('Error fetching post:', error);
       }
     };
-
     fetchPost();
   }, [postId]);
+
+  useEffect(() => {
+    setTitle(`Editing '${postTitle}'`);
+}, [setTitle, postTitle]);
 
 
   const handleUpdatePostSubmit = async (event) => {
     event.preventDefault();
     try {
-      const postData = { title, article };
+      const postData = { postTitle, article };
       const updatedPost = await sendRequest(`/api/blog/${postId}`, "PUT", postData);
       navigate(`/blog/${updatedPost._id}`)
     } catch (error) {
@@ -53,17 +59,17 @@ export default function BlogPostEditPage({ user }) {
   const closeModal = () => { setShowDeleteConfirmationModal(false) };
   const openModal = () => { setShowDeleteConfirmationModal(true) };
 
+
   return (
     <>
-    <TitleBar title={`Editing '${title}'`}></TitleBar>
       <div className="info-card">
         <form onSubmit={handleUpdatePostSubmit}>
           <label>
             Title:<br />
             <input
               type="text"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
+              value={postTitle}
+              onChange={(event) => setPostTitle(event.target.value)}
               required
             /><br />
           </label>

@@ -2,7 +2,7 @@ import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
-import { Link } from 'react-router-dom';
+
 
 export default function BlogPostPreviewCard({ post }) {
   // Constructing the post URL
@@ -22,8 +22,8 @@ export default function BlogPostPreviewCard({ post }) {
             {post.title}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            <p>Written on: <em>{formattedDate}</em></p>
-            <p>By: <em>{post.author.name}</em></p>
+            <span>Written on: <em>{formattedDate}</em></span><br/>
+            <span>By: <em>{post.author.name}</em></span><br/>
             {previewText}
           </Typography>
           <Typography variant="body2" color="primary">

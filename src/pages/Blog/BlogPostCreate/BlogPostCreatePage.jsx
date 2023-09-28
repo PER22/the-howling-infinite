@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { TitleContext } from '../../../components/TitleBar/TitleContext';
 import { useNavigate } from 'react-router-dom';
-import TitleBar from '../../../components/TitleBar/TitleBar';
 import sendRequest from '../../../utilities/send-request';
 import './BlogPostCreate.css'
+
 export default function NewPostForm() {
-  const [title, setTitle] = useState('');
+  const { setTitle } = useContext(TitleContext);
+    useEffect(() => {
+        setTitle('New Blog Post');
+    }, [setTitle]);
+
+  const [postTitle, setPostTitle] = useState('');
   const [article, setArticle] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -12,7 +18,7 @@ export default function NewPostForm() {
   const handleCreatePostSubmit = async (event) => {
     event.preventDefault();
     try {
-      const postData = { title, article};
+      const postData = { title: postTitle, article};
       const createdPost = await sendRequest('/api/blog', 'POST', postData);
       navigate(`/blog/${createdPost._id}`);
     } catch (error) {
@@ -21,16 +27,17 @@ export default function NewPostForm() {
     }
   };
 
+
+
   return (
       <>
-        <TitleBar title={"New Blog Post"}></TitleBar>
         <form onSubmit={handleCreatePostSubmit} className='post-create-form info-card'>
           <label>
             Title:
             <input
               type="text"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
+              value={postTitle}
+              onChange={(event) => setPostTitle(event.target.value)}
               required
             />
           </label>

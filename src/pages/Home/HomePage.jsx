@@ -1,9 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import { TitleContext } from "../../components/TitleBar/TitleContext";
 import sendRequest from "../../utilities/send-request";
 import EssayPreviewCard from "../../components/EssayPreviewCard/EssayPreviewCard";
-import TitleBar from "../../components/TitleBar/TitleBar";
+import './HomePage.css'
 
 export default function HomePage() {
+  const { setTitle } = useContext(TitleContext);
+  useEffect(() => {
+      setTitle('The-Howling-Infinite.com');
+  }, [setTitle]);
   const [sideEssays, setSideEssays] = useState([]);
   useEffect(()=>{
     async function fetchSideEssays(){
@@ -29,10 +34,9 @@ export default function HomePage() {
     }
     fetchMainEssay();
   }, []);
-
+  
   return (<>
-    <TitleBar title={"The-Howling-Infinite.com"}></TitleBar>
-    <p>
+    <p id = "intro-paragraph" className="content-card">
       Welcome to a unique exploration into the mind of Lee Oswald, set against the backdrop of one of the most pivotal moments in American history. 
       Crafted with cinematic precision, this multimedia experience integrates film directions, images, and music, inviting you into a profound psychological narrative.
       Written by licensed clinical psychologist Dr. Gene Riddle, these pieces delve deep into Oswald's psyche, offering a nuanced understanding of the man behind the headlines.
@@ -42,13 +46,14 @@ export default function HomePage() {
       And for ongoing reflections and discussions, the blog offers a space for continued engagement.
       Thank you for joining us in this immersive experience, and for choosing to see history through a psychological lens.
     </p>
-    <div>
-          {mainEssay && <EssayPreviewCard essay={mainEssay} />}
-    </div>
-    <div>
-        {sideEssays.map(essay => (
-          <EssayPreviewCard key={essay._id} essay={essay} />
-        ))}
+    <div id="card-container" className="content-card">
+      
+            {mainEssay && <EssayPreviewCard essay={mainEssay} />}
+      
+          {sideEssays.map(essay => (
+            <EssayPreviewCard key={essay._id} essay={essay} />
+          ))}
+      
     </div>
   </>);
 }

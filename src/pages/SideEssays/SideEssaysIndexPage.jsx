@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import { TitleContext } from "../../components/TitleBar/TitleContext";
 import sendRequest from "../../utilities/send-request";
 import EssayPreviewCard from "../../components/EssayPreviewCard/EssayPreviewCard";
-import TitleBar from "../../components/TitleBar/TitleBar";
 
 export default function SideEssaysIndexPage(){
     const [sideEssays, setSideEssays] = useState([]);
+    
     useEffect(()=>{
       async function fetchSideEssays(){
         try {
@@ -16,10 +17,14 @@ export default function SideEssaysIndexPage(){
       }
       fetchSideEssays();
     }, []);
-  
+    
+    const { setTitle } = useContext(TitleContext);
+    useEffect(() => {
+        setTitle('Side Essays');
+    }, [setTitle]);
+
     return (<>
         <>  
-            <TitleBar title={"Side Essays"}/>
             <section id="main">
               {sideEssays.map(essay => (
               <EssayPreviewCard key={essay._id} essay={essay} />

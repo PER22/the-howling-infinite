@@ -1,8 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { TitleContext } from "../../../components/TitleBar/TitleContext";
 import BlogPostPreviewCard from "../../../components/BlogPostPreviewCard/BlogPostPreviewCard";
-import TitleBar from "../../../components/TitleBar/TitleBar";
 import sendRequest from "../../../utilities/send-request";
+
 export default function AllBlogPostsPage(){
+  const { setTitle } = useContext(TitleContext);
+    useEffect(() => {
+        setTitle("Gene's Blog");
+    }, [setTitle]);
     
   const [posts, setPosts] = useState(null);
   const [error, setError] = useState("");
@@ -23,10 +28,9 @@ export default function AllBlogPostsPage(){
   }
   fetchBlogPosts();
   }, []);
-
+  
   return (
     <>
-      <TitleBar title={"Gene's Blog"}></TitleBar>
       {posts && posts.map((eachPost) => (
         <BlogPostPreviewCard key={eachPost._id} post={eachPost}/>
       ))}

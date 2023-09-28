@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { TitleContext } from "../../components/TitleBar/TitleContext";
 import { useParams } from "react-router-dom";
 import sendRequest from "../../utilities/send-request";
-import TitleBar from "../../components/TitleBar/TitleBar";
+
 export default function SideEssayDetailPage(){
     const [sideEssay, setSideEssay]= useState(null);
     const {essayId} = useParams();
@@ -19,11 +20,15 @@ export default function SideEssayDetailPage(){
             }
             fetchSideEssay();
         }
-    , []);
+    , [essayId]);
+    const { setTitle } = useContext(TitleContext);
+    useEffect(() => {
+        if(sideEssay)setTitle(sideEssay.title);
+    }, [setTitle, sideEssay]);
+    
     return (
         <>{sideEssay &&
             <>
-             <TitleBar title={sideEssay.title}/>
             <div dangerouslySetInnerHTML={{__html: sideEssay.bodyText}}/>
             </>}
         </>

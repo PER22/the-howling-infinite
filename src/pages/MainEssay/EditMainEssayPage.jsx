@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
+import { TitleContext } from '../../components/TitleBar/TitleContext';
 import sendRequest from '../../utilities/send-request';
 import Editor from '../../components/TextEditor/Editor';
-import 'react-quill/dist/quill.snow.css'; // note the change in import for styles
-import TitleBar from '../../components/TitleBar/TitleBar';
+import 'react-quill/dist/quill.snow.css'; 
 import { useNavigate } from 'react-router-dom';
 
 function EditMainEssayPage() {
     const [essayExists, setEssayExists] = useState(false); //decide whether to PUT or POST
     const [essayId, setEssayId] = useState(null);
 
-    const [title, setTitle] = useState(''); //form contents
+    const [essayTitle, setEssayTitle] = useState(''); //form contents
     const [bodyText, setBodyText] = useState('');
     const [coverPhoto, setCoverPhoto] = useState(null);
 
-    const [coverPhotoURL, setCoverPhotoURL] = useState(''); //for preview purposes
+    // const [coverPhotoURL, setCoverPhotoURL] = useState(''); //for preview purposes
     
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -26,7 +26,7 @@ function EditMainEssayPage() {
         async function fetchMainEssayToEdit() {
             try {
                 const response = await sendRequest('/api/essays/mainEssay');
-                setTitle(response.title);
+                setEssayTitle(response.title);
                 setBodyText(response.bodyText);
                 setEssayId(response._id);
                 setEssayExists(true); // Set essayExists to true
@@ -46,7 +46,7 @@ function EditMainEssayPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData();
-        formData.append('title', title);
+        formData.append('title', essayTitle);
         formData.append('bodyText', bodyText);
         formData.append('isMain', true);
         if (coverPhoto) {
@@ -55,7 +55,7 @@ function EditMainEssayPage() {
         try {
             if (essayId) {
                 // Update existing essay
-                const response = await sendRequest(`/api/essays/mainEssay`, 'PUT', formData);
+                await sendRequest(`/api/essays/mainEssay`, 'PUT', formData);
                 setSuccess('Essay successfully updated!');
                 setError(null);
                 setTimeout(() => {
@@ -63,7 +63,7 @@ function EditMainEssayPage() {
                   }, 2000);
             } else {
                 // Create new essay
-                const response = await sendRequest('/api/essays', 'POST', formData);
+                await sendRequest('/api/essays', 'POST', formData);
                 setSuccess('Essay successfully created!');
                 setError(null);
                 setTimeout(() => {
@@ -76,16 +76,22 @@ function EditMainEssayPage() {
             setSuccess('');
         }
     };
+    
+    const { setTitle } = useContext(TitleContext);
+    useEffect(() => {
+        if(essayExists){setTitle(`Editing '${essayTitle}'`);}
+        else{setTitle("Creating Main Essay");}
+    }, [setTitle, essayTitle, essayExists]);
+    
 
     return (
         <div>
-            {essayExists ? <TitleBar title={`Editing '${title}'`}/> : <TitleBar title={ "Creating Main Essay"}/>}
             <h1>Main Essay</h1>
             {loading ? <p>Loading...</p> : 
                 <form onSubmit={handleSubmit}>
                     <div>
                         <label>Title:</label>
-                        <input type="text" value={title} onChange={e => setTitle(e.target.value)} required />
+                        <input type="text" value={essayTitle} onChange={e => setEssayTitle(e.target.value)} required />
                     </div>
                     <div>
                         <label>Body:</label>

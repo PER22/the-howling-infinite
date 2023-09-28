@@ -42,6 +42,7 @@ async function createEssay(req, res) {
 
 async function getEssayById(req, res) {
     try {
+        console.log("EssayID in request: ", req.params.essayId);
         const essay = await Essay.findById(req.params.essayId).populate('author');
         if (!essay) {
             return res.status(404).json({ error: 'Essay not found.' });

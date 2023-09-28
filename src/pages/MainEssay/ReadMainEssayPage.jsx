@@ -1,10 +1,15 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
+import { TitleContext } from '../../components/TitleBar/TitleContext';
 import sendRequest from '../../utilities/send-request';
-import TitleBar from '../../components/TitleBar/TitleBar';
 
 export default function ReadMainEssayPage(){
+    const { setTitle } = useContext(TitleContext);
     const [essay, setMainEssay] = useState(null);
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        if(essay) { setTitle(essay.title);}
+    }, [setTitle, essay]);
 
     useEffect(()=>{
         async function fetchMainEssay(){
@@ -22,11 +27,10 @@ export default function ReadMainEssayPage(){
         }
         fetchMainEssay();
     },[]);
-
+    
     return (<>
         <div>
             {essay ? (<>
-                <TitleBar title={essay.title}/>
                 <div>
                     {/* <p>By: {essay.author.name}</p>  Assuming the author object has a name property */}
                     <div className='article-container' dangerouslySetInnerHTML={{ __html: essay.bodyText }} />

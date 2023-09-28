@@ -29,7 +29,7 @@ export default function EssayPreviewCard({ essay }) {
   const essayPath = essay.isMain ? "/read" : `/side-essays/${essay._id}`;
 
   return (
-      <Card sx={{backgroundColor: '#A3B18A'}}>
+      <Card sx={{backgroundColor: '#A3B18A', marginTop: '1rem', marginBottom: '1rem'}}>
           <CardActionArea href={essayPath} 
             sx={{ 
                 display: 'flex',
