@@ -14,6 +14,7 @@ import './App.css';
 import AuthPage from '../Authentication/AuthPage/AuthPage'
 import RequestPasswordResetPage from '../Authentication/RequestPasswordReset/RequestPasswordResetPage';
 import PerformPasswordResetPage from '../Authentication/PerformPasswordResetPage/PerformPasswordResetPage';
+import EmailVerificationPage from '../EmailVerification/EmailVerificationPage';
   //Home
 import HomePage from '../Home/HomePage';
 
@@ -58,7 +59,8 @@ export default function App() {
               <Route path="/auth" exact element={<AuthPage setUser={setLoggedInUser}/>}/>
               <Route path="/request-password-reset" exact element={<RequestPasswordResetPage />}/>
               <Route path="/reset-password" exact element={<PerformPasswordResetPage />}/>
-              
+              <Route path="/verify-email" element={<EmailVerificationPage/>} />
+
               <Route path="/" exact element={<HomePage />} />
               
               <Route path="/read" element={<ReadMainEssayPage />} />

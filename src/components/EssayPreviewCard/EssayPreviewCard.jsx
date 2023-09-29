@@ -24,7 +24,7 @@ export default function EssayPreviewCard({ essay }) {
         }
       }
       fetchSignedURL();
-  }, []);
+  }, [essay._id, essay.coverPhotoS3Key]);
 
   const essayPath = essay.isMain ? "/read" : `/side-essays/${essay._id}`;
 

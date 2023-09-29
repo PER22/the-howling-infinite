@@ -37,20 +37,58 @@ async function create(req, res) {
     }
     // Add the user to the db
     const user = await User.create(req.body);
+
     //Create a profile with the user
     const profile = new Profile({user: user._id})
     await profile.save();
     user.profile = profile._id;
+    //overwrite isAdmin and isVerified for security
+    user.isAdmin = false; //There will be one administrator and I will change that value by hand in the database.
+    user.isVerified = false; 
+    //create verification token and store in user object
+    user.verificationToken = crypto.randomBytes(32).toString('hex'); 
+    const expirationTime = new Date();
+    expirationTime.setHours(expirationTime.getHours() + 24); // token valid for 24 hours
+    user.verificationExpires = expirationTime;
     await user.save();
-    // token will be a string
-    const token = createJWT(user);
-    // Yes, we can serialize a string
-    res.json(token);
+    var client = new postmark.ServerClient(process.env.POSTMARK_KEY);
+    await client.sendEmail({
+      "From": "preil001@ucr.edu",
+      "To": `${user.email}`,
+      "Subject": "Verify your email address to log into The-Howling-Infinite.com",
+      "HtmlBody": `Here is your verification link: <a href="http://localhost:3000/verify-email?token=${user.verificationToken}">Verify email address</a>`,
+      "TextBody": `Copy and paste this link into your URL bar to verify your email address: http://localhost:3000/reset-password?token=${user.verificationToken}`,
+      "MessageStream": "outbound"
+    });
+    res.status(201).json({"message": "Account created. You must verify your email address before you will be able to log in. Check the inbox of the email you supplied here for a verification link."});
   } catch (err) {
     // console.log(err);
     res.status(500).json(err);
   }
 }
+
+async function verifyEmail(req, res){
+  try {
+    const token = req.body.token;
+    const user = await User.findOne({ verificationToken: token });
+
+    // If the token is invalid or expired, throw an error
+    if (!user || user.verificationExpires < new Date()) {
+      throw new Error('Invalid or expired token.');
+    }
+    // Set the user as verified and clear the verification token and expiration
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    user.verificationExpires = undefined;
+    await user.save();
+
+    // create and send the JWT to the client
+    res.status(200).json(createJWT(user));
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
+
 
 const validateAndSanitizeLogin = [
   body('email').isEmail().normalizeEmail(),
@@ -153,6 +191,7 @@ async function performPasswordReset(req, res){
 
 module.exports = {
   create,
+  verifyEmail,
   login,
   sendPasswordResetEmail,
   performPasswordReset

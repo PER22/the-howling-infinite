@@ -20,8 +20,22 @@ const userSchema = new Schema({
     minlength: 8,
     required: true
   },
+  isVerified: {
+    type: Boolean,
+    required: true,
+    default: false,
+    defaultValue: false
+  },
+  isAdmin: {
+    type: Boolean, 
+    required: true,
+    default: false,
+    defaultValue: false
+  },
   passwordResetToken: {type: String},
   passwordResetExpires: {type: Date},
+  verificationToken: {type: String},
+  verificationExpires: {type: Date},
   profile: { type: Schema.Types.ObjectId, ref: 'Profile' }
 }, {
   timestamps: true,

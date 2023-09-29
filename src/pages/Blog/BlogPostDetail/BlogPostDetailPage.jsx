@@ -32,8 +32,7 @@ export default function BlogPostDetailPage({loggedInUser}) {
         parentId: postId,
         parentType: 'BlogPost'
       });
-
-      setCommentContent(''); 
+      setCommentContent('');
     } catch (error) {
       console.error('Error adding comment:', error);
     }

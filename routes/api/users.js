@@ -10,6 +10,7 @@ router.post('/login', usersCtrl.login);
 router.post('/request-password-reset', usersCtrl.sendPasswordResetEmail);
 // PUT /api/users/perform-password-reset
 router.put('/perform-password-reset', usersCtrl.performPasswordReset);
-
+// POST /api/users/verify-email
+router.post('/verify-email', usersCtrl.verifyEmail);
 
 module.exports = router;
