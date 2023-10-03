@@ -37,6 +37,16 @@ const ContentSchema = new Schema({
   stars: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   numStars: { type: Number, default: 0 },
 
+  
+  chapterNumber: {
+    type: Number,
+    default: 1  
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'converted', 'error'],
+    default: 'pending'
+  }
 }, {
   timestamps: true
 });
