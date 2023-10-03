@@ -7,14 +7,15 @@ import 'react-quill/dist/quill.snow.css'; // note the change in import for style
 
 
 function EditSideEssayPage() {
-    const {essayId} = useParams();
+    const {contentId} = useParams();
+    console.log(contentId);
     const navigate = useNavigate();
 
     const [essayTitle, setEssayTitle] = useState(''); //form contents
     const [bodyText, setBodyText] = useState('');
     const [coverPhoto, setCoverPhoto] = useState(null);
 
-    // const [coverPhotoURL, setCoverPhotoURL] = useState(''); //for preview purposes
+    const [coverPhotoURL, setCoverPhotoURL] = useState(''); //Only used for previewing
     
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -29,10 +30,15 @@ function EditSideEssayPage() {
     useEffect(() => {
         async function fetchSideEssayToEdit() {
             try {
-                const response = await sendRequest(`/api/essays/sideEssays/${essayId}`);
-                console.log("response ", response);
+                const response = await sendRequest(`/api/content/${contentId}`);
                 setEssayTitle(response.title);
                 setBodyText(response.bodyText);
+                if(response.coverPhotoS3Key){
+                    console.log(response.coverPhotoS3Key);
+                    const imageResponse = await sendRequest(`/api/content/image-url/${response._id}`);
+                    if(imageResponse){setCoverPhotoURL(imageResponse.signedURL);}
+                    
+                }
             } catch (err) {
                 if (err.message !== 'sendRequest failed: {"error":"Essay not found."}') { 
                     // Only set error if it's not about essay absence
@@ -43,7 +49,7 @@ function EditSideEssayPage() {
             }
         }
         fetchSideEssayToEdit();
-    }, [essayId]);
+    }, [contentId]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -51,18 +57,19 @@ function EditSideEssayPage() {
         formData.append('title', essayTitle);
         formData.append('bodyText', bodyText);
         formData.append('isMain', false);
+        formData.append('type', 'essay');
         if (coverPhoto) {
             formData.append('coverPhoto', coverPhoto);
         }
         try {
-            if (essayId) {
+            if (contentId) {
                 // Update existing essay
-                await sendRequest(`/api/essays/mainEssay`, 'PUT', formData);
+                await sendRequest(`/api/content/${contentId}`, 'PUT', formData);
                 setSuccess('Essay successfully updated!');
-                setTimeout(() =>{navigate(`/side-essays/${essayId}`)}, 2000);
+                setTimeout(() =>{navigate(`/side-essays/${contentId}`)}, 2000);
             } else {
                 // Create new essay
-                const response = await sendRequest('/api/essays', 'POST', formData);
+                const response = await sendRequest('/api/content', 'POST', formData);
                 setSuccess('Essay successfully created!');
                 setTimeout(() =>{navigate(`/side-essays/${response._id}`)}, 2000);
             }
@@ -88,7 +95,11 @@ function EditSideEssayPage() {
                     <div>
                         <label>Cover Photo:</label>
                         <input type="file" onChange={e => setCoverPhoto(e.target.files[0])} />
-                        {/* {!imageError $$ <img src=`${getSignedURLForEssayCoverImage}`} */}
+                        {coverPhotoURL &&  
+                        <div>
+                            <label>Current cover photo: </label>
+                            <img src={coverPhotoURL} alt="Current cover img" style={{ maxWidth: '300px', maxHeight: '200px' }}/>
+                        </div>}
                     </div>
                     <div>
                         <button type="submit">Submit</button>

@@ -1,3 +1,4 @@
+//LoginForm.jsx:
 import { useState } from 'react';
 import {useNavigate} from 'react-router-dom';
 import * as usersService from '../../utilities/users-service';
@@ -19,16 +20,20 @@ export default function LoginForm({ setUser }) {
     // Prevent form from being submitted to the server
     evt.preventDefault();
     try {
-      // The promise returned by the signUp service method 
-      // will resolve to the user object included in the
-      // payload of the JSON Web Token (JWT)
       const user = await usersService.login(credentials);
       setUser(user);
       navigate('/');
-    } catch {
-      setError('Log In Failed - Try Again');
+    } catch (err) {
+      console.log(err.message);
+      // Check for the specific error messages and set the error state accordingly
+      if (err.message === 'sendRequest failed: {"error":"Email address not verified."}') {
+        setError("You need to verify your email before you can log in. Check your inbox.");
+      } else {
+        setError('Log In Failed - Try Again');
+      }
     }
   }
+  
 
   return (
     <>

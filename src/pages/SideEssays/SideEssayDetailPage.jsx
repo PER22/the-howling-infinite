@@ -5,12 +5,12 @@ import sendRequest from "../../utilities/send-request";
 
 export default function SideEssayDetailPage(){
     const [sideEssay, setSideEssay]= useState(null);
-    const {essayId} = useParams();
+    const {contentId} = useParams();
 
     useEffect(() =>{
             async function fetchSideEssay(){
                 try{
-                const response = await sendRequest(`/api/essays/${essayId}`);
+                const response = await sendRequest(`/api/content/${contentId}`);
                 if(response){
                     setSideEssay(response);
                 }
@@ -20,7 +20,7 @@ export default function SideEssayDetailPage(){
             }
             fetchSideEssay();
         }
-    , [essayId]);
+    , [contentId]);
     const { setTitle } = useContext(TitleContext);
     useEffect(() => {
         if(sideEssay)setTitle(sideEssay.title);

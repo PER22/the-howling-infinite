@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { TitleContext } from "../../../components/TitleBar/TitleContext";
-import BlogPostPreviewCard from "../../../components/BlogPostPreviewCard/BlogPostPreviewCard";
+import ContentPreviewCard from '../../../components/ContentPreviewCard/ContentPreviewCard'
 import sendRequest from "../../../utilities/send-request";
 
 export default function AllBlogPostsPage(){
@@ -31,16 +31,12 @@ export default function AllBlogPostsPage(){
   
   return (
     <>
-      {posts && posts.map((eachPost) => (
-        <BlogPostPreviewCard key={eachPost._id} post={eachPost}/>
-      ))}
+      <div id="card-container">
+        {posts && posts.map((eachPost, index) => (
+          <ContentPreviewCard key={index} content={eachPost} type={'blog'}/>
+        ))}
+      </div>
       {error && <p>{error}</p>}
     </>
   );
-
-
-
-
-
-
 }

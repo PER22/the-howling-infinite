@@ -1,11 +1,13 @@
 import React from "react";
 import { Quill } from "react-quill";
 import ImageUploader from "quill-image-uploader";
+import { ImageActions } from '@xeger/quill-image-actions';
+import { ImageFormats } from '@xeger/quill-image-formats';
+import ImageResize from 'quill-image-resize-module-react';
 import sendRequest from "../../utilities/send-request";
 
-// Custom Undo button icon component for Quill editor. You can import it directly
-// from 'quill/assets/icons/undo.svg' but I found that a number of loaders do not
-// handle them correctly
+
+
 const CustomUndo = () => (
   <svg viewBox="0 0 18 18">
     <polygon className="ql-fill ql-stroke" points="6 10 4 12 2 10 6 10" />
@@ -16,7 +18,6 @@ const CustomUndo = () => (
   </svg>
 );
 
-// Redo button icon component for Quill editor
 const CustomRedo = () => (
   <svg viewBox="0 0 18 18">
     <polygon className="ql-fill ql-stroke" points="12 10 14 12 16 10 12 10" />
@@ -27,7 +28,6 @@ const CustomRedo = () => (
   </svg>
 );
 
-// Undo and redo functions for Custom Toolbar
 function undoChange() {
   this.quill.history.undo();
 }
@@ -35,12 +35,10 @@ function redoChange() {
   this.quill.history.redo();
 }
 
-// Add sizes to whitelist and register them
 const Size = Quill.import("formats/size");
 Size.whitelist = ["extra-small", "small", "medium", "large"];
 Quill.register(Size, true);
 
-// Add fonts to whitelist and register them
 const Font = Quill.import("formats/font");
 Font.whitelist = [
   "arial",
@@ -53,15 +51,16 @@ Font.whitelist = [
 Quill.register(Font, true);
 
 Quill.register("modules/imageUploader", ImageUploader);
+Quill.register('modules/imageActions', ImageActions);
+Quill.register('modules/imageFormats', ImageFormats);
+Quill.register('modules/imageResize', ImageResize);
 
-
-// Modules object for setting up the Quill editor
 export const modules = {
   toolbar: {
     container: "#toolbar",
     handlers: {
       undo: undoChange,
-      redo: redoChange
+      redo: redoChange,
     }
   },
   history: {
@@ -74,7 +73,7 @@ export const modules = {
       return new Promise((resolve, reject) => {
         const formData = new FormData();
         formData.append("image", file);
-        sendRequest("/api/essays/uploadImage", "POST", formData)
+        sendRequest("/api/content/uploadImage", "POST", formData)
         .then((result) => {
           const imageKey = "/api/images/" + result.imageUrl.split(".com/")[1];
           resolve(imageKey);
@@ -85,7 +84,13 @@ export const modules = {
         });      
       });
     }
-  }
+  },
+  imageActions: {},
+  imageFormats: {},
+  imageResize: {
+    parchment: Quill.import('parchment'),
+    modules: ['Resize', 'DisplaySize']
+ }
 };
 
 
@@ -98,6 +103,7 @@ export const formats = [
   "italic",
   "underline",
   "align",
+  "float",
   "strike",
   "script",
   "blockquote",

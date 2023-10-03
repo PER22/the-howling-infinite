@@ -8,7 +8,6 @@ export async function signUp(userData){
 
 export async function verify(token) {
     const response = await usersAPI.verify(token);
-    console.log("Recieved response from verify: ", response);
     if (response) {
         console.log(response);
         localStorage.setItem('token',token);
@@ -20,9 +19,7 @@ export async function verify(token) {
 
 export function getToken() {
     // getItem returns null if there's no string
-    console.log("users-service: entering getToken()");
     const token = localStorage.getItem('token');
-    console.log("users-service: got this from localStorage: ", token);
     if (!token){ 
         return null;
     }
@@ -38,9 +35,7 @@ export function getToken() {
 }
   
 export function getLoggedInUser() {
-    console.log("Getting logged in user");
     const token = getToken();
-    console.log("token: ", token);
     // If there's a token, return the user in the payload, otherwise return null
     return token ? JSON.parse(atob(token.split('.')[1])).user : null;
 }

@@ -1,3 +1,4 @@
+//controllers/comment.js:
 const Comment = require('../../models/comment');
 
 

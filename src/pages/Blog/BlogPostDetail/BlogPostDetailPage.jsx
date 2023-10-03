@@ -1,15 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { TitleContext } from '../../../components/TitleBar/TitleContext';
 import { useParams } from 'react-router-dom';
-import { getPostById } from '../../../utilities/posts-api';
 import { Link } from 'react-router-dom';
-import BlogPostCard from '../../../components/BlogPostCard/BlogPostCard';
-import "./BlogPostDetailPage.css"
 import sendRequest from '../../../utilities/send-request';
+import "./BlogPostDetailPage.css"
 
 export default function BlogPostDetailPage({loggedInUser}) {
 
-  const { postId } = useParams();
+  const { contentId } = useParams();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -29,7 +27,7 @@ export default function BlogPostDetailPage({loggedInUser}) {
     try {
       await sendRequest('/api/comments', "POST", {
         content: commentContent,
-        parentId: postId,
+        parentId: contentId,
         parentType: 'BlogPost'
       });
       setCommentContent('');
@@ -41,7 +39,8 @@ export default function BlogPostDetailPage({loggedInUser}) {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const tempPost = await getPostById(postId);
+        console.log("fetching Post");
+        const tempPost = await sendRequest(`/api/content/${contentId}`);
         setPost(tempPost);
         setLoading(false);
         
@@ -50,7 +49,7 @@ export default function BlogPostDetailPage({loggedInUser}) {
     };
 
     fetchPost();
-  }, [postId]);
+  }, [contentId]);
 
   if (loading) {
     return <p>Loading...</p>;
@@ -63,8 +62,11 @@ export default function BlogPostDetailPage({loggedInUser}) {
 
   return (
     <>
-      {loggedInUser && <>{loggedInUser._id === post.author._id? <Link className="button" to={`/blog/${postId}/edit`}>Edit Post</Link>: ""}</>}
-      <BlogPostCard post={post} loggedInUser={loggedInUser} setPost={setPost}/>
+      {loggedInUser && <>{loggedInUser._id === post.author._id? <Link className="button" to={`/blog/${contentId}/edit`}>Edit Post</Link>: ""}</>}
+      {post &&
+            <>
+            <div dangerouslySetInnerHTML={{__html: post.bodyText}}/>
+            </>}
       {loggedInUser && (
         <form onSubmit={handleCommentSubmit}>
           <textarea

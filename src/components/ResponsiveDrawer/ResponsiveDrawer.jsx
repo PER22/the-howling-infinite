@@ -65,7 +65,7 @@ export default function ResponsiveDrawer({setUser, user}) {
 
     return (
       <div>
-        <Button onClick={toggleDrawer(true)} sx={{position: 'fixed', top:'1rem', left: '1rem', backgroundColor: "#588157"}}><MenuIcon sx={{color: 'white',}}/></Button>
+        <Button onClick={toggleDrawer(true)} sx={{position: 'fixed', top:'1rem', left: '1rem', backgroundColor: "#588157", zIndex:"10"}}><MenuIcon sx={{color: 'white',}}/></Button>
         <Drawer
           anchor={drawerAnchor}
           open={open}

@@ -13,7 +13,7 @@ function EditMainEssayPage() {
     const [bodyText, setBodyText] = useState('');
     const [coverPhoto, setCoverPhoto] = useState(null);
 
-    // const [coverPhotoURL, setCoverPhotoURL] = useState(''); //for preview purposes
+     const [coverPhotoURL, setCoverPhotoURL] = useState('');
     
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -30,6 +30,12 @@ function EditMainEssayPage() {
                 setBodyText(response.bodyText);
                 setEssayId(response._id);
                 setEssayExists(true); // Set essayExists to true
+                if(response.coverPhotoS3Key){
+                    console.log(response.coverPhotoS3Key);
+                    const imageResponse = await sendRequest(`/api/content/image-url/${response._id}`);
+                    if(imageResponse){setCoverPhotoURL(imageResponse.signedURL);}
+                    
+                }
             } catch (err) {
                 if (err.message !== 'sendRequest failed: {"error":"Essay not found."}') { 
                     // Only set error if it's not about essay absence
@@ -49,6 +55,7 @@ function EditMainEssayPage() {
         formData.append('title', essayTitle);
         formData.append('bodyText', bodyText);
         formData.append('isMain', true);
+        formData.append('type', 'essay');
         if (coverPhoto) {
             formData.append('coverPhoto', coverPhoto);
         }
@@ -63,7 +70,7 @@ function EditMainEssayPage() {
                   }, 2000);
             } else {
                 // Create new essay
-                await sendRequest('/api/essays', 'POST', formData);
+                await sendRequest('/api/content', 'POST', formData);
                 setSuccess('Essay successfully created!');
                 setError(null);
                 setTimeout(() => {
@@ -100,8 +107,12 @@ function EditMainEssayPage() {
                     <div>
                         <label>Cover Photo:</label>
                         <input type="file" onChange={e => setCoverPhoto(e.target.files[0])} />
-                        {/* {!imageError $$ <img src=`${getSignedURLForEssayCoverImage}`} */}
                     </div>
+                   {coverPhotoURL &&  <div>
+                        <label>Current cover photo: </label>
+                        <img src={coverPhotoURL} alt="Current cover img" style={{ maxWidth: '300px', maxHeight: '200px' }}/>
+                    </div>
+                    }
                     <div>
                         <button type="submit">Submit</button>
                     </div>

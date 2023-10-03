@@ -3,7 +3,6 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const postmark = require("postmark");
 const User = require('../../models/user');
-const Profile = require('../../models/profile')
 const { body, validationResult } = require('express-validator');
 
 const validateAndSanitizeSignup = [
@@ -33,15 +32,12 @@ async function create(req, res) {
     // Check for validation errors
     const errors = validationResult(req);    
     if (!errors.isEmpty()) {
+      errors.array().forEach((error)=>{console.log(error);});
       return res.status(405).json({ errors: errors.array() });
     }
     // Add the user to the db
     const user = await User.create(req.body);
 
-    //Create a profile with the user
-    const profile = new Profile({user: user._id})
-    await profile.save();
-    user.profile = profile._id;
     //overwrite isAdmin and isVerified for security
     user.isAdmin = false; //There will be one administrator and I will change that value by hand in the database.
     user.isVerified = false; 
@@ -53,14 +49,14 @@ async function create(req, res) {
     await user.save();
     var client = new postmark.ServerClient(process.env.POSTMARK_KEY);
     await client.sendEmail({
-      "From": "preil001@ucr.edu",
+      "From": `${process.env.EMAIL_FROM}`,
       "To": `${user.email}`,
       "Subject": "Verify your email address to log into The-Howling-Infinite.com",
-      "HtmlBody": `Here is your verification link: <a href="http://localhost:3000/verify-email?token=${user.verificationToken}">Verify email address</a>`,
-      "TextBody": `Copy and paste this link into your URL bar to verify your email address: http://localhost:3000/reset-password?token=${user.verificationToken}`,
+      "HtmlBody": `Here is your verification link: <a href="${process.env.BASE_URL}/verify-email?token=${user.verificationToken}">Verify email address</a>`,
+      "TextBody": `Copy and paste this link into your URL bar to verify your email address: ${process.env.BASE_URL}/reset-password?token=${user.verificationToken}`,
       "MessageStream": "outbound"
     });
-    res.status(201).json({"message": "Account created. You must verify your email address before you will be able to log in. Check the inbox of the email you supplied here for a verification link."});
+    res.status(201).json(null);
   } catch (err) {
     // console.log(err);
     res.status(500).json(err);
@@ -72,23 +68,51 @@ async function verifyEmail(req, res){
     const token = req.body.token;
     const user = await User.findOne({ verificationToken: token });
 
-    // If the token is invalid or expired, throw an error
+    //If token is expired, send a new one, and update the user document in database.
     if (!user || user.verificationExpires < new Date()) {
-      throw new Error('Invalid or expired token.');
+      const response = await resendVerification(user);
+      return res.status(response.status).json(null);
     }
-    // Set the user as verified and clear the verification token and expiration
+    
+    // Otherwise, set the user as verified, 
     user.isVerified = true;
+    // and clear the verification token and expiration
     user.verificationToken = undefined;
     user.verificationExpires = undefined;
     await user.save();
 
-    // create and send the JWT to the client
+    // Create and send the JWT to the client, automatically logging them in.
     res.status(200).json(createJWT(user));
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 }
 
+async function resendVerification(user){
+  if (!user) {
+    console.log("User not found");
+    throw new Error('User not found');
+  }  
+  try{
+    user.verificationToken = crypto.randomBytes(32).toString('hex'); 
+    const expirationTime = new Date();
+    expirationTime.setHours(expirationTime.getHours() + 24); // token valid for 24 hours
+    user.verificationExpires = expirationTime;
+    await user.save();
+    var client = new postmark.ServerClient(process.env.POSTMARK_KEY);
+    await client.sendEmail({
+      "From": process.env.EMAIL_FROM,
+      "To": `${user.email}`,
+      "Subject": "Verify your email address to log into The-Howling-Infinite.com",
+      "HtmlBody": `Here is your verification link: <a href="${process.env.BASE_URL}/verify-email?token=${user.verificationToken}">Verify email address</a>. It will be valid for 24 hours. If you need a new one, click this link anyway and the new one will be sent.`,
+      "TextBody": `Copy and paste this link into your URL bar to verify your email address: ${process.env.BASE_URL}/reset-password?token=${user.verificationToken}`,
+      "MessageStream": "outbound"
+    });
+    return {status: 201, message: `A new verification email has been sent to ${user.email}.`};
+  }catch(err){
+    throw(err);
+  }
+}
 
 const validateAndSanitizeLogin = [
   body('email').isEmail().normalizeEmail(),
@@ -102,18 +126,20 @@ async function login(req, res) {
     // Check for validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log("Users controller: login(): Error in validation");
       return res.status(400).json({ errors: errors.array() });
     }
 
     // Find the user by their email address
     const user = await User.findOne({email: req.body.email});
-    if (!user){ throw new Error("User not found");}
+    if (!user){ throw new Error("User not found.");}
+    if(!user.isVerified){throw new Error("Email address not verified.")}
     // Check if the password matches
     const match = bcrypt.compare(req.body.password, user.password);
-    if (!match) throw new Error();
+    if (!match) throw new Error("Password doesn't match.");
     res.json( createJWT(user) );
-  } catch {
-    res.status(400).json('Login failed. Try again.');
+  } catch (err){
+    res.status(400).send({error: err.message});
   }
 }
 

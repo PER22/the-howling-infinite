@@ -4,7 +4,6 @@ const favicon = require('serve-favicon');
 const logger = require('morgan');
 require('dotenv').config();
 require('./config/database');
-const cors = require('cors');
 const app = express();
 
 app.use(logger('dev'));
@@ -15,19 +14,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true}));
 app.use(favicon(path.join(__dirname, 'build', 'favicon.ico')));
 app.use(express.static(path.join(__dirname, 'build')));
-// app.use(cors());
 // middleware that adds the user object from a JWT to req.user
 app.use(require('./config/checkToken'));
 
 
 app.use('/api/users', require('./routes/api/users'));
+app.use('/api/content', require('./routes/api/content'));
 app.use('/api/essays', require('./routes/api/essays'));
-app.use('/api/images', require('./routes/api/images'));
-app.use('/api/comments', require('./routes/api/comments'));
 app.use('/api/blog', require('./routes/api/blog'));
+app.use('/api/comments', require('./routes/api/comments'));
+app.use('/api/images', require('./routes/api/images'));
 
-// "catch-all" route that will match all GET requests
-// that don't match an API route defined above
 app.get('/*', function(req, res) {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });

@@ -23,14 +23,15 @@ function CreateSideEssayPage() {
         formData.append('title', essayTitle);
         formData.append('bodyText', bodyText);
         formData.append('isMain', false);
+        formData.append('type', 'essay');
         if (coverPhoto) {
             formData.append('coverPhoto', coverPhoto);
         }
         try {
-            const response = await sendRequest('/api/essays', 'POST', formData);
+            const response = await sendRequest('/api/content', 'POST', formData);
             setSuccess('Side Essay successfully created!');
             setTimeout(() => {
-                navigate(`/side-essays/${response._id}`);
+                navigate(`/side-essays/${response.essay._id}`);
               }, 2000);
             setError('');
         } catch (err) {

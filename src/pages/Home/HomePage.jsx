@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import { TitleContext } from "../../components/TitleBar/TitleContext";
 import sendRequest from "../../utilities/send-request";
-import EssayPreviewCard from "../../components/EssayPreviewCard/EssayPreviewCard";
+import ContentPreviewCard from "../../components/ContentPreviewCard/ContentPreviewCard";
 import './HomePage.css'
 
 export default function HomePage() {
@@ -9,18 +9,6 @@ export default function HomePage() {
   useEffect(() => {
       setTitle('The-Howling-Infinite.com');
   }, [setTitle]);
-  const [sideEssays, setSideEssays] = useState([]);
-  useEffect(()=>{
-    async function fetchSideEssays(){
-      try {
-        const recievedSideEssays = await sendRequest('/api/essays/sideEssays');
-        if(recievedSideEssays){setSideEssays(recievedSideEssays);}
-      } catch(err){
-        console.log("Error fetching side essays: ", err);
-      }
-    }
-    fetchSideEssays();
-  }, []);
 
   const [mainEssay, setMainEssay] = useState(null);
   useEffect(()=>{
@@ -34,6 +22,33 @@ export default function HomePage() {
     }
     fetchMainEssay();
   }, []);
+
+  const [sideEssays, setSideEssays] = useState([]);
+  useEffect(()=>{
+    async function fetchSideEssays(){
+      try {
+        const recievedSideEssays = await sendRequest('/api/essays/sideEssayPreviews');
+        if(recievedSideEssays){setSideEssays(recievedSideEssays);}
+      } catch(err){
+        console.log("Error fetching side essays: ", err);
+      }
+    }
+    fetchSideEssays();
+  }, []);
+
+  const [blogPosts, setBlogPosts] = useState([]);
+  useEffect(()=>{
+    async function fetchBlogPosts(){
+      try {
+        const recievedBlogPosts = await sendRequest('/api/blog/');
+        if(recievedBlogPosts){setBlogPosts(recievedBlogPosts);}
+      } catch(err){
+        console.log("Error fetching blog posts: ", err);
+      }
+    }
+    fetchBlogPosts();
+  }, []);
+  
   
   return (<>
     <p id = "intro-paragraph" className="content-card">
@@ -47,13 +62,14 @@ export default function HomePage() {
       Thank you for joining us in this immersive experience, and for choosing to see history through a psychological lens.
     </p>
     <div id="card-container" className="content-card">
-      
-            {mainEssay && <EssayPreviewCard essay={mainEssay} />}
-      
+          {mainEssay && <ContentPreviewCard content={mainEssay} />}
           {sideEssays.map(essay => (
-            <EssayPreviewCard key={essay._id} essay={essay} />
+            <ContentPreviewCard key={essay._id} content={essay} />
           ))}
-      
+          {blogPosts.map(post => (
+            <ContentPreviewCard key={post._id} content={post} />
+          ))}
+
     </div>
   </>);
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import { TitleContext } from "../../components/TitleBar/TitleContext";
 import sendRequest from "../../utilities/send-request";
-import EssayPreviewCard from "../../components/EssayPreviewCard/EssayPreviewCard";
+import ContentPreviewCard from "../../components/ContentPreviewCard/ContentPreviewCard";
 
 export default function SideEssaysIndexPage(){
     const [sideEssays, setSideEssays] = useState([]);
@@ -9,7 +9,7 @@ export default function SideEssaysIndexPage(){
     useEffect(()=>{
       async function fetchSideEssays(){
         try {
-          const recievedSideEssays = await sendRequest('/api/essays/sideEssays');
+          const recievedSideEssays = await sendRequest('/api/essays/sideEssayPreviews');
           if(recievedSideEssays){setSideEssays(recievedSideEssays);}
         } catch(err){
           console.log("Error fetching side essays: ", err);
@@ -25,9 +25,9 @@ export default function SideEssaysIndexPage(){
 
     return (<>
         <>  
-            <section id="main">
-              {sideEssays.map(essay => (
-              <EssayPreviewCard key={essay._id} essay={essay} />
+            <section id="card-container">
+              {(sideEssays.length > 0) && sideEssays.map(essay => (
+              <ContentPreviewCard key={essay._id} content={essay} />
               ))}
             </section>
         </>

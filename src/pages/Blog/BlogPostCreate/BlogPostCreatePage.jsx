@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import { TitleContext } from '../../../components/TitleBar/TitleContext';
 import { useNavigate } from 'react-router-dom';
 import sendRequest from '../../../utilities/send-request';
+import Editor from '../../../components/TextEditor/Editor';
+import 'react-quill/dist/quill.snow.css'; 
 import './BlogPostCreate.css'
 
 export default function NewPostForm() {
@@ -11,16 +13,24 @@ export default function NewPostForm() {
     }, [setTitle]);
 
   const [postTitle, setPostTitle] = useState('');
-  const [article, setArticle] = useState('');
+  const [bodyText, setBodyText] = useState('');
+  const [coverPhoto, setCoverPhoto] = useState(null);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleCreatePostSubmit = async (event) => {
     event.preventDefault();
     try {
-      const postData = { title: postTitle, article};
-      const createdPost = await sendRequest('/api/blog', 'POST', postData);
-      navigate(`/blog/${createdPost._id}`);
+      const formData = new FormData();
+      formData.append('title', postTitle);
+      formData.append('bodyText', bodyText);
+      formData.append('isMain', false);
+      formData.append('type', 'blog');
+      if (coverPhoto) {
+        formData.append('coverPhoto', coverPhoto);
+      }
+      const createdPost = await sendRequest('/api/content', 'POST', formData);
+      setTimeout( ()=>{navigate(`/blog/${createdPost.essay._id}`);}, 2000);
     } catch (error) {
       setError('Failed to create post. Please try again.');
       console.error('Error creating post:', error);
@@ -43,13 +53,14 @@ export default function NewPostForm() {
           </label>
           <br />
           <label>
-            Article:<br />
-            <textarea rows="15" cols="35"
-              value={article}
-              onChange={(event) => setArticle(event.target.value)}
-              required>
-            </textarea>
-          </label>
+        Article:<br />
+        <Editor innerHTML={bodyText} onChange={setBodyText} />
+    </label>
+          <div>
+                        <label>Cover Photo:</label>
+                        <input type="file" onChange={e => setCoverPhoto(e.target.files[0])} />
+                        {/* {!imageError $$ <img src=`${getSignedURLForEssayCoverImage}`} */}
+                    </div>
           <br />
           <button type="submit">Create Post</button>
         </form>

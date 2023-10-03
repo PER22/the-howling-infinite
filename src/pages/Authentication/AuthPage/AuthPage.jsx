@@ -1,4 +1,4 @@
-
+//AuthPage.jsx:
 import { useState, useEffect, useContext } from 'react';
 import { TitleContext } from '../../../components/TitleBar/TitleContext';
 import LoginForm from '../../../components/LoginForm/LoginForm';

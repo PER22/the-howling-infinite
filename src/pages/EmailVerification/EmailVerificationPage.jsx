@@ -11,13 +11,10 @@ const EmailVerificationPage = () => {
     // Function to get the token from query parameters
     const query = new URLSearchParams(location.search);
     const token = query.get('token');
-    console.log("EmailVerificationPage parsed this as the token from the URL: ", token);
     // Send the token to the backend for verification
     try{
         const data = await sendRequest('/api/users/verify-email', 'POST', {token});
-        console.log("data: ",data);
         if (data) {
-          console.log("data.success is truthy");
             setIsVerified(true);
             localStorage.setItem('token', data);
         }

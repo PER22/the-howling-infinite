@@ -1,31 +1,19 @@
+//routes/essays.js:
 const express = require('express');
 const router = express.Router();
-const essayController = require('../../controllers/api/essays');
+const contentController = require('../../controllers/api/content');
 const ensureLoggedIn = require('../../config/ensureLoggedIn');
 const { uploadImage } = require('../../utilities/aws');
 
-router.get('/sideEssays', essayController.getAllSideEssayPreviews);
-router.get('/sideEssays/:essayId', essayController.getEssayById);
-router.get("/mainEssayPreview", essayController.getMainEssayPreview);
-router.get('/mainEssay', essayController.getMainEssay);
-router.get('/image-url/:essayId', essayController.getSignedURLForEssayCoverImage);
-router.get('/:essayId', essayController.getEssayById);
+// GET /api/essays/mainEssay
+router.get('/mainEssay', contentController.getMainEssay);
 
-router.put('/mainEssay', ensureLoggedIn, uploadImage.single('coverPhoto'), essayController.updateMainEssay);
-router.put('/:essayId', ensureLoggedIn, uploadImage.single('coverPhoto'), essayController.updateEssayById);
+// GET /api/essays/sideEssayPreviews
+router.get('/sideEssayPreviews', contentController.getAllSideEssayPreviews);
 
-router.delete('/:essayId', ensureLoggedIn, essayController.deleteEssayById);
+// GET /api/essays/mainEssayPreview
+router.get("/mainEssayPreview", contentController.getMainEssayPreview);
 
-router.post('/uploadImage', ensureLoggedIn, uploadImage.single("image"), (req, res) => {
-    if (req.file) {
-        res.json({
-            imageUrl: req.file.location
-        });
-    } else {
-        res.status(400).json({ error: 'Image upload failed' });
-    }
-});
-router.post('/', ensureLoggedIn, uploadImage.single('coverPhoto'), essayController.createEssay);
-
-
+// PUT /api/essays/mainEssay
+router.put('/mainEssay', ensureLoggedIn, uploadImage.single('coverPhoto'), contentController.updateMainEssay);
 module.exports = router;
