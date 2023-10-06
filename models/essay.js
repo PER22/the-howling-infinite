@@ -1,12 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const ContentSchema = new Schema({
-  type: {
-    type: String,
-    enum: ['essay', 'blog'],
-    required: true
-  },
+const EssaySchema = new Schema({
   author: {
     type: Schema.Types.ObjectId,
     ref: 'User',
@@ -19,36 +14,33 @@ const ContentSchema = new Schema({
     maxlength: 80
   },
   preview: {
-    type: String,
-    required: true
+    type: String
   },
   isMain: {
     type: Boolean,
     required: true,
     default: false
   },
-  contentS3Key: {
-    type: String,
-    required: true
-  },
   coverPhotoS3Key: {
+    type: String
+  },
+  htmlS3Key: {
     type: String
   },
   stars: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   numStars: { type: Number, default: 0 },
-
-  
   chapterNumber: {
     type: Number,
-    default: 1  
+    default: 1 ,
+    required: true
   },
   status: {
     type: String,
-    enum: ['pending', 'converted', 'error'],
+    enum: ['pending', 'completed', 'error'],
     default: 'pending'
   }
 }, {
   timestamps: true
 });
 
-module.exports = mongoose.model('Content', ContentSchema);
+module.exports = mongoose.model('Essay', EssaySchema);

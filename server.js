@@ -19,7 +19,6 @@ app.use(require('./config/checkToken'));
 
 
 app.use('/api/users', require('./routes/api/users'));
-app.use('/api/content', require('./routes/api/content'));
 app.use('/api/essays', require('./routes/api/essays'));
 app.use('/api/blog', require('./routes/api/blog'));
 app.use('/api/comments', require('./routes/api/comments'));

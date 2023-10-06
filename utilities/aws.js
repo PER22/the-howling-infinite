@@ -6,6 +6,7 @@ const {
       } = require("@aws-sdk/lib-storage"),
       {
         GetObjectCommand,
+        PutObjectCommand,
         S3
       } = require("@aws-sdk/client-s3");
 const multer = require('multer');
@@ -18,23 +19,37 @@ const s3 = new S3({
   region: process.env.AWS_DEFAULT_REGION
 });
 
-async function generateSignedURL(objectKey){
+async function generatePresignedS3DownloadURL(objectKey){
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: objectKey,
-    Expires: 60 * 20
+    expiresIn: 1200
   }
-  return await getSignedUrl(s3, new GetObjectCommand(params), {
-    expiresIn: params.Expires
-  });
+  return await getSignedUrl(s3, new GetObjectCommand(params));
 }
+
+async function generatePresignedS3UploadURL(objectKey) {
+  const params = {
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: objectKey,
+    expiresIn: 3600
+  };
+
+  return await getSignedUrl(s3, new PutObjectCommand(params));
+}
+
+const sanitizeTitleForS3 = (title) => {
+  return title.replace(/[^a-zA-Z0-9-_]/g, '-')
+      .replace(/\s+/g, '-')
+      .toLowerCase();
+};
 
 function extractKeyFromURL(url) {
   const urlParts = url.split('/');
   return urlParts.slice(3).join('/');
 }
 
-const uploadImage = multer({
+const uploadFiles = multer({
   storage: multerS3({
       s3: s3,
       bucket: process.env.AWS_BUCKET_NAME,
@@ -42,10 +57,23 @@ const uploadImage = multer({
           cb(null, {fieldName: file.fieldname});
       },
       key: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname);
+        let folder = ''; // default, files go to the root
+        if (file.fieldname === 'pdf') {
+          folder = 'pdfs-';
+        } else if (file.fieldname === 'coverPhoto' || file.fieldname === 'image') {
+          folder = 'images-';
+        }
+        else if (file.fieldname === 'html') {
+          folder = 'html-';
+        }
+        else if (file.fieldname === 'folderFiles') {
+          folder = 'essayimages-';
+        }
+        cb(null, folder + `${req.newEssay._id}-`+  sanitizeTitleForS3(file.originalname));
     }
   })
 });
+
 
 async function uploadToS3(key, content) {
   const params = {
@@ -57,7 +85,7 @@ async function uploadToS3(key, content) {
     const response = await new Upload({
       client: s3,
       params
-    }).done();  // Using the .promise() method to get a promise
+    }).done(); 
     return extractKeyFromURL(response.Location);
   } catch (error) {
     console.error('Error uploading to S3:', error);
@@ -84,21 +112,34 @@ async function updateInS3(key, content) {
 }
 
 async function downloadFromS3(key) {
+  console.log("donwloadFromS3's key: ", key);
   const params = {
-    Bucket: process.env.AWS_BUCKET_NAME,
-    Key: key
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: key
   };
-  try{
-    return new Promise((resolve, reject) => {
+
+  return new Promise((outerResolve, outerReject) => {
       s3.getObject(params, (err, data) => {
-        if (err) reject(err);
-        resolve(data.Body);
+          if (err) return outerReject(err);
+
+          const incomingMsg = data.Body;
+          let aggregatedData = '';
+          
+          incomingMsg.on('data', chunk => {
+              aggregatedData += chunk;
+          });
+
+          incomingMsg.on('end', () => {
+              outerResolve(aggregatedData);
+          });
+
+          incomingMsg.on('error', error => {
+              outerReject(error);
+          });
       });
-    });
-  }catch(error){
-    console.log("Error: ", error);
-  }
+  });
 }
+
 
 async function deleteFromS3(key) {
   const params = {
@@ -115,10 +156,12 @@ async function deleteFromS3(key) {
 }
 
 module.exports = {
-  uploadImage,
+  uploadFiles,
   uploadToS3,
   downloadFromS3,
   deleteFromS3,
-  generateSignedURL, 
-  updateInS3
+  generatePresignedS3DownloadURL, 
+  generatePresignedS3UploadURL,
+  updateInS3,
+  sanitizeTitleForS3
 };

@@ -8,22 +8,25 @@ import { useEffect, useState } from 'react';
 
 
 export default function ContentPreviewCard({ content }) {
-    const [signedURL, setSignedURL] = useState(null);
-    useEffect(() => {
-        async function fetchSignedURL() {
-            if (content.coverPhotoS3Key && content.coverPhotoS3Key !== 'undefined') {
-                try {
-                    const response = await sendRequest(`/api/content/image-url/${content._id}`);
-                    if (response) {
-                        setSignedURL(response.signedURL);
-                    }
-                } catch (error) {
-                    console.error("Error fetching signed URL:", error);
-                }
-            }
-        }
-        fetchSignedURL();
-    }, [content._id, content.coverPhotoS3Key]);
+    // const [signedURL, setSignedURL] = useState(null);
+    // useEffect(() => {
+    //     async function fetchSignedURL() {
+    //         console.log("photo key: ",content.coverPhotoS3Key);
+    //         if (content.coverPhotoS3Key && content.coverPhotoS3Key !== 'undefined') {
+    //             try {
+    //                 const response = await fetch(`/api/images/${content.coverPhotoS3Key}`);
+    //                 if (!response.ok) {
+    //                     throw new Error(`HTTP error! status: ${response.status}`);
+    //                 }
+    //                 const data = await response.json();
+    //                 setSignedURL(data);
+    //             } catch (error) {
+    //                 console.error("Error fetching signed URL:", error);
+    //             }
+    //         }
+    //     }
+    //     fetchSignedURL();
+    // }, [content._id, content.coverPhotoS3Key]);
 
     let essayPath;
     if (content.isMain) {
@@ -35,17 +38,17 @@ export default function ContentPreviewCard({ content }) {
     }
 
     return (
-        <Card sx={{ backgroundColor: '#A3B18A', marginTop: '1rem', marginBottom: '1rem' }}>
+        <Card sx={{ backgroundColor: '#A3B18A', marginTop: '1rem', marginBottom: '1rem', width: '80%' }}>
             <CardActionArea href={essayPath}
                 sx={{
                     display: 'flex',
                     justifyContent: 'center',
                     alignContent: 'flex-start'
                 }}>
-                {signedURL && <CardMedia
+                {content.coverPhotoS3Key && <CardMedia
                     component="img"
                     height="140"
-                    image={signedURL}
+                    image={`/api/images/${content.coverPhotoS3Key}`}
                     alt="Cover Image"
                     className='essay-cover-image'
                     sx={{
@@ -55,7 +58,7 @@ export default function ContentPreviewCard({ content }) {
                         objectPosition: 'center'
                     }}
                 />}
-                <CardContent className='essay-card-body'>
+                <CardContent sx={{}} className='essay-card-body'>
                     <Typography variant="h5" component="div">
                         {content.title}
                     </Typography>

@@ -17,6 +17,7 @@
     "@xeger/quill-image-actions": "^0.7.1",
     "@xeger/quill-image-formats": "^0.7.1",
     "bcrypt": "^5.1.1",
+    "cheerio": "^1.0.0-rc.12",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "downsize": "^0.0.8",
@@ -45,7 +46,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "heroku-postbuild": "npm run build"
   },
   "eslintConfig": {
     "extends": [
@@ -64,6 +66,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "engines": {
+    "node": "18.15.0"
   },
   "proxy": "http://localhost:3001"
 }

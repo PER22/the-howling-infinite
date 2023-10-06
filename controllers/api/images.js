@@ -1,4 +1,4 @@
-const { generateSignedURL } = require('../../utilities/aws');
+const { generatePresignedS3DownloadURL: generateSignedURL } = require('../../utilities/aws');
 
 async function fetchPublicImageURL(req, res) {
     try {

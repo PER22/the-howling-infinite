@@ -1,14 +1,23 @@
 //routes/content.js:
 const express = require('express');
 const router = express.Router();
-const contentController = require('../../controllers/api/content');
+const contentController = require('../../controllers/api/essay');
 const ensureLoggedIn = require('../../config/ensureLoggedIn');
-const { uploadImage } = require('../../utilities/aws');
+const { uploadFiles } = require('../../utilities/aws');
 
-//   /api/content
-router.post('/', ensureLoggedIn, uploadImage.single('coverPhoto'), contentController.createContent);
+// function logRequestDetails(req, res, next) {
+//     console.log("Request Body:", req.body);
+//     console.log("Request Files:", req.files);
+//     next();  
+// }
+
+
+
+// POST /api/content
+router.post('/', ensureLoggedIn,   uploadFiles.fields([{name: 'coverPhoto', maxCount: 1}, {name: 'pdf', maxCount: 1}]), contentController.createContent);
+
 //api/content/uploadImage
-router.post('/uploadImage', ensureLoggedIn, uploadImage.single("image"), (req, res) => {
+router.post('/uploadImage', ensureLoggedIn, uploadFiles.single("image"), (req, res) => {
     if (req.file) {
         res.json({
             imageUrl: req.file.location
@@ -24,8 +33,8 @@ router.get('/:contentId', contentController.getContentById);
 // GET api/content/image-url/contentId
 router.get('/image-url/:contentId', contentController.getSignedURLForContentCoverImage);
 
-//PUT api/content/:contentId
-router.put('/:contentId', ensureLoggedIn, uploadImage.single('coverPhoto'), contentController.updateContentById);
+// PUT api/content/:contentId
+router.put('/:contentId', ensureLoggedIn, uploadFiles.fields([{name: 'coverPhoto', maxCount: 1}, {name: 'pdf', maxCount: 1}]), contentController.updateContentById);
 
 //DELETE api/content/:contentId/star
 router.delete('/:contentId/star', ensureLoggedIn, contentController.unstarContentById);
