@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const usersCtrl = require('../../controllers/api/users');
 
+//All methods are ok for anonymous use
 // POST /api/users
 router.post('/', usersCtrl.create);
 // POST /api/users/login

@@ -24,11 +24,12 @@ function CreateSideEssayPage() {
         formData.append('bodyText', bodyText);
         formData.append('isMain', false);
         formData.append('type', 'essay');
+        //is chapter number required?
         if (coverPhoto) {
             formData.append('coverPhoto', coverPhoto);
         }
         try {
-            const response = await sendRequest('/api/content', 'POST', formData);
+            const response = await sendRequest('/api/essays', 'POST', formData);
             setSuccess('Side Essay successfully created!');
             setTimeout(() => {
                 navigate(`/side-essays/${response.essay._id}`);

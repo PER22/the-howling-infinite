@@ -64,10 +64,10 @@ export default function HomePage() {
     <div id="card-container" className="content-card">
           {mainEssay && <ContentPreviewCard content={mainEssay} />}
           {sideEssays.map(essay => (
-            <ContentPreviewCard key={essay._id} content={essay} />
+            <ContentPreviewCard key={essay._id} content={essay} type={"essay"} />
           ))}
           {blogPosts.map(post => (
-            <ContentPreviewCard key={post._id} content={post} />
+            <ContentPreviewCard key={post._id} content={post} type={"blog"}/>
           ))}
 
     </div>

@@ -2,25 +2,33 @@ const express = require('express');
 const router = express.Router();
 const commentController = require('../../controllers/api/comments');
 const ensureLoggedIn = require('../../config/ensureLoggedIn');
+const adminOnly = require('../../config/adminOnly');
 
-const ensureAdmin = require('../../config/ensureLoggedIn');
-
+//Signed-in users
 // POST route to create a new comment
 router.post('/', ensureLoggedIn, commentController.createComment);
 
+//AdminOnly
+router.put('/approve/:commentId', ensureLoggedIn, adminOnly, commentController.approveComment  )
+
+//Anonymous
+// GET route to comments associated with the entity ID
+router.get('/on/:entityType/:entityId', commentController.getCommentsByEntity);
+
+//Anonymous
 // GET route to fetch a single comment by ID
 router.get('/:commentId', commentController.getCommentById);
 
-// PUT route to update a comment by ID (approve a comment)
-router.put('/:commentId', ensureAdmin, commentController.updateCommentById);
+//Signed-in users
+// PUT route to update a comment by ID
+router.put('/:commentId', ensureLoggedIn, commentController.updateCommentById);
 
+//Signed-in users
 // DELETE route to delete a comment by ID
-router.delete('/:commentId', ensureAdmin, commentController.deleteCommentById);
+router.delete('/:commentId', ensureLoggedIn, adminOnly, commentController.deleteCommentById);
 
-// GET route to fetch all comments for a specific parent
-router.get('/parent/:parentId', commentController.getCommentsByParent);
-
+//AdminOnly
 // GET route to fetch all unapproved comments
-router.get('/unapproved', ensureAdmin, commentController.getAllUnapprovedComments);
+router.get('/unapproved', ensureLoggedIn, adminOnly, commentController.getAllUnapprovedComments);
 
 module.exports = router;

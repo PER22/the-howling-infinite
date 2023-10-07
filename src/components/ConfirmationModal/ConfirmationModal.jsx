@@ -1,3 +1,4 @@
+import './ConfirmationModal.css'
 export default function ConfirmationModal({closeFunction, deleteFunction, confirmationText, contentId}){
     const handleDelete = async (id) => {
         await deleteFunction(id);

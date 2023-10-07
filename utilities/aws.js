@@ -59,17 +59,21 @@ const uploadFiles = multer({
       key: function (req, file, cb) {
         let folder = ''; // default, files go to the root
         if (file.fieldname === 'pdf') {
+          cb(null, folder + `${req.contentId}-`+  sanitizeTitleForS3(file.originalname));
           folder = 'pdfs-';
         } else if (file.fieldname === 'coverPhoto' || file.fieldname === 'image') {
           folder = 'images-';
+          cb(null, folder + Date.now());
         }
         else if (file.fieldname === 'html') {
           folder = 'html-';
+          cb(null, folder + `${req.contentId}-`+  sanitizeTitleForS3(file.originalname));
         }
         else if (file.fieldname === 'folderFiles') {
           folder = 'essayimages-';
+          cb(null, folder + `${req.contentId}-`+  sanitizeTitleForS3(file.originalname));
         }
-        cb(null, folder + `${req.newEssay._id}-`+  sanitizeTitleForS3(file.originalname));
+        
     }
   })
 });

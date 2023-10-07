@@ -29,7 +29,7 @@ function EditMainEssayPage() {
                 setEssayExists(true); // Set essayExists to true
                 if (response.coverPhotoS3Key) {
                     console.log(response.coverPhotoS3Key);
-                    const imageResponse = await sendRequest(`/api/images/${response.coverPhotoS3Key}`);
+                    const imageResponse = await fetch(`/api/images/${response.coverPhotoS3Key}`);
                     if (imageResponse) { setCoverPhotoURL(imageResponse.signedURL); }
 
                 }
@@ -64,7 +64,6 @@ function EditMainEssayPage() {
                 formData.append('folderFiles', imageFolder[i]);
             }
         }
-        console.log("FormData Before Send: ", [...formData.entries()]);
         try {
             if (essayExists) {
                 // Update existing essay

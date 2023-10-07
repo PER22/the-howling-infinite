@@ -64,12 +64,12 @@ function EditSideEssayPage() {
         try {
             if (contentId) {
                 // Update existing essay
-                await sendRequest(`/api/content/${contentId}`, 'PUT', formData);
+                await sendRequest(`/api/essay/${contentId}`, 'PUT', formData);
                 setSuccess('Essay successfully updated!');
                 setTimeout(() =>{navigate(`/side-essays/${contentId}`)}, 2000);
             } else {
                 // Create new essay
-                const response = await sendRequest('/api/content', 'POST', formData);
+                const response = await sendRequest(`/api/essay/${contentId}`, 'POST', formData);
                 setSuccess('Essay successfully created!');
                 setTimeout(() =>{navigate(`/side-essays/${response._id}`)}, 2000);
             }

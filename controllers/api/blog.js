@@ -42,14 +42,14 @@ async function createBlogPost(req, res) {
 //Anonymous
 async function getBlogPostById(req, res) {
     try {
-        const content = await BlogModel.findById(req.params.contentId).populate('author');
+        const content = await BlogModel.findById(req.params.postId).populate('author');
         if (!content) {
             return res.status(404).json({ error: 'Blog post not found.' });
         }
-        const contentBody =  await downloadFromS3(content.contentS3Key);
+        const contentBody =  await downloadFromS3(content.htmlS3Key);
         res.status(200).json({ ...content.toObject(), bodyText: contentBody.toString() });
     } catch (error) {
-        console.error('Error fetching content:', error);
+        console.log('Error fetching content:', error);
         res.status(400).json({ error: 'Failed to fetch content' });
     }
 }
@@ -57,7 +57,7 @@ async function getBlogPostById(req, res) {
 //Anonymous
 async function getAllBlogPostPreviews(req, res) {
     try {
-        const posts = await BlogModel.find({type: 'blog'}).populate('author');
+        const posts = await BlogModel.find().populate('author');
         if (!posts || posts.length === 0) {
             return res.status(404).json({ error: 'Posts not found.' });
         }

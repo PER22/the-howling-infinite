@@ -1,0 +1,9 @@
+.add-comment-form{
+    background-color: #344E41;
+    display: flex;
+    align-content: center;
+    justify-content: space-evenly;
+    padding: 1rem 0 1rem 0;
+    margin-top: .5rem;
+    border-radius: 1rem;
+}

@@ -3,37 +3,15 @@ import CardActionArea from '@mui/material/CardActionArea';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
-import sendRequest from '../../utilities/send-request';
-import { useEffect, useState } from 'react';
 
 
-export default function ContentPreviewCard({ content }) {
-    // const [signedURL, setSignedURL] = useState(null);
-    // useEffect(() => {
-    //     async function fetchSignedURL() {
-    //         console.log("photo key: ",content.coverPhotoS3Key);
-    //         if (content.coverPhotoS3Key && content.coverPhotoS3Key !== 'undefined') {
-    //             try {
-    //                 const response = await fetch(`/api/images/${content.coverPhotoS3Key}`);
-    //                 if (!response.ok) {
-    //                     throw new Error(`HTTP error! status: ${response.status}`);
-    //                 }
-    //                 const data = await response.json();
-    //                 setSignedURL(data);
-    //             } catch (error) {
-    //                 console.error("Error fetching signed URL:", error);
-    //             }
-    //         }
-    //     }
-    //     fetchSignedURL();
-    // }, [content._id, content.coverPhotoS3Key]);
-
+export default function ContentPreviewCard({ content , type}) {
     let essayPath;
     if (content.isMain) {
         essayPath = "/read";
-    } else if (content.type === 'essay') {
+    } else if (type === 'essay') {
         essayPath = `/side-essays/${content._id}`;
-    } else if (content.type === 'blog') {
+    } else if (type === 'blog') {
         essayPath = `/blog/${content._id}`;
     }
 

@@ -29,7 +29,7 @@ export default function NewPostForm() {
       if (coverPhoto) {
         formData.append('coverPhoto', coverPhoto);
       }
-      const createdPost = await sendRequest('/api/content', 'POST', formData);
+      const createdPost = await sendRequest('/api/blog', 'POST', formData);
       setTimeout( ()=>{navigate(`/blog/${createdPost.essay._id}`);}, 2000);
     } catch (error) {
       setError('Failed to create post. Please try again.');

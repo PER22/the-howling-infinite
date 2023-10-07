@@ -20,13 +20,13 @@ async function preCreateEssay(req, res, next) {
         console.log("newEssay: ", newEssay);
 
         // Attach the newEssay to the req object
-        req.newEssay = newEssay;
+        req.contentId = newEssay._id;
 
         // Move to the next middleware (which should be multer)
         next();
     } catch (error) {
-        console.error('Error during pre-middleware:', error);
-        res.status(400).json({ error: 'Failed during pre-middleware' });
+        console.error('Error during preCreateEssay middleware:', error);
+        res.status(400).json({ error: 'Failed during preCreateEssay middleware' });
     }
 }
 
@@ -147,45 +147,70 @@ async function getAllSideEssayPreviews(req, res) {
 }
 
 //Admin only
+async function preUpdateMainEsssay(req, res, next){
+    try{
+        const mainEssay = await EssayModel.findOne({isMain: true});
+        req.contentId = mainEssay._id;
+        next();
+    }catch(err){
+        res.status(400).json({error: "preUpdateMainEssay failed."});
+    }
+}
+
+//Admin only
 async function updateMainEssay(req, res) {
     try {
-        const { title, bodyText } = req.body;
         const mainEssay = await EssayModel.findOne({ isMain: true });
+
         if (!mainEssay) {
             return res.status(404).json({ error: 'Main essay not found.' });
         }
-        if (req.user._id !== mainEssay.author.toString()) {
+
+        if (req.user._id.toString() !== mainEssay.author.toString()) {
             return res.status(403).json({ error: "You don't have permission to edit the main essay." });
         }
 
-        let oldS3Key;
-        if (req.file && req.file.key) {
-            oldS3Key = mainEssay.coverPhotoS3Key;
-            mainEssay.coverPhotoS3Key = req.file.key;
-        }
-        if (oldS3Key) {
-            await deleteFromS3(oldS3Key);
+        let coverPhotoS3Key = mainEssay.coverPhotoS3Key;
+        let htmlS3Key = mainEssay.htmlS3Key;
+        let preview = "";
+
+        if (req.files.coverPhoto && req.files.coverPhoto[0]) {
+            coverPhotoS3Key = req.files.coverPhoto[0].key;
+            // Delete the old cover photo from S3 if there's a new one
+            await deleteFromS3(mainEssay.coverPhotoS3Key);
         }
 
-        if (title) {
-            mainEssay.title = title;
-        }
-        if (bodyText) {
-            await updateInS3(mainEssay.contentS3Key, bodyText);
-        }
-        await mainEssay.save(); // Save all changes once
+        if (req.files.html && req.files.html[0]) {
+            htmlS3Key = req.files.html[0].key;
 
-        // Delete old image from S3 (after saving to DB for consistency)
-        if (oldS3Key) {
-            await deleteFromS3(oldS3Key);
+            const oldHTML = await downloadFromS3(htmlS3Key);
+            const $ = cheerio.load(oldHTML);
+
+            $('img').each((index, img) => {
+                const src = $(img).attr('src');
+                const fileName = src.split('/').pop();
+                const newSrc = `/api/images/essayimages-${mainEssay._id}-${sanitizeTitleForS3(fileName)}`;
+                $(img).attr('src', newSrc);
+            });
+
+            const modifiedHtmlContent = $.html();
+            await updateInS3(htmlS3Key, modifiedHtmlContent);
+            preview = downsize(modifiedHtmlContent, { words: 20, append: "..." });
         }
+
+        mainEssay.title = req.body.title || mainEssay.title;
+        mainEssay.htmlS3Key = htmlS3Key;
+        mainEssay.coverPhotoS3Key = coverPhotoS3Key;
+        mainEssay.preview = preview;
+        await mainEssay.save();
 
         res.status(200).json(mainEssay);
     } catch (error) {
-        console.error("Failed to update essay:", error); // For debugging
+        console.error('Failed to update essay:', error);
         res.status(400).json({ error: 'Failed to update essay' });
     }
 }
+
 
 //Admin only
 async function updateEssayById(req, res) {
@@ -313,6 +338,7 @@ module.exports = {
     getMainEssayPreview,
     getAllSideEssayPreviews,
     //Update
+    preUpdateMainEsssay,
     updateMainEssay,
     updateEssayById,
     starEssayById,

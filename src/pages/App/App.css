@@ -52,52 +52,6 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    border:1px solid red;
 }
 
-
-
-.confirmation-modal-background{
-    background-color: rgba(0, 0, 0, 0.6);
-    height:100%;
-    width:100%;
-    position:fixed;
-    top: 0;
-    left:0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 3;
-  }
-  
-  .confirmation-modal-container{
-    max-width: 80%;
-    background-color: lightgray;
-    color:black;
-    padding-left:1.5rem;
-    padding-right:1.5rem;
-    border-radius: 2rem;
-  }
-  
-  
-  .confirmation-modal-footer{
-    margin-bottom: 1.5rem;
-    display: flex;
-    justify-content: space-around;
-  }
-  
-  .modal-button{
-    border-radius: 1rem;
-    border:none;
-   padding:.5rem;
-   font-size: medium;
-  }
-  
-  .cancel-button{
-    background-color: darkgray;
-  }
-  
-  .delete-button{
-    background-color: #f85628;
-  }
-  
+ 

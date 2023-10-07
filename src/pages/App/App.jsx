@@ -68,13 +68,13 @@ export default function App() {
               
               <Route path="/side-essays" element={<SideEssaysIndexPage />} />
               <Route path="/side-essays/create"  element={<CreateSideEssayPage />} />
-              <Route path="/side-essays/:contentId" element={<SideEssayDetailPage />} />
-              <Route path="/side-essays/:contentId/edit" element={<EditSideEssayPage />} />
+              <Route path="/side-essays/:essayId" element={<SideEssayDetailPage />} />
+              <Route path="/side-essays/:essayId/edit" element={<EditSideEssayPage />} />
             
               <Route path="/blog" exact element={<AllBlogPostsPage />} />
               <Route path="/blog/new" element={<BlogPostCreatePage />}/>
-              <Route path="/blog/:contentId/edit" element={<BlogPostEditPage />} />
-              <Route path="/blog/:contentId" element={<BlogPostDetailPage loggedInUser={loggedInUser} />} />
+              <Route path="/blog/:postId/edit" element={<BlogPostEditPage />} />
+              <Route path="/blog/:postId" element={<BlogPostDetailPage loggedInUser={loggedInUser} />} />
 
               <Route path="/about" element={<AboutPage />} />
               <Route path="/contact" element={<ContactPage />} />
