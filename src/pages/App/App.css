@@ -1,5 +1,7 @@
+a:visited{color:black !important;}
+
 .success-message{
-    color: green
+    color: green;
 }
 
 .error-message{

@@ -24,7 +24,6 @@ function CreateSideEssayPage() {
         formData.append('bodyText', bodyText);
         formData.append('isMain', false);
         formData.append('type', 'essay');
-        //is chapter number required?
         if (coverPhoto) {
             formData.append('coverPhoto', coverPhoto);
         }

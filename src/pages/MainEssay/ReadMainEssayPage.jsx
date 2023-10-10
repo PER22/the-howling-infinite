@@ -17,7 +17,7 @@ export default function ReadMainEssayPage(){
     useEffect(()=>{
         async function fetchMainEssay(){
             try{
-                const mainEssay = await sendRequest('/api/essays/mainEssay');
+                const mainEssay = await sendRequest(`/api/essays/mainEssay`);
                 setMainEssay(mainEssay);
                 if (mainEssay){
                     setError("");
@@ -40,7 +40,7 @@ export default function ReadMainEssayPage(){
             ) : (
                 <p>Loading...</p>
             )}
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {error && <p className='error-message'>{error}</p>}
         </div>
     </>);
 }

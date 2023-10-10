@@ -10,7 +10,6 @@ function EditMainEssayPage() {
     const [coverPhoto, setCoverPhoto] = useState(null);
     const [htmlFile, setHtmlFile] = useState(null);  // To store the uploaded HTML
     const [imageFolder, setImageFolder] = useState([]);
-    const [chapterNumber, setChapterNumber] = useState(1);
 
     const [coverPhotoURL, setCoverPhotoURL] = useState('');
 
@@ -52,7 +51,6 @@ function EditMainEssayPage() {
         const formData = new FormData();
         formData.append('title', essayTitle);
         formData.append('isMain', true);
-        formData.append('chapterNumber', chapterNumber);
         if (coverPhoto) {
             formData.append('coverPhoto', coverPhoto);
         }
@@ -92,9 +90,8 @@ function EditMainEssayPage() {
     //Set page title dynamically
     const { setTitle } = useContext(TitleContext);
     useEffect(() => {
-        if (essayExists) { setTitle(`Editing '${essayTitle}'`); }
-        else { setTitle("Creating Main Essay"); }
-    }, [setTitle, essayTitle, essayExists]);
+        setTitle(`Editing Main Essay`); 
+    }, [setTitle, essayTitle]);
 
     return (
         <div>
@@ -112,10 +109,6 @@ function EditMainEssayPage() {
                     <div>
                         <label>Images Folder (.fld):</label>
                         <input type="file" webkitdirectory="" directory="" onChange={e => setImageFolder(e.target.files)} required/>
-                    </div>
-                    <div>
-                        <label>Chapter Number:</label>
-                        <input type="number" value={chapterNumber} onChange={e => setChapterNumber(e.target.value)} required />
                     </div>
                     <div>
                         <label>Cover Photo:</label>

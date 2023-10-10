@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 export default function ContentPreviewCard({ content , type}) {
     let essayPath;
     if (content.isMain) {
-        essayPath = "/read";
+        essayPath = `/read`;
     } else if (type === 'essay') {
         essayPath = `/side-essays/${content._id}`;
     } else if (type === 'blog') {
@@ -20,8 +20,7 @@ export default function ContentPreviewCard({ content , type}) {
             <CardActionArea href={essayPath}
                 sx={{
                     display: 'flex',
-                    justifyContent: 'center',
-                    alignContent: 'flex-start'
+                    justifyContent: 'flex-start',
                 }}>
                 {content.coverPhotoS3Key && <CardMedia
                     component="img"
