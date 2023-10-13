@@ -1,25 +1,18 @@
-.footnote-ref {
+.footnote-container {
     position: relative;
-    cursor: help; /* This will show a "?" cursor when hovering, signaling to the user that it's a tooltip */
-}
-
-.footnote-ref:hover::before {
-    content: attr(data-tooltip);
+  }
+  
+  .footnote-tooltip {
+    display: inline-block;
     position: absolute;
-    bottom: 100%; /* position tooltip above the footnote-ref */
-    left: 50%; /* center the tooltip */
-    transform: translateX(-50%); /* this will ensure the tooltip is truly centered */
+    top: 100%;
+    left: 0; 
     background-color: #333;
     color: white;
-    border-radius: 5px;
     padding: 5px;
-    margin-bottom: 5px; /* gap between the tooltip and the reference number */
-    z-index: 10; /* ensure it's on top of other content */
-    font-size: 0.8rem; /* smaller font-size for tooltip text */
-    max-width: 30vw;  /* set maximum width to 80% of the viewport width */
-    min-width: 0;
-    text-align: left; 
-    word-break: break-word;
-    box-sizing: border-box;
-    width: max-content;
-}
+    border-radius: 5px;
+    z-index: 1;
+    min-width: 15rem;
+    max-width: 25rem;
+    width: auto;
+  }

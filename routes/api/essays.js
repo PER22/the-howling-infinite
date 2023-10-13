@@ -9,7 +9,7 @@ const { uploadFiles } = require('../../utilities/aws');
 //Anonymous
 // MAIN ESSAYS:
 // GET /api/essays/mainEssayPreview
-router.get("/mainEssayPreviews", essayController.getMainEssayPreviews);
+router.get("/mainEssayPreview", essayController.getMainEssayPreview);
 
 //Anonymous
 // GET /api/essays/mainEssay
@@ -29,7 +29,7 @@ router.put('/mainEssay', ensureLoggedIn, adminOnly, essayController.preUpdateMai
   {name: 'coverPhoto', maxCount: 1},
   {name: 'html', maxCount: 1},
   {name: 'folderFiles'}
-]), essayController.updateMainEssay);
+]), essayController.postUpdateMainEssay);
 
 //Anonymous
 // SIDE ESSAYS: 

@@ -7,8 +7,6 @@ async function createComment(req, res) {
   try {
     const { text, entityType, entityId } = req.body;
     if (!entityType || !entityId) {
-      console.log("entityType: ", entityType);
-      console.log("entityId: ", entityId);
       return res.status(400).json({ error: "Both entityType and entityId are required." });
     }
     if (!text) {

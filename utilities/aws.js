@@ -57,23 +57,19 @@ const uploadFiles = multer({
           cb(null, {fieldName: file.fieldname});
       },
       key: function (req, file, cb) {
-        let folder = ''; // default, files go to the root
+        let folder = '';
         if (file.fieldname === 'pdf') {
-          cb(null, folder + `${req.contentId}-`+  sanitizeTitleForS3(file.originalname));
-          folder = 'pdfs-';
+          folder = 'pdfs';
         } else if (file.fieldname === 'coverPhoto' || file.fieldname === 'image') {
-          folder = 'images-';
-          cb(null, folder + Date.now());
+          folder = 'images';
         }
         else if (file.fieldname === 'html') {
-          folder = 'html-';
-          cb(null, folder + `${req.contentId}-`+  sanitizeTitleForS3(file.originalname));
+          folder = 'html';
         }
         else if (file.fieldname === 'folderFiles') {
-          folder = 'essayimages-';
-          cb(null, folder + `${req.contentId}-`+  sanitizeTitleForS3(file.originalname));
+          folder = 'essayimages';
         }
-        
+        cb(null, `${folder}-${req.newEssay._id}-`+  sanitizeTitleForS3(file.originalname));
     }
   })
 });

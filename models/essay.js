@@ -7,6 +7,10 @@ const EssaySchema = new Schema({
     ref: 'User',
     required: true
   },
+  title: {
+    type: String,
+    required:true
+  },
   isMain: {
     type: Boolean,
     required: true,
@@ -19,6 +23,7 @@ const EssaySchema = new Schema({
   coverPhotoS3Key: {
     type: String
   },
+  inlineImagesS3Keys : [String],
   preview: {
     type: String
   },
