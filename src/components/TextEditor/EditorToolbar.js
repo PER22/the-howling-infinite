@@ -4,7 +4,7 @@ import ImageUploader from "quill-image-uploader";
 import { ImageActions } from '@xeger/quill-image-actions';
 import { ImageFormats } from '@xeger/quill-image-formats';
 import ImageResize from 'quill-image-resize-module-react';
-import sendRequest from "../../utilities/send-request";
+import { uploadInlineImage } from "../../utilities/images-service";
 
 
 
@@ -73,7 +73,7 @@ export const modules = {
       return new Promise((resolve, reject) => {
         const formData = new FormData();
         formData.append("image", file);
-        sendRequest("/api/content/uploadImage", "POST", formData)
+        uploadInlineImage(formData)
         .then((result) => {
           const imageKey = "/api/images/" + result.imageUrl.split(".com/")[1];
           resolve(imageKey);

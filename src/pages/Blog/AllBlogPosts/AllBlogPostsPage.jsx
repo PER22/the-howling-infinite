@@ -1,7 +1,8 @@
+// /src/pages/Blog/AllBlogPosts/AllBlogPostsPage.jsx:
 import { useState, useEffect, useContext } from "react";
 import { TitleContext } from "../../../components/TitleBar/TitleContext";
 import ContentPreviewCard from '../../../components/ContentPreviewCard/ContentPreviewCard'
-import sendRequest from "../../../utilities/send-request";
+import {getBlogPostPreviews} from '../../../utilities/blog-service'
 
 export default function AllBlogPostsPage(){
   const { setTitle } = useContext(TitleContext);
@@ -15,12 +16,12 @@ export default function AllBlogPostsPage(){
   useEffect( () => {
     async function fetchBlogPosts(){
     try{
-      const retrievedPosts = await sendRequest('/api/blog');
-      if(retrievedPosts){
-        setPosts(retrievedPosts);
-        setError(null);
+      const retrievedPosts = await getBlogPostPreviews();
+      if(retrievedPosts.data){
+        setPosts(retrievedPosts.data);
+        setError(retrievedPosts.error);
       }else{
-        setError("Failed to retrieve blog posts.");
+        setError(retrievedPosts.error);
       }
     }catch(err){
       console.log("Error retrieving all blog posts.");

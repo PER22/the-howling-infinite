@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { TitleContext } from '../../../components/TitleBar/TitleContext';
-import sendRequest from '../../../utilities/send-request';
 import { useNavigate } from 'react-router-dom';
+import { requestPasswordReset } from '../../../utilities/users-api';
 
 export default function RequestPasswordResetPage(){
 
@@ -18,7 +18,7 @@ export default function RequestPasswordResetPage(){
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-          await sendRequest('/api/users/request-password-reset', 'POST', {email});
+          await requestPasswordReset(email);
           setMessage('Password reset email sent! Check your email for further instructions.');
           setError(null);
           setTimeout(() => {

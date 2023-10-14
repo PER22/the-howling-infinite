@@ -11,7 +11,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Divider  from '@mui/material/Divider';
 import MenuIcon from '@mui/icons-material/Menu';
-import './ResponsiveDrawer.css';
+
 
 export default function ResponsiveDrawer({setUser, user}) {
     async function handleLogOut() {
@@ -39,7 +39,7 @@ export default function ResponsiveDrawer({setUser, user}) {
     };
 
     const list = () => (
-      <List>
+      <List sx={{backgroundColor: "#406150"}}>
       {[
         { name: 'Home', path: '/' },
         { name: 'The Howling Infinite', path: '/read' },
@@ -49,15 +49,15 @@ export default function ResponsiveDrawer({setUser, user}) {
         { name: 'Contact', path: '/contact' },
       ].map((item) => (
         <ListItem key={item.name} disablePadding>
-          <ListItemButton component={Link} to={item.path}>
-            <ListItemText primary={item.name} />
+          <ListItemButton component={Link} to={item.path} sx={{textDecoration: "none"}} >
+            <ListItemText primary={item.name} sx={{color: "white"}} />
           </ListItemButton>
         </ListItem>
       ))}
-      <Divider />
+      <Divider  sx={{backgroundColor: "white"}}/>
       <ListItem disablePadding>
         <ListItemButton component={Link} to="/auth" onClick={user ? handleLogOut : null}>
-          <ListItemText primary={user ? "Log Out" : "Log In"} />
+          <ListItemText primary={user ? "Log Out" : "Log In"}  sx={{color: "white"}}/>
         </ListItemButton>
       </ListItem>
     </List>
@@ -65,7 +65,7 @@ export default function ResponsiveDrawer({setUser, user}) {
 
     return (
       <div>
-        <Button onClick={toggleDrawer(true)} sx={{position: 'fixed', top:'1rem', left: '1rem', backgroundColor: "#588157", zIndex:"10"}}><MenuIcon sx={{color: 'white',}}/></Button>
+        <Button onClick={toggleDrawer(true)} sx={{position: 'fixed', top:'1rem', left: '1rem', backgroundColor: "rgba(1,1,1,0.5)", zIndex:"10"}}><MenuIcon sx={{color: 'white',}}/></Button>
         <Drawer
           anchor={drawerAnchor}
           open={open}

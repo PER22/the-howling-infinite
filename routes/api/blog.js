@@ -11,6 +11,8 @@ const blogController = require('../../controllers/api/blog');
 // GET /api/blog - Get all blog posts
 router.get('/', blogController.getAllBlogPostPreviews);
 
+//Anonymous
+// GET /api/blog/:postId - Get specific blog post
 router.get('/:postId', blogController.getBlogPostById);
 
 //Admin only
@@ -19,18 +21,18 @@ router.post('/', ensureLoggedIn, adminOnly,  uploadFiles.single("coverPhoto"), b
 
 //Admin only
 // PUT /api/blog/:postId - Update a specific blog post
-router.put('/:postId',  ensureLoggedIn, adminOnly, blogController.updateBlogPostById);
+router.put('/:postId',  ensureLoggedIn, adminOnly, uploadFiles.single("coverPhoto"), blogController.updateBlogPostById);
 
 //Admin only
 // DELETE /api/blog/:postId - Delete a specific blog post
 router.delete('/:postId',  ensureLoggedIn, adminOnly, blogController.deleteBlogPostById);
 
 //All signed-in users
-// POST /api/blog/:postId/star - Star post
-router.post('/:postId/star', ensureLoggedIn, blogController.starBlogPostById);
+// POST /api/blog/star/:postId - Star a specific post
+router.post('/star/:postId', ensureLoggedIn, blogController.starBlogPostById);
 
 //All signed-in users
-// DELETE /api/blog/:postId/star - Unstar post
-router.delete('/:postId/star', ensureLoggedIn, blogController.unstarBlogPostById);
+// DELETE /api/blog/star/:postId - Unstar a specific post
+router.delete('/star/:postId', ensureLoggedIn, blogController.unstarBlogPostById);
 
 module.exports = router;

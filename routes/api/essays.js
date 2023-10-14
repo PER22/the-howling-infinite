@@ -8,12 +8,12 @@ const { uploadFiles } = require('../../utilities/aws');
 
 //Anonymous
 // MAIN ESSAYS:
-// GET /api/essays/mainEssayPreview
+// GET /api/essays
 router.get("/mainEssayPreview", essayController.getMainEssayPreview);
 
 //Anonymous
-// GET /api/essays/mainEssay
-router.get('/mainEssay', essayController.getMainEssay);
+// GET /api/essays
+router.get('/', essayController.getMainEssay);
 
 //Admin only
 // POST /api/essays
@@ -25,7 +25,7 @@ router.post('/', ensureLoggedIn, adminOnly, essayController.preCreateEssay, uplo
 
 //Admin only
 // PUT /api/essays/mainEssay
-router.put('/mainEssay', ensureLoggedIn, adminOnly, essayController.preUpdateMainEsssay, uploadFiles.fields([
+router.put('/', ensureLoggedIn, adminOnly, essayController.preUpdateMainEsssay, uploadFiles.fields([
   {name: 'coverPhoto', maxCount: 1},
   {name: 'html', maxCount: 1},
   {name: 'folderFiles'}
@@ -35,5 +35,13 @@ router.put('/mainEssay', ensureLoggedIn, adminOnly, essayController.preUpdateMai
 // SIDE ESSAYS: 
 // GET /api/essays/sideEssayPreviews
 router.get('/sideEssayPreviews', essayController.getAllSideEssayPreviews);
+
+//Logged In Users
+// POST /api/essays/star/:essayId
+router.post('/star/:essayId', ensureLoggedIn, essayController.starEssayById);
+
+//Logged In Users
+// DELETE /api/essays/star/:essayId
+router.delete('/star/:essayId', ensureLoggedIn, essayController.unstarEssayById);
 
 module.exports = router;

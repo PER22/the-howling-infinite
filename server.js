@@ -23,7 +23,6 @@ app.use('/api/essays', require('./routes/api/essays'));
 app.use('/api/blog', require('./routes/api/blog'));
 app.use('/api/comments', require('./routes/api/comments'));
 app.use('/api/images', require('./routes/api/images'));
-app.use('/api/content', require('./routes/api/content'));
 
 app.get('/*', function(req, res) {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));

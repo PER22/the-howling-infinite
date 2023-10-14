@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { TitleContext } from '../../components/TitleBar/TitleContext';
-import sendRequest from '../../utilities/send-request';
+import { getMainEssay } from '../../utilities/essays-service';
+import { updateMainEssay } from '../../utilities/essays-service';
+import { createEssay } from '../../utilities/essays-service';
+import { getSignedURLForImage } from '../../utilities/images-service';
 import 'react-quill/dist/quill.snow.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,22 +18,27 @@ function EditMainEssayPage() {
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [success, setSuccess] = useState(null);
+    const [message, setMessage] = useState(null);
 
     const navigate = useNavigate();
 
-//Fetch main essay if it exists
+    //Fetch main essay if it exists
     useEffect(() => {
         async function fetchMainEssayToEdit() {
             try {
-                const response = await sendRequest('/api/essays/mainEssay');
-                setEssayTitle(response.title);
-                setEssayExists(true); // Set essayExists to true
-                if (response.coverPhotoS3Key) {
-                    console.log(response.coverPhotoS3Key);
-                    const imageResponse = await fetch(`/api/images/${response.coverPhotoS3Key}`);
-                    if (imageResponse) { setCoverPhotoURL(imageResponse.signedURL); }
-
+                const response = await getMainEssay();
+                if (!response.error) {
+                    setEssayTitle(response.title);
+                    setEssayExists(true); // Set essayExists to true
+                    if (response.coverPhotoS3Key) {
+                        console.log(response.coverPhotoS3Key);
+                        const imageResponse = await getSignedURLForImage(response.coverPhotoS3Key);
+                        if (imageResponse) {
+                            setCoverPhotoURL(imageResponse.signedURL);
+                        }
+                    }
+                } else {
+                    setError(response.error);
                 }
             } catch (err) {
                 if (err.message !== 'sendRequest failed: {"error":"Essay not found."}') {
@@ -45,7 +53,7 @@ function EditMainEssayPage() {
         fetchMainEssayToEdit();
     }, []);
 
-   //Handle submission of form
+    //Handle submission of form
     const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData();
@@ -65,32 +73,44 @@ function EditMainEssayPage() {
         try {
             if (essayExists) {
                 // Update existing essay
-                await sendRequest(`/api/essays/mainEssay`, 'PUT', formData);
-                setSuccess('Essay successfully updated!');
+                const response = await updateMainEssay(formData);
+                if (!response.error) {
+                    setMessage('Essay successfully updated!');
+                    setError(null);
+                    setTimeout(() => {
+                        navigate('/read');
+                    }, 2000);
+                }
+                setMessage('Essay successfully updated!');
                 setError(null);
                 setTimeout(() => {
                     navigate('/read');
                 }, 2000);
             } else {
                 // Create new essay
-                await sendRequest('/api/essays', 'POST', formData);
-                setSuccess('Essay successfully created!');
-                setError(null);
-                setTimeout(() => {
-                    navigate('/read');
-                }, 2000);
+                const newEssay = await createEssay(formData);
+                if (!newEssay.error) {
+                    setMessage(newEssay.message);
+                    setError(null);
+                    setTimeout(() => {
+                        navigate('/read');
+                    }, 2000);
+                }else{
+
+                }
+
             }
             setError('');
         } catch (err) {
             setError('Error creating/updating main essay: ' + err.message);
-            setSuccess('');
+            setMessage('');
         }
     };
 
     //Set page title dynamically
     const { setTitle } = useContext(TitleContext);
     useEffect(() => {
-        setTitle(`Editing Main Essay`); 
+        setTitle(`Editing Main Essay`);
     }, [setTitle, essayTitle]);
 
     return (
@@ -108,7 +128,7 @@ function EditMainEssayPage() {
                     </div>
                     <div>
                         <label>Images Folder (.fld):</label>
-                        <input type="file" webkitdirectory="" directory="" onChange={e => setImageFolder(e.target.files)} required/>
+                        <input type="file" webkitdirectory="" directory="" onChange={e => setImageFolder(e.target.files)} required />
                     </div>
                     <div>
                         <label>Cover Photo:</label>
@@ -125,7 +145,7 @@ function EditMainEssayPage() {
                 </form>
             }
             {error && <p style={{ color: 'red' }}>{error}</p>}
-            {success && <p style={{ color: 'green' }}>{success}</p>}
+            {message && <p style={{ color: 'green' }}>{message}</p>}
         </div>
     );
 }

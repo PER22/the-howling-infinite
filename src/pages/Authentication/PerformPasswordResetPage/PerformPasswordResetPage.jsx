@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { useLocation } from 'react-router-dom';
 import { TitleContext } from "../../../components/TitleBar/TitleContext";
-import sendRequest from "../../../utilities/send-request";
+import { resetPassword } from "../../../utilities/users-api";
 
 
 function useQuery() {
@@ -31,7 +31,7 @@ export default function PerformPasswordResetPage() {
           return;
         }
         try{
-            const response = await sendRequest('/api/users/perform-password-reset', "PUT", {token: token, newPassword: password});
+            const response = await resetPassword(token,password);
             if(response){
                 setMessage("Password reset successfully.");
             }

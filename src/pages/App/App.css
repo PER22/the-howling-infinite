@@ -1,5 +1,7 @@
-a:visited{color:black !important;}
 
+a, a:visited {
+    text-decoration: none;
+}
 .success-message{
     color: green;
 }

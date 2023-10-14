@@ -324,22 +324,22 @@ async function deleteEssayById(req, res) {
 //All logged in users
 async function starEssayById(req, res) {
     try {
-        const postId = req.params.postId;
+        const essayId = req.params.essayId;
         const userId = req.user._id;
-        const foundPost = await EssayModel.findById(postId);
+        const foundPost = await EssayModel.findById(essayId);
         if (!foundPost) {
             return res.status(404).json({ eror: "Post not found." });
         }
         // Add the user's reference to the post's stars array
         await EssayModel.findByIdAndUpdate(
-            postId,
+            essayId,
             { $addToSet: { stars: userId } },
             { new: true }
         );
-        let post = await EssayModel.findById(postId);
+        let post = await EssayModel.findById(essayId);
         const numStars = post.stars.length;
         post = await EssayModel.findByIdAndUpdate(
-            postId,
+            essayId,
             { $set: { numStars } },
             { new: true }
         );

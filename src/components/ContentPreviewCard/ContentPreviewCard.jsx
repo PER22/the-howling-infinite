@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 
 
 export default function ContentPreviewCard({ content , type}) {
+    //console.log(content);
     let essayPath;
     if (content.isMain) {
         essayPath = `/read`;

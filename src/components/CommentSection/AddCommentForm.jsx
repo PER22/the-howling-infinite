@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import sendRequest from '../../utilities/send-request';
+import {postComment} from '../../utilities/comments-api'
+
 import './AddCommentForm.css'
 
 function AddCommentForm({ entityType, entity, onNewComment }) {
@@ -8,7 +9,7 @@ function AddCommentForm({ entityType, entity, onNewComment }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await sendRequest('/api/comments', 'POST', {
+      const response = await postComment({
         entityType,
         entityId : entity._id,
         text

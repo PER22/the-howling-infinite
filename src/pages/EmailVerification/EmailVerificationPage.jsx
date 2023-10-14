@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import sendRequest from '../../utilities/send-request';
+
+import { verifyEmail } from '../../utilities/users-service';
 
 const EmailVerificationPage = () => {
   const [isVerified, setIsVerified] = useState(false);
@@ -13,7 +14,7 @@ const EmailVerificationPage = () => {
     const token = query.get('token');
     // Send the token to the backend for verification
     try{
-        const data = await sendRequest('/api/users/verify-email', 'POST', {token});
+        const data = await verifyEmail(token);
         if (data) {
             setIsVerified(true);
             localStorage.setItem('token', data);

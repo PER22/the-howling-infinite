@@ -63,21 +63,21 @@ export default function App() {
 
               <Route path="/" exact element={<HomePage />} />
               
-              <Route path="/read" element={<ReadMainEssayPage />} />
-              <Route path="/edit" element={<EditMainEssayPage />} />
+              <Route path="/read" element={<ReadMainEssayPage loggedInUser={loggedInUser}/>} />
+              <Route path="/edit" element={<EditMainEssayPage loggedInUser={loggedInUser}/>} />
               
               <Route path="/side-essays" element={<SideEssaysIndexPage />} />
-              <Route path="/side-essays/create"  element={<CreateSideEssayPage />} />
-              <Route path="/side-essays/:essayId" element={<SideEssayDetailPage />} />
-              <Route path="/side-essays/:essayId/edit" element={<EditSideEssayPage />} />
+              <Route path="/side-essays/create"  element={<CreateSideEssayPage loggedInUser={loggedInUser}/>} />
+              <Route path="/side-essays/:essayId" element={<SideEssayDetailPage loggedInUser={loggedInUser}/>} />
+              <Route path="/side-essays/:essayId/edit" element={<EditSideEssayPage loggedInUser={loggedInUser}/>} />
             
-              <Route path="/blog" exact element={<AllBlogPostsPage />} />
-              <Route path="/blog/new" element={<BlogPostCreatePage />}/>
-              <Route path="/blog/:postId/edit" element={<BlogPostEditPage />} />
+              <Route path="/blog" exact element={<AllBlogPostsPage loggedInUser={loggedInUser}/>} />
+              <Route path="/blog/new" element={<BlogPostCreatePage loggedInUser={loggedInUser}/>}/>
+              <Route path="/blog/:postId/edit" element={<BlogPostEditPage loggedInUser={loggedInUser}/>} />
               <Route path="/blog/:postId" element={<BlogPostDetailPage loggedInUser={loggedInUser} />} />
 
               <Route path="/about" element={<AboutPage />} />
-              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/contact" element={<ContactPage loggedInUser={loggedInUser}/>} />
             </Routes>
           </section>
         </TitleProvider>

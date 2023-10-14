@@ -6,8 +6,8 @@ export async function signUp(userData){
     return response;
 }
 
-export async function verify(token) {
-    const response = await usersAPI.verify(token);
+export async function verifyEmail(token) {
+    const response = await usersAPI.verifyEmail(token);
     if (response) {
         console.log(response);
         localStorage.setItem('token',token);

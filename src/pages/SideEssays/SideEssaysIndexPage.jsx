@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import { TitleContext } from "../../components/TitleBar/TitleContext";
-import sendRequest from "../../utilities/send-request";
 import ContentPreviewCard from "../../components/ContentPreviewCard/ContentPreviewCard";
+import { getSideEssayPreviews } from "../../utilities/essays-service";
 
 export default function SideEssaysIndexPage(){
     const [sideEssays, setSideEssays] = useState([]);
@@ -9,7 +9,7 @@ export default function SideEssaysIndexPage(){
     useEffect(()=>{
       async function fetchSideEssays(){
         try {
-          const recievedSideEssays = await sendRequest('/api/essays/sideEssayPreviews');
+          const recievedSideEssays = await getSideEssayPreviews();
           if(recievedSideEssays){setSideEssays(recievedSideEssays);}
         } catch(err){
           console.log("Error fetching side essays: ", err);

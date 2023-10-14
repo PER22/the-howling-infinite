@@ -1,8 +1,11 @@
 import { useEffect, useState, useContext } from "react";
 import { TitleContext } from "../../components/TitleBar/TitleContext";
-import sendRequest from "../../utilities/send-request";
+import { getBlogPostPreviews } from "../../utilities/blog-service";
+import { getMainEssayPreview } from "../../utilities/essays-service";
+import { getSideEssayPreviews } from "../../utilities/essays-service";
 import ContentPreviewCard from "../../components/ContentPreviewCard/ContentPreviewCard";
-import './HomePage.css'
+
+
 
 export default function HomePage() {
   const { setTitle } = useContext(TitleContext);
@@ -14,8 +17,9 @@ export default function HomePage() {
   useEffect(()=>{
     async function fetchMainEssay(){
       try {
-        const recievedMainEssay = await sendRequest('/api/essays/mainEssayPreview');
-        if(recievedMainEssay){setMainEssay(recievedMainEssay);}
+        const recievedMainEssay = await getMainEssayPreview();
+        console.log("recievedMainEssay: ", recievedMainEssay);
+        if(!recievedMainEssay.error){setMainEssay(recievedMainEssay.data);}
       } catch(err){
         console.log("Error fetching main essay: ", err);
       }
@@ -27,8 +31,8 @@ export default function HomePage() {
   useEffect(()=>{
     async function fetchSideEssays(){
       try {
-        const recievedSideEssays = await sendRequest('/api/essays/sideEssayPreviews');
-        if(recievedSideEssays){setSideEssays(recievedSideEssays);}
+        const recievedSideEssays = await getSideEssayPreviews();
+        if(!recievedSideEssays.error){setSideEssays(recievedSideEssays.data);}
       } catch(err){
         console.log("Error fetching side essays: ", err);
       }
@@ -40,8 +44,8 @@ export default function HomePage() {
   useEffect(()=>{
     async function fetchBlogPosts(){
       try {
-        const recievedBlogPosts = await sendRequest('/api/blog/');
-        if(recievedBlogPosts){setBlogPosts(recievedBlogPosts);}
+        const recievedBlogPosts = await getBlogPostPreviews();
+        if(!recievedBlogPosts.error){setBlogPosts(recievedBlogPosts.data);}
       } catch(err){
         console.log("Error fetching blog posts: ", err);
       }

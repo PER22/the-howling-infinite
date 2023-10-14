@@ -41,7 +41,6 @@ const userSchema = new Schema({
   timestamps: true,
   toJSON: {
     transform: function (doc, ret) {
-      delete ret.email;
       delete ret.password;
       delete ret.createdAt;
       delete ret.updatedAt;

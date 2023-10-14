@@ -32,7 +32,7 @@ async function createBlogPost(req, res) {
             coverPhotoS3Key,
             preview: downsize(bodyText , {words: 20, append: "..."})
         });
-        res.status(201).json({ essay: blogPost, htmlS3Key });
+        res.status(201).json({ essay: blogPost, htmlS3Key, message: "New blog post successfully created" });
     } catch (error) {
         console.error('Error creating blog post:', error);
         res.status(400).json({ error: 'Failed to create blog post' });
@@ -41,6 +41,7 @@ async function createBlogPost(req, res) {
  
 //Anonymous
 async function getBlogPostById(req, res) {
+    console.log("req.params: ", req.params);
     try {
         const content = await BlogModel.findById(req.params.postId).populate('author');
         if (!content) {
@@ -72,7 +73,9 @@ async function getAllBlogPostPreviews(req, res) {
 async function updateBlogPostById(req, res) {
     try {
         const { title, bodyText} = req.body; //User can only affect title and body text
-        const blogPost = await BlogModel.findById(req.params.blogPostId);
+        console.log(req.body);
+        const blogPost = await BlogModel.findById(req.params.postId);
+        console.log("Blog post found in controller:", blogPost)
         if (!blogPost) {
             return res.status(404).json({ error: 'Blog post not found.' });
         }
@@ -90,6 +93,7 @@ async function updateBlogPostById(req, res) {
             blogPost.coverPhotoS3Key = req.file.key;
         }
         if(oldS3Key){
+            console.log("Old S3 cover photo key", oldS3Key);
             deleteFromS3(req.file.key);
         }
         if (bodyText) {
@@ -107,16 +111,15 @@ async function updateBlogPostById(req, res) {
 //Admin only
 async function deleteBlogPostById(req, res) {
     try {
-        const blogPost = await BlogModel.findById(req.params.contentId);
+        const blogPost = await BlogModel.findById(req.params.postId);
         if (!blogPost) {
-            return res.status(404).json({ error: 'Cont not found.' });
+            return res.status(404).json({ error: 'Post not found.' });
         }
-        if(req.user._id !== blogPost.author.toString()){
+        if(req.user._id.toString() !== blogPost.author.toString()){
             return res.status(403).json({ error: "You don't have permission to delete this content."});
         }
-        await deleteFromS3(blogPost.contentS3Key);
         if(blogPost.coverPhotoS3Key){await deleteFromS3(blogPost.coverPhotoS3Key);}
-        await blogPost.remove();
+        await blogPost.deleteOne();
         res.status(200).json({ message: 'Blog post deleted successfully' });
     } catch (error) {
         console.error('Error deleting content:', error);

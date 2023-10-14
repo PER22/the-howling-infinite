@@ -3,6 +3,8 @@ import { TitleContext } from '../../../components/TitleBar/TitleContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import Editor from '../../../components/TextEditor/Editor';
 import ConfirmationModal from '../../../components/ConfirmationModal/ConfirmationModal';
+import { editBlogPost, getBlogPostById } from '../../../utilities/blog-service';
+import { getSignedURLForImage } from '../../../utilities/images-service';
 import sendRequest from '../../../utilities/send-request';
 
 
@@ -10,7 +12,7 @@ export default function BlogPostEditPage({ user }) {
   const { setTitle } = useContext(TitleContext);
 
   //Form contents
-  const { contentId } = useParams();
+  const {postId } = useParams();
   const [postTitle, setPostTitle] = useState('');
   const [bodyText, setBodyText] = useState(null);
   const [coverPhoto, setCoverPhoto] = useState(null);
@@ -23,20 +25,22 @@ export default function BlogPostEditPage({ user }) {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const postData = await sendRequest(`/api/content/${contentId}`);
-        setPostTitle(postData.title);
-        setBodyText(postData.bodyText);
-        if (postData.coverPhotoS3Key) {
-          const imageResponse = await sendRequest(`/api/content/image-url/${postData._id}`);
-          if (imageResponse) { setPreviewImageURL(imageResponse.signedURL); }
-
+        const post = await getBlogPostById(postId);
+        if(!post.error){
+          setPostTitle(post.data.title);
+          setBodyText(post.data.bodyText);
+          if (post.data.coverPhotoS3Key) {
+            const imageResponse = await getSignedURLForImage(post.data.coverPhotoS3Key);
+            if (imageResponse) { setPreviewImageURL(imageResponse.data.signedURL); }
+          }
         }
+        
       } catch (error) {
         console.error('Error fetching post:', error);
       }
     };
     fetchPost();
-  }, [contentId]);
+  }, [postId]);
 
   useEffect(() => {
     setTitle(`Editing '${postTitle}'`);
@@ -49,12 +53,15 @@ export default function BlogPostEditPage({ user }) {
       formData.append('title', postTitle);
       formData.append('bodyText', bodyText);
       formData.append('isMain', true);
-      formData.append('type', 'blog');
       if (coverPhoto) {
         formData.append('coverPhoto', coverPhoto);
       }
-      const updatedPost = await sendRequest(`/api/content/${contentId}`, "PUT", formData);
-      navigate(`/blog/${updatedPost._id}`)
+      const updatedPost = await editBlogPost(postId, formData);
+      if (!updatedPost.error){
+        navigate(`/blog/${postId}`)
+      }else{
+        setError(updatedPost.error)
+      }
     } catch (error) {
       setError('Failed to update post. Please try again.');
       console.log('Error updating post:', error);
@@ -63,7 +70,7 @@ export default function BlogPostEditPage({ user }) {
 
   const handleDeletePost = async () => {
     try {
-      await sendRequest(`/api/content/${contentId}`, "DELETE");
+      await sendRequest(`/api/blog/${postId}`, "DELETE");
       navigate(`/blog`);
     } catch (error) {
       console.log('Error deleting post:', error);
@@ -112,7 +119,7 @@ export default function BlogPostEditPage({ user }) {
         <ConfirmationModal closeFunction={closeModal}
           deleteFunction={handleDeletePost}
           confirmationText={"This will permanently delete this post, and can not be undone."}
-          contentId={contentId}
+          contentId={postId}
         />
       </div>}
     </>
