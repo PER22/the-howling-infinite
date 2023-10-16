@@ -5,12 +5,19 @@ import { getSideEssayPreviews } from "../../utilities/essays-service";
 
 export default function SideEssaysIndexPage(){
     const [sideEssays, setSideEssays] = useState([]);
-    
+    const [error, setError] = useState(null);
+    const [message, setMessage] = useState(null);
     useEffect(()=>{
       async function fetchSideEssays(){
         try {
           const recievedSideEssays = await getSideEssayPreviews();
-          if(recievedSideEssays){setSideEssays(recievedSideEssays);}
+          if(!recievedSideEssays.error){
+            setSideEssays(recievedSideEssays.data);
+            setError(null);
+            setMessage(null);
+          }else{
+            setError(recievedSideEssays.error);
+          }
         } catch(err){
           console.log("Error fetching side essays: ", err);
         }
@@ -27,7 +34,7 @@ export default function SideEssaysIndexPage(){
         <>  
             <section id="card-container">
               {(sideEssays.length > 0) && sideEssays.map(essay => (
-              <ContentPreviewCard key={essay._id} content={essay} />
+              <ContentPreviewCard key={essay._id} content={essay} type={"essay"}/>
               ))}
             </section>
         </>

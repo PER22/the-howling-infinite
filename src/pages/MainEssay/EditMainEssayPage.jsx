@@ -56,6 +56,7 @@ function EditMainEssayPage() {
     //Handle submission of form
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError(null);
         const formData = new FormData();
         formData.append('title', essayTitle);
         formData.append('isMain', true);
@@ -81,22 +82,17 @@ function EditMainEssayPage() {
                         navigate('/read');
                     }, 2000);
                 }
-                setMessage('Essay successfully updated!');
-                setError(null);
-                setTimeout(() => {
-                    navigate('/read');
-                }, 2000);
             } else {
                 // Create new essay
                 const newEssay = await createEssay(formData);
                 if (!newEssay.error) {
-                    setMessage(newEssay.message);
+                    // setMessage(newEssay.message);
                     setError(null);
                     setTimeout(() => {
                         navigate('/read');
                     }, 2000);
                 }else{
-
+                    setError(newEssay.error);
                 }
 
             }
@@ -134,11 +130,6 @@ function EditMainEssayPage() {
                         <label>Cover Photo:</label>
                         <input type="file" onChange={e => setCoverPhoto(e.target.files[0])} />
                     </div>
-                    {coverPhotoURL && <div>
-                        <label>Current cover photo: </label>
-                        <img src={coverPhotoURL} alt="Current cover img" style={{ maxWidth: '300px', maxHeight: '200px' }} />
-                    </div>
-                    }
                     <div>
                         <button type="submit">Submit</button>
                     </div>

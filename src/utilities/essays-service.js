@@ -1,9 +1,9 @@
 // /src/utilities/essays-service.js:
 import * as essayAPI from './essays-api'
 
-export async function createEssay(){
+export async function createEssay(formData){
     try{
-        const newEssay = await essayAPI.createEssay();
+        const newEssay = await essayAPI.createEssay(formData);
         if(!newEssay.error) {
             return {data: newEssay, error: null};
         }
@@ -63,5 +63,31 @@ export async function updateMainEssay(formData){
     }catch(err){
         console.log("Failed to update main essay:", err);
         return {data: null, error: "Failed to update main essay."};
+    }
+}
+
+export async function getSideEssay(essayId){
+    try{
+        const essay = await essayAPI.getSideEssay(essayId);
+        if(!essay.error) {
+            return {data: essay, error: null, message: null};
+        }
+        return {data : null, error: "Failed to retrieve requested essay."};
+    }catch(err){
+        console.log("Failed to retrieve requested essay:", err);
+        return {data: null, error: "Failed to retrieve requested essay."};
+    }
+}
+
+export async function updateSideEssay(essayId, formData){
+    try{
+        const essay = await essayAPI.updateSideEssay(essayId, formData);
+        if(!essay.error) {
+            return {data: essay, error: null, message: null};
+        }
+        return {data : null, error: "Failed to update requested essay."};
+    }catch(err){
+        console.log("Failed to update requested essay:", err);
+        return {data: null, error: "Failed to update requested essay."};
     }
 }

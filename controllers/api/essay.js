@@ -18,7 +18,7 @@ async function preCreateEssay(req, res, next) {
         });
         console.log(newEssay);
         // Attach the newEssay to the req object
-        req.newEssay = newEssay;
+        req.essay = newEssay;
 
         // Move to the next middleware (which should be multer)
         next();
@@ -73,6 +73,7 @@ async function postCreateEssay(req, res) {
         let coverPhotoS3Key = null;
         let htmlS3Key = null;
         const folderFiles = [];
+        if(!req.file && !req.files){console.log("Files are not attached.")}
 
         if (req.files.coverPhoto && req.files.coverPhoto[0]) {
             coverPhotoS3Key = req.files.coverPhoto[0].key;
@@ -89,22 +90,22 @@ async function postCreateEssay(req, res) {
         if (htmlS3Key) {
             const oldHTML = await downloadFromS3(htmlS3Key);
             const htmlWithFootnotes = formatFootnotes(oldHTML);
-            const imagesKeysAndHTML = editImgSrc(htmlWithFootnotes, req.newEssay._id.toString());
+            const imagesKeysAndHTML = editImgSrc(htmlWithFootnotes, req.essay._id.toString());
             imagesKeysAndHTML.newImageKeys.forEach((imgKey)=>{
-                req.newEssay.inlineImagesS3Keys.push(imgKey)    
+                req.essay.inlineImagesS3Keys.push(imgKey)    
             });
             const modifiedHtmlContent = imagesKeysAndHTML.html;
             await updateInS3(htmlS3Key, modifiedHtmlContent);
             preview = downsize(modifiedHtmlContent, { words: 20, append: "..." });
         }
-        req.newEssay.title = req.body.title
-        req.newEssay.isMain = req.body.isMain
-        req.newEssay.htmlS3Key = htmlS3Key;
-        req.newEssay.status = "completed";
-        req.newEssay.coverPhotoS3Key = coverPhotoS3Key;
-        req.newEssay.preview = preview;
-        await req.newEssay.save();
-        res.status(201).json({ essay: req.newEssay });
+        req.essay.title = req.body.title
+        req.essay.isMain = req.body.isMain
+        req.essay.htmlS3Key = htmlS3Key;
+        req.essay.status = "completed";
+        req.essay.coverPhotoS3Key = coverPhotoS3Key;
+        req.essay.preview = preview;
+        await req.essay.save();
+        res.status(201).json(req.essay);
     } catch (error) {
         console.error('Error creating content:', error);
         res.status(400).json({ error: 'Failed to create content' });
@@ -133,15 +134,17 @@ async function getMainEssay(req, res) {
 //Anonymous
 async function getEssayById(req, res) {
     try {
-        const content = await EssayModel.findById(req.params.contentId).populate('author');
-        if (!content) {
-            return res.status(404).json({ error: 'Content not found.' });
+        const essay = await EssayModel.findById(req.params.essayId).populate('author');
+        if (!essay) {
+            return res.status(404).json({ error: 'Essay not found.' });
         }
-        const contentBody = await downloadFromS3(content.contentS3Key);
-        res.status(200).json({ ...content.toObject(), bodyText: contentBody.toString() });
+        const contentBody = await downloadFromS3(essay.htmlS3Key);
+        const essayObj = essay.toObject();
+        essayObj.bodyHTML = contentBody;
+        res.status(200).json(essayObj);
     } catch (error) {
-        console.error('Error fetching content:', error);
-        res.status(400).json({ error: 'Failed to fetch content' });
+        console.error('Error fetching side essay:', error);
+        res.status(400).json({ error: 'Failed to fetch side essay.' });
     }
 }
 
@@ -150,19 +153,19 @@ async function getMainEssayPreview(req, res) {
     try {
         const essay = await EssayModel.findOne({ isMain: true }).populate('author');
         if (!essay) {
-            return res.status(404).json({ error: 'Main essay not found.' });
+            return res.status(404).json({ error: 'Main essay preview not found.' });
         }
         return res.status(200).json(essay);
     } catch (error) {
-        console.error('Error fetching main essay:', error);
-        res.status(400).json({ error: 'Failed to fetch main essay' });
+        console.error('Error fetching main essay preview:', error);
+        res.status(400).json({ error: 'Failed to fetch main essay preview' });
     }
 }
 
 //Anonymous
 async function getAllSideEssayPreviews(req, res) {
     try {
-        const essays = await EssayModel.find({ isMain: false, type: 'essay' }).populate('author');
+        const essays = await EssayModel.find({ isMain: false}).populate('author');
         if (!essays || essays.length === 0) {
             return res.status(404).json({ error: 'Essays not found.' });
         }
@@ -181,7 +184,7 @@ async function getAllSideEssayPreviews(req, res) {
 
 //Admin only
 //Admin only
-async function preUpdateMainEsssay(req, res, next) {
+async function preUpdateMainEssay(req, res, next) {
     try {
         const mainEssay = await EssayModel.findOne({ isMain: true });
         if(!mainEssay){res.status(400).json({ error: "preUpdateMainEssay(): Failed to find main essay." });}
@@ -202,7 +205,7 @@ async function preUpdateMainEsssay(req, res, next) {
         mainEssay.htmlS3Key = "null";
 
         await mainEssay.save();
-        req.newEssay = mainEssay;
+        req.essay = mainEssay;
         next();
     } catch (err) {
         console.log(err.message);
@@ -214,7 +217,7 @@ async function preUpdateMainEsssay(req, res, next) {
 async function postUpdateMainEssay(req, res) {
     try {
         // Grab essay document
-        const mainEssay = req.newEssay;
+        const mainEssay = req.essay;
 
         // Check authorship against the requesting user
         if (req.user._id.toString() !== mainEssay.author.toString()) {
@@ -264,40 +267,86 @@ async function postUpdateMainEssay(req, res) {
     }
 }
 
+async function preUpdateSideEssay(req, res, next) {
+    try {
+        const sideEssay = await EssayModel.findById( req.params.essayId );
+        if(!sideEssay){res.status(400).json({ error: "preUpdateMainEssay(): Failed to find main essay." });}
+        //delete inline images
+        for (const img of sideEssay.inlineImagesS3Keys) {
+            await deleteFromS3(img);
+        }
+        sideEssay.inlineImagesS3Keys = [];
+        //delete cover image
+        if(sideEssay.coverPhotoS3Key){
+            await deleteFromS3(sideEssay.coverPhotoS3Key);
+        }
+        sideEssay.coverPhotoS3Key = "null";
+        //delete html
+        if(sideEssay.htmlS3Key){
+            await deleteFromS3(sideEssay.htmlS3Key);
+        }
+        sideEssay.htmlS3Key = "null";
+
+        await sideEssay.save();
+        req.essay = sideEssay;
+        next();
+    } catch (err) {
+        console.log(err.message);
+        return res.status(400).json({ error: "preUpdateMainEssay failed." });
+    }
+}
 
 //Admin only
-async function updateEssayById(req, res) {
+async function postUpdateSideEssay(req, res) {
     try {
-        const { title, bodyText } = req.body; //User can only affect title and body text
-        const content = await EssayModel.findById(req.params.contentId);
-        if (!content) {
-            return res.status(404).json({ error: 'Content not found.' });
+        // Grab essay document
+        const essay = req.essay;
+
+        // Check authorship against the requesting user
+        if (req.user._id.toString() !== essay.author.toString()) {
+            return res.status(403).json({ error: "You don't have permission to edit the main essay." });
         }
-        if (req.user._id !== content.author.toString()) {
-            return res.status(403).json({ error: "You don't have permission to edit this content." });
+        essay.coverPhotoS3Key = req.files.coverPhoto[0].key;
+
+        // Process HTML file if uploaded
+        let preview = essay.preview;
+        if (req.files.html && req.files.html[0]) {
+            const oldHtmlS3Key = essay.htmlS3Key;
+            if (oldHtmlS3Key) {
+                await deleteFromS3(oldHtmlS3Key);
+            }
+
+            const newHtmlS3Key = req.files.html[0].key;
+            essay.htmlS3Key = newHtmlS3Key;
+            const oldHTML = await downloadFromS3(newHtmlS3Key);
+
+
+            // Format footnotes and edit image source
+            const htmlWithFootnotes = formatFootnotes(oldHTML);
+            const imagesKeysAndHTML = editImgSrc(htmlWithFootnotes, essay._id.toString());
+
+            // Update essay's inline image keys
+            imagesKeysAndHTML.newImageKeys.forEach(imgKey => essay.inlineImagesS3Keys.push(imgKey));
+
+            // Update the HTML content in S3
+            const modifiedHtmlContent = imagesKeysAndHTML.html;
+            await updateInS3(newHtmlS3Key, modifiedHtmlContent);
+
+            // Update the preview
+            preview = downsize(modifiedHtmlContent, { words: 20, append: "..." });
         }
-        if (title) {
-            content.title = title;
-        }
-        let oldS3Key;//Swap photos if a new one uploaded
-        if (req.file && req.file.key) {
-            // Store old S3 key
-            oldS3Key = content.coverPhotoS3Key;
-            // Set new S3 key
-            content.coverPhotoS3Key = req.file.key;
-        }
-        if (oldS3Key) {
-            deleteFromS3(req.file.key);
-        }
-        if (bodyText) {
-            await updateInS3(content.contentS3Key, bodyText);
-            content.preview = downsize(bodyText, { words: 20, append: "..." });
-        }
-        await content.save();
-        res.status(200).json(content);
+
+        // Update the main essay's title if provided
+        essay.title = req.body.title || essay.title;
+        essay.preview = preview;
+
+        // Save the changes to the database
+        await essay.save();
+
+        res.status(200).json(essay);
     } catch (error) {
-        console.error('Error updating content:', error);
-        res.status(400).json({ error: 'Failed to update content' });
+        console.error('Failed to update essay:', error);
+        res.status(400).json({ error: 'Failed to update essay' });
     }
 }
 
@@ -391,9 +440,10 @@ module.exports = {
     getMainEssayPreview,
     getAllSideEssayPreviews,
     //Update
-    preUpdateMainEsssay,
+    preUpdateMainEssay,
     postUpdateMainEssay,
-    updateEssayById,
+    preUpdateSideEssay,
+    postUpdateSideEssay,
     starEssayById,
     unstarEssayById,
     //Delete

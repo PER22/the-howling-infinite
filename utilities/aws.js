@@ -69,7 +69,7 @@ const uploadFiles = multer({
         else if (file.fieldname === 'folderFiles') {
           folder = 'essayimages';
         }
-        cb(null, `${folder}-${req.newEssay._id}-`+  sanitizeTitleForS3(file.originalname));
+        cb(null, `${folder}-${req.essay._id}-`+  sanitizeTitleForS3(file.originalname));
     }
   })
 });

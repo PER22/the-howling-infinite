@@ -23,3 +23,11 @@ export function updateMainEssay(formData){
     return sendRequest(`${BASE_URL}`, 'PUT', formData);
 }
 
+export function getSideEssay(essayId){
+    return sendRequest(`${BASE_URL}/${essayId}`);
+}
+
+export function updateSideEssay(essayId, formData){
+    return sendRequest(`${BASE_URL}/${essayId}`, "PUT", formData);
+}
+

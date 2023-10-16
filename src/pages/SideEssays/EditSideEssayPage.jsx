@@ -1,113 +1,103 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { TitleContext } from '../../components/TitleBar/TitleContext';
-import sendRequest from '../../utilities/send-request';
-import Editor from '../../components/TextEditor/Editor';
+import { getSideEssay, updateSideEssay} from '../../utilities/essays-service'
 import 'react-quill/dist/quill.snow.css'; // note the change in import for styles
 
 
 function EditSideEssayPage() {
-    const {contentId} = useParams();
-    console.log(contentId);
+    const { essayId } = useParams();
     const navigate = useNavigate();
 
     const [essayTitle, setEssayTitle] = useState(''); //form contents
-    const [bodyText, setBodyText] = useState('');
-    const [coverPhoto, setCoverPhoto] = useState(null);
+    const [coverPhoto, setCoverPhoto] = useState('');
+    const [htmlFile, setHtmlFile] = useState('');  // To store the uploaded HTML
+    const [imageFolder, setImageFolder] = useState([]);
 
-    const [coverPhotoURL, setCoverPhotoURL] = useState(''); //Only used for previewing
-    
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [success, setSuccess] = useState(null);
+    const [message, setMessage] = useState(null);
 
     const { setTitle } = useContext(TitleContext);
     useEffect(() => {
-        if(essayTitle){setTitle(essayTitle);}
+        if (essayTitle) { setTitle(essayTitle); }
     }, [setTitle, essayTitle]);
 
-    
+
     useEffect(() => {
         async function fetchSideEssayToEdit() {
-            try {
-                const response = await sendRequest(`/api/content/${contentId}`);
-                setEssayTitle(response.title);
-                setBodyText(response.bodyText);
-                if(response.coverPhotoS3Key){
-                    console.log(response.coverPhotoS3Key);
-                    const imageResponse = await sendRequest(`/api/content/image-url/${response._id}`);
-                    if(imageResponse){setCoverPhotoURL(imageResponse.signedURL);}
-                    
-                }
-            } catch (err) {
-                if (err.message !== 'sendRequest failed: {"error":"Essay not found."}') { 
-                    // Only set error if it's not about essay absence
+            if(essayId){
+                try {
+                    const response = await getSideEssay(essayId);
+                    setEssayTitle(response.title || '');
+                } catch (err) {
                     setError(err.message);
-                }
-            } finally {
-                setLoading(false);
+                } finally {
+                    setLoading(false);
+                } 
             }
         }
         fetchSideEssayToEdit();
-    }, [contentId]);
+    }, [essayId]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData();
         formData.append('title', essayTitle);
-        formData.append('bodyText', bodyText);
         formData.append('isMain', false);
-        formData.append('type', 'essay');
         if (coverPhoto) {
             formData.append('coverPhoto', coverPhoto);
         }
-        try {
-            if (contentId) {
-                // Update existing essay
-                await sendRequest(`/api/essay/${contentId}`, 'PUT', formData);
-                setSuccess('Essay successfully updated!');
-                setTimeout(() =>{navigate(`/side-essays/${contentId}`)}, 2000);
-            } else {
-                // Create new essay
-                const response = await sendRequest(`/api/essay/${contentId}`, 'POST', formData);
-                setSuccess('Essay successfully created!');
-                setTimeout(() =>{navigate(`/side-essays/${response._id}`)}, 2000);
+        if (htmlFile) {
+            formData.append('html', htmlFile);
+        }
+        if (imageFolder) {
+            for (let i = 0; i < imageFolder.length; i++) {
+                formData.append('folderFiles', imageFolder[i]);
             }
+        }
+        try {
+                // Update existing essay
+                const response = await updateSideEssay(essayId, formData);
+                if(!response.error){
+                    setMessage('Essay successfully updated!');
+                    setTimeout(() => { navigate(`/side-essays/${essayId}`) }, 2000);
+                }else{setError(response.error);}
             setError('');
         } catch (err) {
             setError('Error creating/updating main essay: ' + err.message);
-            setSuccess('');
+            setMessage('');
         }
     };
 
     return (
         <div>
-            {loading ? <p>Loading...</p> : 
+            {loading ? <p>Loading...</p> :
                 <form onSubmit={handleSubmit}>
                     <div>
                         <label>Title:</label>
                         <input type="text" value={essayTitle} onChange={e => setEssayTitle(e.target.value)} required />
                     </div>
                     <div>
-                        <label>Body:</label>
-                        <Editor innerHTML={bodyText} onChange={setBodyText} />
+                        <label>HTML File:</label>
+                        <input type="file" onChange={e => setHtmlFile(e.target.files[0])} required />
+                    </div>
+                    <div>
+                        <label>Images Folder (.fld):</label>
+                        <input type="file" webkitdirectory="" directory="" onChange={e => setImageFolder(e.target.files)} required />
                     </div>
                     <div>
                         <label>Cover Photo:</label>
-                        <input type="file" onChange={e => setCoverPhoto(e.target.files[0])} />
-                        {coverPhotoURL &&  
-                        <div>
-                            <label>Current cover photo: </label>
-                            <img src={coverPhotoURL} alt="Current cover img" style={{ maxWidth: '300px', maxHeight: '200px' }}/>
-                        </div>}
+                        <input type="file" onChange={e => setCoverPhoto(e.target.files[0])} required/>
                     </div>
                     <div>
                         <button type="submit">Submit</button>
                     </div>
                 </form>
             }
-            {error && <p style={{color: 'red'}}>{error}</p>}
-            {success && <p style={{color: 'green'}}>{success}</p>}
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {message && <p style={{ color: 'green' }}>{message}</p>}
         </div>
     );
 }
