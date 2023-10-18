@@ -27,22 +27,20 @@ export default function NewPostForm() {
       const formData = new FormData();
       formData.append('title', postTitle);
       formData.append('bodyText', bodyText);
-      formData.append('isMain', false);
-      formData.append('type', 'blog');
       if (coverPhoto) {
         formData.append('coverPhoto', coverPhoto);
       }
       const createdPost = await createBlogPost(formData);
-      console.log("Newly created blog post:" , createdPost);
       if (createdPost.error) {
-        throw new Error(createdPost.error);
+        setError(createdPost.error);
+        setMessage('');
       } else {
         setMessage(createdPost.message);
+        setError('')
         setTimeout(() => { navigate(`/blog/${createdPost.data._id}`); }, 2000);
       }
     } catch (error) {
-      setError('Failed to create post. Please try again.');
-      console.error('Error creating post:', error);
+      console.log('Error creating post:', error);
     }
   };
 

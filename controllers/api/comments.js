@@ -57,7 +57,7 @@ async function getCommentsByEntity(req, res){
   try {
     const entityType = req.params.entityType;
     const entityId = req.params.entityId;
-    const requestedComments = await commentModel.find({entityType: entityType, entityId: entityId}).populate("author");
+    const requestedComments = await commentModel.find({entityType: entityType, entityId: entityId, isApproved: true}).populate("author");
     if (requestedComments) { 
       return res.status(200).json(requestedComments); 
     }
@@ -65,10 +65,9 @@ async function getCommentsByEntity(req, res){
       return [];
     }
   } catch (err) {
-    res.status(404).json({error: "Failed to get comments by entity."});
+    res.status(404).json("Failed to get comments by entity.");
   }
 }
-
 
 async function updateCommentById(req, res) {
   try {
@@ -99,22 +98,21 @@ async function updateCommentById(req, res) {
   }
 };
 
-
 async function deleteCommentById(req, res) {
   try {
-    const commentToDelete = await commentModel.findById(req.params.commentId);
+    const commentToDelete = await commentModel.findById(req.params.commentId).populate('author');
+    
     if (commentToDelete) {
-      if (req.user._id.toString() === commentToDelete.author._id.toString()) {
-        await commentToDelete.remove();
-        return res.status(200).json({success: "Comment deleted!"});
+      if (req.user._id.toString() === commentToDelete.author._id.toString() || req.user.isAdmin) {
+        await commentToDelete.deleteOne();
+        return res.status(200).json({message: "Comment deleted!"});
       }
       else {
-        console.log("deleteCommentById(): request.user._id does not match comment.author._id");
-        return res.status(400).json({ error: "deleteCommentById(): request.user._id does not match comment.author._id" });
+        return res.status(400).json({ error: "You can only delete comments you wrote, unless you are an administrator." });
       }
     } else {
-      console.log("deleteCommentById(): Requested comment not found.");
-      return res.status(404).json({ error: "deleteCommentById(): Requested comment not found." });
+      console.log("deleteCommentById(): Comment not found.");
+      return res.status(404).json({ error: "Comment not found." });
     }
   } catch (err) {
     console.log("deleteCommentById(): ", err);
@@ -133,19 +131,19 @@ async function getAllUnapprovedComments(req, res) {
   }
 };
 
-async function approveComment(req, res) {
+async function approveCommentById(req, res) {
   try {
     const approvedComment = await commentModel.findByIdAndUpdate(
-      req.params.contentId,
+      req.params.commentId,
       { isApproved: true },
       { new: true });
     if(!approvedComment){
       console.error("approveComment(): Comment not found");
-      return res.status(404).json({ error: "Comment not found." });
+      return res.status(404).json({error: "Comment not found." });
     }
     res.status(200).json(approvedComment);
   } catch (err) { 
-    res.status(400).json({ error: "Error approving comment."}); 
+    res.status(400).json({ data: null, error: `${err.message}`}); 
   }
 }
 
@@ -155,6 +153,6 @@ module.exports = {
   updateCommentById,
   deleteCommentById,
   getAllUnapprovedComments,
-  approveComment, 
+  approveCommentById, 
   getCommentsByEntity
 };

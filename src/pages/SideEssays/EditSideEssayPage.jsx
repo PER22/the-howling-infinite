@@ -2,10 +2,11 @@ import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { TitleContext } from '../../components/TitleBar/TitleContext';
 import { getSideEssay, updateSideEssay} from '../../utilities/essays-service'
+import UnauthorizedBanner from '../../components/UnauthorizedBanner/UnauthorizedBanner';
 import 'react-quill/dist/quill.snow.css'; // note the change in import for styles
 
 
-function EditSideEssayPage() {
+function EditSideEssayPage({loggedInUser}) {
     const { essayId } = useParams();
     const navigate = useNavigate();
 
@@ -70,8 +71,11 @@ function EditSideEssayPage() {
             setMessage('');
         }
     };
-
-    return (
+    console.log(loggedInUser);
+    if(!loggedInUser || !loggedInUser.isAdmin){
+        return <UnauthorizedBanner/>
+    }
+    else return (
         <div>
             {loading ? <p>Loading...</p> :
                 <form onSubmit={handleSubmit}>

@@ -6,8 +6,9 @@ import { createEssay } from '../../utilities/essays-service';
 import { getSignedURLForImage } from '../../utilities/images-service';
 import 'react-quill/dist/quill.snow.css';
 import { useNavigate } from 'react-router-dom';
+import UnauthorizedBanner from '../../components/UnauthorizedBanner/UnauthorizedBanner';
 
-function EditMainEssayPage() {
+export default function EditMainEssayPage({loggedInUser}) {
     const [essayExists, setEssayExists] = useState(false); //decide whether to PUT or POST
     const [essayTitle, setEssayTitle] = useState(''); //form contents
     const [coverPhoto, setCoverPhoto] = useState(null);
@@ -109,6 +110,9 @@ function EditMainEssayPage() {
         setTitle(`Editing Main Essay`);
     }, [setTitle, essayTitle]);
 
+    if(!loggedInUser || !loggedInUser.isAdmin){
+        return <UnauthorizedBanner/>
+    }
     return (
         <div>
             <h1>Main Essay</h1>
@@ -140,4 +144,3 @@ function EditMainEssayPage() {
         </div>
     );
 }
-export default EditMainEssayPage;

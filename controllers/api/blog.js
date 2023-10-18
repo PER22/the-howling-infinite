@@ -1,6 +1,6 @@
 //controllers/blog.js:
 const BlogModel = require('../../models/blog');
-const { uploadToS3, downloadFromS3, deleteFromS3, generatePresignedS3DownloadURL, updateInS3 } = require('../../utilities/aws');
+const { uploadToS3, downloadFromS3, deleteFromS3, updateInS3 } = require('../../utilities/aws');
 const downsize = require("downsize");
 
 // New sanitization function
@@ -10,8 +10,27 @@ const sanitizeTitleForS3 = (title) => {
                 .toLowerCase();
 };
 
+async function preCreateBlogPost(req, res, next){
+    
+    try {
+        // Create the essay without actual content just to get _id back
+        const newPost = await BlogModel.create({
+            title: "temporary",
+            author: req.user._id,
+            htmlS3Key: "not a real key",
+            preview: "temporary preview"
+        });
+        // Attach the newEssay to the req object
+        req.entity = newPost;
+        next();
+    } catch (error) {
+        console.error('Error during preCreateBlogPost middleware:', error);
+        res.status(400).json({ error: 'Failed during preCreateBlogPost middleware.' });
+    }
+}
+
 //Admin only
-async function createBlogPost(req, res) {
+async function postCreateBlogPost(req, res) {
     try {
         const { title, bodyText } = req.body;
         // Use the sanitization function to generate the s3key
@@ -19,21 +38,20 @@ async function createBlogPost(req, res) {
         const htmlS3Key = await uploadToS3(s3key, bodyText);
         let coverPhotoS3Key = null;
         
-        // Check if image was uploaded
-        if (req.file && req.file.key) {
+        if (req.file) {
             coverPhotoS3Key = req.file.key;
         }
-        
+
+        const newPost = req.entity;
         // Save the blog post along with cover photo info (if uploaded)
-        const blogPost = await BlogModel.create({
-            title,
-            author: req.user._id,
-            htmlS3Key,
-            coverPhotoS3Key,
-            preview: downsize(bodyText , {words: 20, append: "..."})
-        });
-        res.status(201).json({ essay: blogPost, htmlS3Key, message: "New blog post successfully created" });
+        newPost.title = title;
+        newPost.htmlS3Key = htmlS3Key;    
+        newPost.coverPhotoS3Key = coverPhotoS3Key;
+        newPost.preview = downsize(req.body.bodyText , {words: 20, append: "..."});
+        await newPost.save();
+        res.status(201).json(newPost);
     } catch (error) {
+        req.entity.removeOne();
         console.error('Error creating blog post:', error);
         res.status(400).json({ error: 'Failed to create blog post' });
     }
@@ -41,7 +59,6 @@ async function createBlogPost(req, res) {
  
 //Anonymous
 async function getBlogPostById(req, res) {
-    console.log("req.params: ", req.params);
     try {
         const content = await BlogModel.findById(req.params.postId).populate('author');
         if (!content) {
@@ -69,13 +86,29 @@ async function getAllBlogPostPreviews(req, res) {
     }
 }
 
+async function preUpdateBlogPost(req, res, next){
+    try {
+        const blogPost = await BlogModel.findById(req.params.postId);
+        if(!blogPost){return res.status(400).json({ error: "Failed to find blog post." });}
+        //delete cover image
+        if(blogPost.coverPhotoS3Key){
+            await deleteFromS3(blogPost.coverPhotoS3Key);
+        }
+        blogPost.coverPhotoS3Key = null;
+        //delete html
+        req.entity = blogPost;
+        next();
+    } catch (err) {
+        console.log(err.message);
+        return res.status(400).json({ error: "preUpdateBlogPostfailed." });
+    }
+}
+
 //Admin only
-async function updateBlogPostById(req, res) {
+async function postUpdateBlogPost(req, res) {
     try {
         const { title, bodyText} = req.body; //User can only affect title and body text
-        console.log(req.body);
-        const blogPost = await BlogModel.findById(req.params.postId);
-        console.log("Blog post found in controller:", blogPost)
+        const blogPost = req.entity;
         if (!blogPost) {
             return res.status(404).json({ error: 'Blog post not found.' });
         }
@@ -85,19 +118,11 @@ async function updateBlogPostById(req, res) {
         if (title) {
             blogPost.title = title;
         }
-        let oldS3Key;//Swap photos if a new one uploaded
-        if (req.file && req.file.key) {
-            // Store old S3 key
-            oldS3Key = blogPost.coverPhotoS3Key;
-            // Set new S3 key
+        if (req.file) {
             blogPost.coverPhotoS3Key = req.file.key;
-        }
-        if(oldS3Key){
-            console.log("Old S3 cover photo key", oldS3Key);
-            deleteFromS3(req.file.key);
-        }
+        }        
         if (bodyText) {
-            await updateInS3(blogPost.contentS3Key, bodyText);
+            await updateInS3(blogPost.htmlS3Key, bodyText);
             blogPost.preview = downsize(bodyText , {words: 20, append: "..."});
         }
         await blogPost.save();
@@ -188,13 +213,15 @@ async function unstarBlogPostById(req, res) {
 
 module.exports = {
 //Create
-    createBlogPost,
+    preCreateBlogPost,
+    postCreateBlogPost,
 //Read
     getBlogPostById,
 //Previews
     getAllBlogPostPreviews, 
 //Update
-    updateBlogPostById,
+    preUpdateBlogPost,
+    postUpdateBlogPost,
     starBlogPostById,
     unstarBlogPostById,
 //Delete

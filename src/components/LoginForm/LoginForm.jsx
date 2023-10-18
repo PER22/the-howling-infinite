@@ -1,7 +1,8 @@
 //LoginForm.jsx:
 import { useState } from 'react';
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import * as usersService from '../../utilities/users-service';
+import FeedbackMessage from '../FeedbackMessage/FeedbackMessage';
 
 export default function LoginForm({ setUser }) {
   const navigate = useNavigate();
@@ -21,32 +22,34 @@ export default function LoginForm({ setUser }) {
     evt.preventDefault();
     try {
       const user = await usersService.login(credentials);
-      setUser(user);
-      navigate('/');
-    } catch (err) {
-      console.log(err.message);
-      // Check for the specific error messages and set the error state accordingly
-      if (err.message === 'sendRequest failed: {"error":"Email address not verified."}') {
-        setError("You need to verify your email before you can log in. Check your inbox.");
+      console.log("MAde it past await login");
+      console.log(user);
+      if (!user.error) {
+        setUser(user);
+        navigate('/');
       } else {
-        setError('Log In Failed - Try Again');
+        console.log("user.error: ", user.error)
+        setError(user.error);
       }
+    } catch (err) {
+      // Check for the specific error messages and set the error state accordingly
+      setError('Log In Failed - Try Again');
     }
   }
-  
+
 
   return (
     <>
       <div className="info-card">
         <form autoComplete="off" onSubmit={handleSubmit}>
-          <label>Email</label><br/>
-          <input type="text" name="email" value={credentials.email} onChange={handleChange} required /><br/>
-          <label>Password</label><br/>
-          <input type="password" name="password" value={credentials.password} onChange={handleChange} required /><br/>
+          <label>Email</label><br />
+          <input type="text" name="email" value={credentials.email} onChange={handleChange} required /><br />
+          <label>Password</label><br />
+          <input type="password" name="password" value={credentials.password} onChange={handleChange} required /><br />
           <button className="auth-submit-button" type="submit">Log In</button>
         </form>
       </div>
-      <p className="error-message">&nbsp;{error}</p>
+      <FeedbackMessage error={error} message={null} />
     </>
   );
 }

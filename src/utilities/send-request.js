@@ -25,7 +25,7 @@ export default async function sendRequest(url, method = 'GET', payload=null, hea
             return res.text();
         }
     } else {
-        const errorData = await res.text();
-        throw new Error(`sendRequest failed: ${errorData}`);
+        const errorData = await res.json(); // Assume server always sends JSON error responses
+        return {error: errorData.error};
     }
 }

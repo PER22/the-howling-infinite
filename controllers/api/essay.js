@@ -18,7 +18,7 @@ async function preCreateEssay(req, res, next) {
         });
         console.log(newEssay);
         // Attach the newEssay to the req object
-        req.essay = newEssay;
+        req.entity = newEssay;
 
         // Move to the next middleware (which should be multer)
         next();
@@ -90,22 +90,22 @@ async function postCreateEssay(req, res) {
         if (htmlS3Key) {
             const oldHTML = await downloadFromS3(htmlS3Key);
             const htmlWithFootnotes = formatFootnotes(oldHTML);
-            const imagesKeysAndHTML = editImgSrc(htmlWithFootnotes, req.essay._id.toString());
+            const imagesKeysAndHTML = editImgSrc(htmlWithFootnotes, req.entity._id.toString());
             imagesKeysAndHTML.newImageKeys.forEach((imgKey)=>{
-                req.essay.inlineImagesS3Keys.push(imgKey)    
+                req.entity.inlineImagesS3Keys.push(imgKey)    
             });
             const modifiedHtmlContent = imagesKeysAndHTML.html;
             await updateInS3(htmlS3Key, modifiedHtmlContent);
             preview = downsize(modifiedHtmlContent, { words: 20, append: "..." });
         }
-        req.essay.title = req.body.title
-        req.essay.isMain = req.body.isMain
-        req.essay.htmlS3Key = htmlS3Key;
-        req.essay.status = "completed";
-        req.essay.coverPhotoS3Key = coverPhotoS3Key;
-        req.essay.preview = preview;
-        await req.essay.save();
-        res.status(201).json(req.essay);
+        req.entity.title = req.body.title
+        req.entity.isMain = req.body.isMain
+        req.entity.htmlS3Key = htmlS3Key;
+        req.entity.status = "completed";
+        req.entity.coverPhotoS3Key = coverPhotoS3Key;
+        req.entity.preview = preview;
+        await req.entity.save();
+        res.status(201).json(req.entity);
     } catch (error) {
         console.error('Error creating content:', error);
         res.status(400).json({ error: 'Failed to create content' });
@@ -187,7 +187,7 @@ async function getAllSideEssayPreviews(req, res) {
 async function preUpdateMainEssay(req, res, next) {
     try {
         const mainEssay = await EssayModel.findOne({ isMain: true });
-        if(!mainEssay){res.status(400).json({ error: "preUpdateMainEssay(): Failed to find main essay." });}
+        if(!mainEssay){res.status(400).json({ error: "Failed to find main essay." });}
         //delete inline images
         for (const img of mainEssay.inlineImagesS3Keys) {
             await deleteFromS3(img);
@@ -205,7 +205,7 @@ async function preUpdateMainEssay(req, res, next) {
         mainEssay.htmlS3Key = "null";
 
         await mainEssay.save();
-        req.essay = mainEssay;
+        req.entity = mainEssay;
         next();
     } catch (err) {
         console.log(err.message);
@@ -217,7 +217,7 @@ async function preUpdateMainEssay(req, res, next) {
 async function postUpdateMainEssay(req, res) {
     try {
         // Grab essay document
-        const mainEssay = req.essay;
+        const mainEssay = req.entity;
 
         // Check authorship against the requesting user
         if (req.user._id.toString() !== mainEssay.author.toString()) {
@@ -288,7 +288,7 @@ async function preUpdateSideEssay(req, res, next) {
         sideEssay.htmlS3Key = "null";
 
         await sideEssay.save();
-        req.essay = sideEssay;
+        req.entity = sideEssay;
         next();
     } catch (err) {
         console.log(err.message);
@@ -300,7 +300,7 @@ async function preUpdateSideEssay(req, res, next) {
 async function postUpdateSideEssay(req, res) {
     try {
         // Grab essay document
-        const essay = req.essay;
+        const essay = req.entity;
 
         // Check authorship against the requesting user
         if (req.user._id.toString() !== essay.author.toString()) {
@@ -353,7 +353,7 @@ async function postUpdateSideEssay(req, res) {
 //Admin only
 async function deleteEssayById(req, res) {
     try {
-        const content = await EssayModel.findById(req.params.contentId);
+        const content = await EssayModel.findById(req.params.essayId);
         if (!content) {
             return res.status(404).json({ error: 'Cont not found.' });
         }

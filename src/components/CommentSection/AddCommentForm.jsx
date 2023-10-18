@@ -14,8 +14,8 @@ function AddCommentForm({ entityType, entity, onNewComment }) {
         entityId : entity._id,
         text
       });
-      if (response && ! response?.error) {
-        console.log("Comment posted");
+      if (response && !response.error) {
+
         setText('');
         onNewComment(response);
       } else {

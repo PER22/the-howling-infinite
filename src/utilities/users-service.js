@@ -1,7 +1,7 @@
 // users-service.js
 import * as usersAPI from './users-api';
 
-export async function signUp(userData){
+export async function signUp(userData) {
     const response = await usersAPI.signUp(userData);
     return response;
 }
@@ -9,9 +9,7 @@ export async function signUp(userData){
 export async function verifyEmail(token) {
     const response = await usersAPI.verifyEmail(token);
     if (response) {
-        console.log(response);
-        localStorage.setItem('token',token);
-        return getLoggedInUser();
+        return;
     } else {
         throw new Error(response.error || 'Email verification failed');
     }
@@ -20,7 +18,7 @@ export async function verifyEmail(token) {
 export function getToken() {
     // getItem returns null if there's no string
     const token = localStorage.getItem('token');
-    if (!token){ 
+    if (!token) {
         return null;
     }
     // Obtain the payload of the token
@@ -33,10 +31,9 @@ export function getToken() {
     }
     return token;
 }
-  
+
 export function getLoggedInUser() {
     const token = getToken();
-    // If there's a token, return the user in the payload, otherwise return null
     return token ? JSON.parse(atob(token.split('.')[1])).user : null;
 }
 
@@ -46,6 +43,12 @@ export function logOut() {
 
 export async function login(credentials) {
     const token = await usersAPI.login(credentials);
-    localStorage.setItem('token', token)
-    return getLoggedInUser();
+    console.log(token);
+    if (!token.error) {
+        localStorage.setItem('token', token)
+        return getLoggedInUser();
+    }
+    else{
+        return {error: token.error};
+    }
 }

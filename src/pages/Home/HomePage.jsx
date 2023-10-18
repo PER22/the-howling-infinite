@@ -59,10 +59,14 @@ export default function HomePage() {
       Welcome to a unique exploration into the mind of Lee Oswald, set against the backdrop of one of the most pivotal moments in American history. 
       Crafted with cinematic precision, this multimedia experience integrates film directions, images, and music, inviting you into a profound psychological narrative.
       Written by licensed clinical psychologist Dr. Gene Riddle, these pieces delve deep into Oswald's psyche, offering a nuanced understanding of the man behind the headlines.
-      It's not a recounting of those events, but rather a journey into the complexities of human behavior and motivations.
-      If you're new here, begin with the main piece, titled “Lee Oswald’s Quest for a Howling Infinite”, to immerse yourself in the central narrative.
+      It's not a recounting of those events, but rather a journey into the complexities of Oswald's life, behavior, and motivations.
+      </p>
+      
+      <p>If you're new here, begin with the main piece, titled “Lee Oswald’s Quest for a Howling Infinite”, to immerse yourself in the central narrative.
       For deeper insights into specific facets of the subject matter, the side essays provide further exploration. 
-      And for ongoing reflections and discussions, the blog offers a space for continued engagement.
+      And for ongoing reflections and discussions, the blog offers a space for continued engagement. </p>
+      
+      <p>Feel free to leave comments, and "star" content you enjoyed.
       Thank you for joining us in this immersive experience, and for choosing to see history through a psychological lens.
     </p>
     <div id="card-container" className="content-card">

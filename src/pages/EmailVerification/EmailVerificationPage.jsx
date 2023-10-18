@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 
 import { verifyEmail } from '../../utilities/users-service';
@@ -6,6 +7,7 @@ import { verifyEmail } from '../../utilities/users-service';
 const EmailVerificationPage = () => {
   const [isVerified, setIsVerified] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function sendVerificationRequest(){
@@ -14,18 +16,15 @@ const EmailVerificationPage = () => {
     const token = query.get('token');
     // Send the token to the backend for verification
     try{
-        const data = await verifyEmail(token);
-        if (data) {
-            setIsVerified(true);
-            localStorage.setItem('token', data);
-        }
+        await verifyEmail(token);
+        navigate('/auth');
         //TODO: navigate to homepage
     }catch(err){
         console.log("Error verifying email.");
     }
     }
     sendVerificationRequest();   
-  }, [location.search]);
+  }, [location.search, navigate]);
 
   return (
     <div>

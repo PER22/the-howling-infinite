@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { Link } from 'react-router-dom';
 import { TitleContext } from '../../components/TitleBar/TitleContext';
 import parse from 'html-react-parser';
 import sendRequest from '../../utilities/send-request';
@@ -6,7 +7,8 @@ import Footnote from '../../components/Footnote/Footnote';
 import AddCommentForm from '../../components/CommentSection/AddCommentForm';
 import CommentDisplaySection from '../../components/CommentSection/CommentDisplaySection';
 import "./ReadMainEssayPage.css"
-import { getCommentsOn } from '../../utilities/comments-api';
+import { getCommentsOn } from '../../utilities/comments-service';
+import FeedbackMessage from '../../components/FeedbackMessage/FeedbackMessage';
 
 const options = {
     replace: ({ attribs }) => {
@@ -17,37 +19,42 @@ const options = {
 };
 
 
-export default function ReadMainEssayPage() {
+export default function ReadMainEssayPage({ loggedInUser }) {
     const { setTitle } = useContext(TitleContext);
     const [mainEssay, setMainEssay] = useState(null);
     const [error, setError] = useState('');
+    const [message, setMessage] = useState('');
 
     useEffect(() => {
         if (mainEssay) { setTitle(mainEssay.title); }
     }, [setTitle, mainEssay]);
-    
+
     const [comments, setComments] = useState([]);
     useEffect(() => {
-        const fetchPostComments = async () => {
-          try {
-            if (mainEssay) {
-              const tempComments = getCommentsOn("Essay", mainEssay._id);
-              if (tempComments) {
-                setComments(tempComments);
+      const fetchPostComments = async () => {
+        try {
+          if (mainEssay) {
+            const tempComments = await getCommentsOn("Essay", mainEssay._id);
+            console.log("tempComments;",tempComments);
+            if (!tempComments.error) {
+              if (Array.isArray(tempComments.data)) {
+                setComments(tempComments.data);
+              } else {
+                console.log('API did not return an array for comments:', tempComments);
               }
             }
-          } catch (error) {
           }
-        };
-    
-        fetchPostComments();
-      }, [mainEssay]);
-    
+        } catch (error) {
+        }
+      };
+      fetchPostComments();
+    }, [mainEssay]);
+
     const handleNewComment = (newComment) => {
         setComments(prevComments => [...prevComments, newComment]);
-      };
-    
-    
+    };
+
+
 
     useEffect(() => {
         async function fetchMainEssay() {
@@ -68,17 +75,23 @@ export default function ReadMainEssayPage() {
 
 
     return (
-        <div className='article-container'>
-            {mainEssay ? (
-                <>
-                    {parse(mainEssay.bodyHTML, options)}
-                </>
-            ) : (
-                <p>Loading...</p>
-            )}
-            {error && <p className='error-message'>{error}</p>}
-            <CommentDisplaySection comments={comments} />
-            <AddCommentForm entity={mainEssay} entityType='Essay' onNewComment={handleNewComment} />
-        </div>
+        <>
+            <div className="navigation-container">
+                {loggedInUser && loggedInUser.isAdmin && <Link to={`/edit`} className="edit-content-button">Edit This Essay</Link>}
+            </div>
+            <div className='article-container'>
+                {mainEssay ? (
+                    <>
+                        {parse(mainEssay.bodyHTML, options)}
+                    </>
+                ) : (
+                    <p>Loading...</p>
+                )}
+                
+                <CommentDisplaySection comments={comments} />
+                {loggedInUser ? <AddCommentForm entity={mainEssay} entityType='Essay' onNewComment={handleNewComment} />: <p>Log in to leave a comment.</p>}
+                <FeedbackMessage error={error} message={message}/>
+            </div>
+        </>
     );
 }

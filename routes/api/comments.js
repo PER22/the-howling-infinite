@@ -8,12 +8,21 @@ const adminOnly = require('../../config/adminOnly');
 // POST route to create a new comment
 router.post('/', ensureLoggedIn, commentController.createComment);
 
-//AdminOnly
-router.put('/approve/:commentId', ensureLoggedIn, adminOnly, commentController.approveComment  )
 
 //Anonymous
 // GET route to comments associated with the entity ID
 router.get('/on/:entityType/:entityId', commentController.getCommentsByEntity);
+
+
+
+
+//AdminOnly
+// GET route to fetch all unapproved comments
+router.get('/moderate', ensureLoggedIn, adminOnly, commentController.getAllUnapprovedComments);
+
+//AdminOnly
+// GET route to fetch all unapproved comments
+router.post('/moderate/:commentId', ensureLoggedIn, adminOnly, commentController.approveCommentById);
 
 //Anonymous
 // GET route to fetch a single comment by ID
@@ -23,12 +32,10 @@ router.get('/:commentId', commentController.getCommentById);
 // PUT route to update a comment by ID
 router.put('/:commentId', ensureLoggedIn, commentController.updateCommentById);
 
-//Signed-in users
+//Comment's Authors and Admins only
 // DELETE route to delete a comment by ID
-router.delete('/:commentId', ensureLoggedIn, adminOnly, commentController.deleteCommentById);
 
-//AdminOnly
-// GET route to fetch all unapproved comments
-router.get('/unapproved', ensureLoggedIn, adminOnly, commentController.getAllUnapprovedComments);
+router.delete('/:commentId', ensureLoggedIn, commentController.deleteCommentById);
+
 
 module.exports = router;

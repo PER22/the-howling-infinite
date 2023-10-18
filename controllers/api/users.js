@@ -56,7 +56,7 @@ async function create(req, res) {
       "TextBody": `Copy and paste this link into your URL bar to verify your email address: ${process.env.BASE_URL}/reset-password?token=${user.verificationToken}`,
       "MessageStream": "outbound"
     });
-    res.status(201).json(null);
+    return res.status(201).json({message: "Account created."});
   } catch (err) {
     // console.log(err);
     res.status(500).json(err);
@@ -82,7 +82,7 @@ async function verifyEmail(req, res){
     await user.save();
 
     // Create and send the JWT to the client, automatically logging them in.
-    res.status(200).json(createJWT(user));
+    res.status(200).json({message: "You are verfied, and can now log in."});
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -127,19 +127,25 @@ async function login(req, res) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       console.log("Users controller: login(): Error in validation");
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: "Errors in validation." });
     }
 
     // Find the user by their email address
     const user = await User.findOne({email: req.body.email});
-    if (!user){ throw new Error("User not found.");}
-    if(!user.isVerified){throw new Error("Email address not verified.")}
+    if (!user){ 
+      return res.status(401).json({error: "User not found."});
+    }
+    if(!user.isVerified){
+      return res.status(402).json({error: "Email address not verified."});
+    }
     // Check if the password matches
     const match = bcrypt.compare(req.body.password, user.password);
-    if (!match) throw new Error("Password doesn't match.");
-    res.json( createJWT(user) );
+    if (!match) {
+      return res.status(403).json({error: "Password doesn't match."});
+    }
+    return res.json( createJWT(user) );
   } catch (err){
-    res.status(400).send({error: err.message});
+    return res.status(404).send({error: err.message});
   }
 }
 

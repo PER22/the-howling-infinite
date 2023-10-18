@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signUp } from '../../utilities/users-service';
+import FeedbackMessage from '../FeedbackMessage/FeedbackMessage';
 
-export default function SignUpForm({setUser}){
+export default function SignUpForm(){
   const navigate = useNavigate();
   const [formData, setFormData] = useState ({
     name: '',
@@ -12,6 +13,7 @@ export default function SignUpForm({setUser}){
     confirm: '',
     error: ''
   });
+  const [message, setMessage] = useState("");
 
   const handleSubmit = async (evt) => {
     evt.preventDefault();
@@ -25,9 +27,8 @@ export default function SignUpForm({setUser}){
       // The promise returned by the signUp service method
       // will resolve to the user object included in the
       // payload of the JSON Web Token (JWT)
-      const user = await signUp(form);
+      await signUp(form);
       // Update user state with user
-      setUser(user);
       navigate('/');
     } catch(err) {
       // Invalid signup
@@ -106,7 +107,7 @@ export default function SignUpForm({setUser}){
           >Sign Up</button>
         </form>
       </div>
-      <p className="error-message">&nbsp;{formData.error}</p>
+      <FeedbackMessage error={formData.error} message={message}/>
     </>
   );
 }

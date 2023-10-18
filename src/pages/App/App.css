@@ -58,4 +58,32 @@ body {
     align-items: center;
 }
 
- 
+ .new-content-button {
+    padding: 0.5rem;
+    margin: 1rem 0 1rem 0;
+    background-color: lightgreen;
+    border: 1px solid black;
+    border-radius: 1rem;
+    color: black;
+    text-decoration: none !important;
+ }
+
+ .edit-content-button{
+    padding: 0.5rem;
+    margin: 1rem 0 1rem 0;
+    background-color: yellow;
+    border: 1px solid black;
+    border-radius: 1rem;
+    color: black;
+    text-decoration: none !important;
+ }
+
+ .edit-content-button:visited{
+    color:inherit;
+    
+ }
+
+
+ .navigation-container{
+    margin-bottom: 2rem;
+ }

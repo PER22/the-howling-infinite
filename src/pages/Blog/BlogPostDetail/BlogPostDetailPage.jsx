@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import AddCommentForm from '../../../components/CommentSection/AddCommentForm';
 import CommentDisplaySection from '../../../components/CommentSection/CommentDisplaySection';
 import "./BlogPostDetailPage.css"
-import { getCommentsOn } from '../../../utilities/comments-api'; //TODO: this should be routed through the service.
+import { getCommentsOn } from '../../../utilities/comments-service'; //TODO: this should be routed through the service.
 import { getBlogPostById, unstarPostById } from '../../../utilities/blog-service';
 import { starPostById } from '../../../utilities/blog-service';
 
@@ -72,13 +72,16 @@ export default function BlogPostDetailPage({ loggedInUser }) {
       try {
         if (postId) {
           const tempPost = await getBlogPostById(postId);
-          console.log(tempPost.data);
           if (!tempPost.error) {
             setPost(tempPost.data);
           }
+          else{
+            setPost(null)
+            setError(tempPost.error);}
           setLoading(false);
         }
       } catch (error) {
+        setError(error)
       }
     };
 
@@ -89,17 +92,20 @@ export default function BlogPostDetailPage({ loggedInUser }) {
   useEffect(() => {
     const fetchPostComments = async () => {
       try {
-        if (postId) {
-          const tempComments = await getCommentsOn("Blog", postId);
-          if (tempComments) {
-            setComments(tempComments.data);
+        if (post) {
+          const tempComments = await getCommentsOn("Blog", post._id);
+          console.log("tempComments;",tempComments);
+          if (!tempComments.error) {
+            if (Array.isArray(tempComments.data)) {
+              setComments(tempComments.data);
+            }
           }
         }
       } catch (error) {
       }
     };
     fetchPostComments();
-  }, [postId]);
+  }, [post]);
 
 
   if (loading) {
@@ -118,7 +124,7 @@ export default function BlogPostDetailPage({ loggedInUser }) {
   return (
     <>
 
-      {loggedInUser && <>{loggedInUser?._id === post?.author._id ? <Link className="button" to={`/blog/${postId}/edit`}>Edit Post</Link> : ""}</>}
+      {loggedInUser?.isAdmin && <>{loggedInUser?._id === post?.author._id ? <Link className="button" to={`/blog/${postId}/edit`}>Edit Post</Link> : ""}</>}
       {post &&
         <>
           <div dangerouslySetInnerHTML={{ __html: post.bodyText }} />
@@ -132,7 +138,7 @@ export default function BlogPostDetailPage({ loggedInUser }) {
             <span className="num-stars">{numStars} star{numStars !== 1 ? "s" : ""}</span>
           </div>
           <CommentDisplaySection comments={comments} />
-          <AddCommentForm entity={post} entityType='Blog' onNewComment={handleNewComment} />
+          {loggedInUser ? <AddCommentForm entity={post} entityType='Blog' onNewComment={handleNewComment} /> : <p>Log in to leave a comment.</p>}
         </>}
     </>
   );

@@ -61,7 +61,8 @@ const uploadFiles = multer({
         if (file.fieldname === 'pdf') {
           folder = 'pdfs';
         } else if (file.fieldname === 'coverPhoto' || file.fieldname === 'image') {
-          folder = 'images';
+          folder = 'coverimages';
+          console.log("MulterS3: found a coverPhoto");
         }
         else if (file.fieldname === 'html') {
           folder = 'html';
@@ -69,7 +70,7 @@ const uploadFiles = multer({
         else if (file.fieldname === 'folderFiles') {
           folder = 'essayimages';
         }
-        cb(null, `${folder}-${req.essay._id}-`+  sanitizeTitleForS3(file.originalname));
+        cb(null, `${folder}-${req.entity._id}-`+  sanitizeTitleForS3(file.originalname));
     }
   })
 });

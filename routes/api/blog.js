@@ -17,11 +17,11 @@ router.get('/:postId', blogController.getBlogPostById);
 
 //Admin only
 // POST /api/blog - Create new blog post
-router.post('/', ensureLoggedIn, adminOnly,  uploadFiles.single("coverPhoto"), blogController.createBlogPost);
+router.post('/', ensureLoggedIn, adminOnly,  blogController.preCreateBlogPost, uploadFiles.single("coverPhoto"), blogController.postCreateBlogPost);
 
 //Admin only
 // PUT /api/blog/:postId - Update a specific blog post
-router.put('/:postId',  ensureLoggedIn, adminOnly, uploadFiles.single("coverPhoto"), blogController.updateBlogPostById);
+router.put('/:postId',  ensureLoggedIn, adminOnly, blogController.preUpdateBlogPost, uploadFiles.single("coverPhoto"), blogController.postUpdateBlogPost);
 
 //Admin only
 // DELETE /api/blog/:postId - Delete a specific blog post

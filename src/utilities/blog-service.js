@@ -20,10 +20,10 @@ export async function createBlogPost(formData){
         if(!newPost.error) {
             return {data: newPost, error: null};
         }
-        return {data : null, error: "Failed to create blog post."};
+        return {data : null, error: newPost.error};
     }catch(err){
-        console.log("Error creating blog post: ", err);
-        return {data: null, error: "Error creating blog post."};
+        console.log(err);
+        return {data: null, error: err};
     }
 }
 

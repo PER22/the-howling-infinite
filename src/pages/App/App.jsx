@@ -38,6 +38,8 @@ import AboutPage from '../About/AboutPage';
 
 import ContactPage from '../Contact/ContactPage';
 
+import CommentModerationPage from '../CommentModeration/CommentModerationPage';
+
 //Components
 // import NavigationBar from '../../components/NavigationBar/NavigationBar';
 import ResponsiveDrawer from '../../components/ResponsiveDrawer/ResponsiveDrawer'
@@ -66,8 +68,8 @@ export default function App() {
               <Route path="/read" element={<ReadMainEssayPage loggedInUser={loggedInUser}/>} />
               <Route path="/edit" element={<EditMainEssayPage loggedInUser={loggedInUser}/>} />
               
-              <Route path="/side-essays" element={<SideEssaysIndexPage />} />
-              <Route path="/side-essays/create"  element={<CreateSideEssayPage loggedInUser={loggedInUser}/>} />
+              <Route path="/side-essays" element={<SideEssaysIndexPage loggedInUser={loggedInUser}/>} />
+              <Route path="/side-essays/new"  element={<CreateSideEssayPage loggedInUser={loggedInUser}/>} />
               <Route path="/side-essays/:essayId" element={<SideEssayDetailPage loggedInUser={loggedInUser}/>} />
               <Route path="/side-essays/:essayId/edit" element={<EditSideEssayPage loggedInUser={loggedInUser}/>} />
             
@@ -78,6 +80,8 @@ export default function App() {
 
               <Route path="/about" element={<AboutPage />} />
               <Route path="/contact" element={<ContactPage loggedInUser={loggedInUser}/>} />
+
+              <Route path="/moderate" element={<CommentModerationPage loggedInUser={loggedInUser} />} />
             </Routes>
           </section>
         </TitleProvider>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { TitleContext } from '../../../components/TitleBar/TitleContext';
 import { useNavigate } from 'react-router-dom';
+import FeedbackMessage from '../../../components/FeedbackMessage/FeedbackMessage';
 import { requestPasswordReset } from '../../../utilities/users-api';
 
 export default function RequestPasswordResetPage(){
@@ -25,7 +26,7 @@ export default function RequestPasswordResetPage(){
             navigate('/reset-password');
           }, 5000);
         } catch (error) {
-          setError(`Error: ${error.message}`);
+          setError(error.message);
           setMessage(null);
         }
   };
@@ -46,8 +47,7 @@ export default function RequestPasswordResetPage(){
         </label>
         <button type="submit">Send Password Reset Email</button>
       </form>
-      {message && <p class="success-message">{message}</p>}
-      {error && <p class="error-message">{error}</p>}
+      <FeedbackMessage error={error} message={message}/>
     </>
   );
 }

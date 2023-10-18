@@ -3,12 +3,14 @@ import { TitleContext } from '../../../components/TitleBar/TitleContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import Editor from '../../../components/TextEditor/Editor';
 import ConfirmationModal from '../../../components/ConfirmationModal/ConfirmationModal';
+import FeedbackMessage from '../../../components/FeedbackMessage/FeedbackMessage';
 import { editBlogPost, getBlogPostById } from '../../../utilities/blog-service';
 import { getSignedURLForImage } from '../../../utilities/images-service';
 import sendRequest from '../../../utilities/send-request';
+import UnauthorizedBanner from '../../../components/UnauthorizedBanner/UnauthorizedBanner';
 
 
-export default function BlogPostEditPage({ user }) {
+export default function BlogPostEditPage({ loggedInUser }) {
   const { setTitle } = useContext(TitleContext);
 
   //Form contents
@@ -20,6 +22,7 @@ export default function BlogPostEditPage({ user }) {
   const [previewImageURL, setPreviewImageURL] = useState('');
 
   const [error, setError] = useState('');
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -52,7 +55,6 @@ export default function BlogPostEditPage({ user }) {
       const formData = new FormData();
       formData.append('title', postTitle);
       formData.append('bodyText', bodyText);
-      formData.append('isMain', true);
       if (coverPhoto) {
         formData.append('coverPhoto', coverPhoto);
       }
@@ -82,7 +84,9 @@ export default function BlogPostEditPage({ user }) {
   const closeModal = () => { setShowDeleteConfirmationModal(false) };
   const openModal = () => { setShowDeleteConfirmationModal(true) };
 
-
+  if(!loggedInUser || !loggedInUser.isAdmin){
+    return <UnauthorizedBanner/>
+  }
   return (
     <>
       <div className="info-card">
@@ -91,6 +95,7 @@ export default function BlogPostEditPage({ user }) {
             Title:<br />
             <input
               type="text"
+              name={"postTitleInput"}
               value={postTitle}
               onChange={(event) => setPostTitle(event.target.value)}
               required
@@ -102,7 +107,7 @@ export default function BlogPostEditPage({ user }) {
           {bodyText && <Editor innerHTML={bodyText} onChange={setBodyText} />}
           <div>
             <label>Cover Photo:
-              <input type="file" onChange={e => setCoverPhoto(e.target.files[0])} />
+              <input type="file" name={"coverPhotoInput"} onChange={e => setCoverPhoto(e.target.files[0])} />
             </label>
           </div>
           {previewImageURL && <div>
@@ -112,7 +117,7 @@ export default function BlogPostEditPage({ user }) {
           }
           <button type="submit">Update Post</button><br />
         </form>
-        {error && <p className="error-message">{error}</p>}
+        <FeedbackMessage error={error} message={message}/>
         <button className="open-delete-modal-button" onClick={openModal}>Delete Post</button>
       </div>
       {showDeleteConfirmationModal && <div className="deletion-confirmation-modal">
