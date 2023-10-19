@@ -1,10 +1,8 @@
 //REACT imports
-import React, { useState} from 'react';
+import React from 'react';
 
 import { Routes, Route} from 'react-router-dom';
 
-//Utility imports
-import { getLoggedInUser } from '../../utilities/users-service';
 
 //CSS
 import './App.css';
@@ -46,45 +44,47 @@ import ResponsiveDrawer from '../../components/ResponsiveDrawer/ResponsiveDrawer
 import FooterBar from '../../components/FooterBar/FooterBar'
 import TitleBar from '../../components/TitleBar/TitleBar';
 import { TitleProvider } from '../../components/TitleBar/TitleContext';
-
+import { LoggedInUserProvider } from '../../components/LoggedInUserContext/LoggedInUserContext';
 
 
 export default function App() {
-  const [loggedInUser, setLoggedInUser] = useState(getLoggedInUser());
+  // const [loggedInUser, setLoggedInUser] = useState(getLoggedInUser());
   return (
     <main className="App">
-        <ResponsiveDrawer setUser={setLoggedInUser} user={loggedInUser} sx={{position: 'fixed'}}/>
+        <LoggedInUserProvider>
+        <ResponsiveDrawer sx={{position: 'fixed'}}/>
         <TitleProvider>
           <TitleBar/>
           <section className='content'>
             <Routes>  
-              <Route path="/auth" exact element={<AuthPage setUser={setLoggedInUser}/>}/>
+              <Route path="/auth" exact element={<AuthPage/>}/>
               <Route path="/request-password-reset" exact element={<RequestPasswordResetPage />}/>
               <Route path="/reset-password" exact element={<PerformPasswordResetPage />}/>
               <Route path="/verify-email" element={<EmailVerificationPage/>} />
 
               <Route path="/" exact element={<HomePage />} />
               
-              <Route path="/read" element={<ReadMainEssayPage loggedInUser={loggedInUser}/>} />
-              <Route path="/edit" element={<EditMainEssayPage loggedInUser={loggedInUser}/>} />
+              <Route path="/read" element={<ReadMainEssayPage/>} />
+              <Route path="/edit" element={<EditMainEssayPage/>} />
               
-              <Route path="/side-essays" element={<SideEssaysIndexPage loggedInUser={loggedInUser}/>} />
-              <Route path="/side-essays/new"  element={<CreateSideEssayPage loggedInUser={loggedInUser}/>} />
-              <Route path="/side-essays/:essayId" element={<SideEssayDetailPage loggedInUser={loggedInUser}/>} />
-              <Route path="/side-essays/:essayId/edit" element={<EditSideEssayPage loggedInUser={loggedInUser}/>} />
+              <Route path="/side-essays" element={<SideEssaysIndexPage />} />
+              <Route path="/side-essays/new"  element={<CreateSideEssayPage />} />
+              <Route path="/side-essays/:essayId" element={<SideEssayDetailPage />} />
+              <Route path="/side-essays/:essayId/edit" element={<EditSideEssayPage />} />
             
-              <Route path="/blog" exact element={<AllBlogPostsPage loggedInUser={loggedInUser}/>} />
-              <Route path="/blog/new" element={<BlogPostCreatePage loggedInUser={loggedInUser}/>}/>
-              <Route path="/blog/:postId/edit" element={<BlogPostEditPage loggedInUser={loggedInUser}/>} />
-              <Route path="/blog/:postId" element={<BlogPostDetailPage loggedInUser={loggedInUser} />} />
+              <Route path="/blog" exact element={<AllBlogPostsPage />} />
+              <Route path="/blog/new" element={<BlogPostCreatePage />}/>
+              <Route path="/blog/:postId/edit" element={<BlogPostEditPage />} />
+              <Route path="/blog/:postId" element={<BlogPostDetailPage  />} />
 
               <Route path="/about" element={<AboutPage />} />
-              <Route path="/contact" element={<ContactPage loggedInUser={loggedInUser}/>} />
+              <Route path="/contact" element={<ContactPage />} />
 
-              <Route path="/moderate" element={<CommentModerationPage loggedInUser={loggedInUser} />} />
+              <Route path="/moderate" element={<CommentModerationPage  />} />
             </Routes>
           </section>
         </TitleProvider>
+        </LoggedInUserProvider>
         <FooterBar></FooterBar>
     </main>
   );

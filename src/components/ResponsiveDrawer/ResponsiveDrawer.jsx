@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as userService from '../../utilities/users-service'
 import { Link } from 'react-router-dom';
+import { useLoggedInUser } from '../LoggedInUserContext/LoggedInUserContext';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Drawer from '@mui/material/Drawer';
@@ -13,10 +14,11 @@ import Divider  from '@mui/material/Divider';
 import MenuIcon from '@mui/icons-material/Menu';
 
 
-export default function ResponsiveDrawer({setUser, user}) {
+export default function ResponsiveDrawer() {
+  const { loggedInUser, setLoggedInUser } = useLoggedInUser();
     async function handleLogOut() {
       userService.logOut();
-      setUser(null);
+      setLoggedInUser(null);
     }
 
     const [open, setOpen] = React.useState(false);
@@ -56,8 +58,8 @@ export default function ResponsiveDrawer({setUser, user}) {
       ))}
       <Divider  sx={{backgroundColor: "white"}}/>
       <ListItem disablePadding>
-        <ListItemButton component={Link} to="/auth" onClick={user ? handleLogOut : null}>
-          <ListItemText primary={user ? "Log Out" : "Log In"}  sx={{color: "white"}}/>
+        <ListItemButton component={Link} to="/auth" onClick={loggedInUser ? handleLogOut : null}>
+          <ListItemText primary={loggedInUser ? "Log Out" : "Log In"}  sx={{color: "white"}}/>
         </ListItemButton>
       </ListItem>
     </List>

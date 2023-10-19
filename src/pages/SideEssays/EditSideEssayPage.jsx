@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { TitleContext } from '../../components/TitleBar/TitleContext';
+import { useLoggedInUser } from '../../components/LoggedInUserContext/LoggedInUserContext';
 import { getSideEssay, updateSideEssay} from '../../utilities/essays-service'
 import UnauthorizedBanner from '../../components/UnauthorizedBanner/UnauthorizedBanner';
 import 'react-quill/dist/quill.snow.css'; // note the change in import for styles
 
 
-function EditSideEssayPage({loggedInUser}) {
+function EditSideEssayPage() {
     const { essayId } = useParams();
     const navigate = useNavigate();
 
@@ -24,6 +25,8 @@ function EditSideEssayPage({loggedInUser}) {
     useEffect(() => {
         if (essayTitle) { setTitle(essayTitle); }
     }, [setTitle, essayTitle]);
+
+    const { loggedInUser, setLoggedInUser } = useLoggedInUser();
 
 
     useEffect(() => {

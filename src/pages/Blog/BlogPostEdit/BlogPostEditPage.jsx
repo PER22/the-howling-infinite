@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { TitleContext } from '../../../components/TitleBar/TitleContext';
+import { useLoggedInUser } from '../../../components/LoggedInUserContext/LoggedInUserContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import Editor from '../../../components/TextEditor/Editor';
 import ConfirmationModal from '../../../components/ConfirmationModal/ConfirmationModal';
@@ -10,8 +11,9 @@ import sendRequest from '../../../utilities/send-request';
 import UnauthorizedBanner from '../../../components/UnauthorizedBanner/UnauthorizedBanner';
 
 
-export default function BlogPostEditPage({ loggedInUser }) {
+export default function BlogPostEditPage() {
   const { setTitle } = useContext(TitleContext);
+  const { loggedInUser, setLoggedInUser } = useLoggedInUser();
 
   //Form contents
   const {postId } = useParams();

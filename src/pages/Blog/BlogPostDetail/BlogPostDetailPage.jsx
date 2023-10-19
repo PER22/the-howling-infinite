@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { TitleContext } from '../../../components/TitleBar/TitleContext';
 import { useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import { useLoggedInUser } from '../../../components/LoggedInUserContext/LoggedInUserContext';
 import AddCommentForm from '../../../components/CommentSection/AddCommentForm';
 import CommentDisplaySection from '../../../components/CommentSection/CommentDisplaySection';
 import "./BlogPostDetailPage.css"
@@ -12,11 +13,13 @@ import { starPostById } from '../../../utilities/blog-service';
 const greyStarIcon = require('../../../assets/greystar.png')
 const starIcon = require('../../../assets/star.png')
 
-export default function BlogPostDetailPage({ loggedInUser }) {
+export default function BlogPostDetailPage() {
+  const { loggedInUser, setLoggedInUser } = useLoggedInUser();
   const { postId } = useParams();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
   const { setTitle } = useContext(TitleContext);
 
@@ -137,8 +140,8 @@ export default function BlogPostDetailPage({ loggedInUser }) {
             />}
             <span className="num-stars">{numStars} star{numStars !== 1 ? "s" : ""}</span>
           </div>
-          <CommentDisplaySection comments={comments} />
-          {loggedInUser ? <AddCommentForm entity={post} entityType='Blog' onNewComment={handleNewComment} /> : <p>Log in to leave a comment.</p>}
+          <CommentDisplaySection comments={comments} setComments={setComments}/>
+          {loggedInUser ? <AddCommentForm entity={post} entityType='Blog' onNewComment={handleNewComment}/> : <p>Log in to leave a comment.</p>}
         </>}
     </>
   );

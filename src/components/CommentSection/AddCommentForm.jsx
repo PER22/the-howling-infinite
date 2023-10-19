@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import {postComment} from '../../utilities/comments-api'
-
-import './AddCommentForm.css'
+import { postComment } from '../../utilities/comments-api';
+import { Button, TextField, Typography, Box, FormControl } from '@mui/material';
 
 function AddCommentForm({ entityType, entity, onNewComment }) {
   const [text, setText] = useState('');
@@ -11,36 +10,42 @@ function AddCommentForm({ entityType, entity, onNewComment }) {
     try {
       const response = await postComment({
         entityType,
-        entityId : entity._id,
+        entityId: entity._id,
         text
       });
       if (response && !response.error) {
-
         setText('');
         onNewComment(response);
       } else {
         // Handle any errors, maybe show an error message to the user.
       }
     } catch (error) {
-      console.log("Failed to submit comment because: ", error)
+      console.log("Failed to submit comment because: ", error);
     }
   };
 
-  return (<>
-  
-    <label>Note: All comments must be approved before being displayed.</label>
-      <form onSubmit={handleSubmit}  className="add-comment-form">
-        
-        <textarea
+  return (
+    <Box component="div" sx={{ width: '100%', mb:3}}>
+      <Typography variant="body1">
+        Note: All comments must be approved before being displayed.
+      </Typography>
+
+      <FormControl component="form" onSubmit={handleSubmit} sx={{ mt: 2, width: '100%' }}>
+        <TextField
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Add a comment..."
+          multiline
           rows={5}
-          cols={50}
-        ></textarea>
-        <button type="submit">Submit Comment</button>
-      </form>
-      </>
+          variant="outlined"
+          fullWidth
+          sx={{backgroundColor: "white", borderRadius:'4px'}}
+        />
+        <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
+          Submit Comment
+        </Button>
+      </FormControl>
+    </Box>
   );
 }
 

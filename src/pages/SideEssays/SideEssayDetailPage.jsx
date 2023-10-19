@@ -1,13 +1,14 @@
 import { useState, useEffect, useContext } from "react";
 import { TitleContext } from "../../components/TitleBar/TitleContext";
 import { useParams, Link } from "react-router-dom";
+import { useLoggedInUser } from "../../components/LoggedInUserContext/LoggedInUserContext";
 import AddCommentForm from '../../components/CommentSection/AddCommentForm';
 import CommentDisplaySection from '../../components/CommentSection/CommentDisplaySection';
 import FeedbackMessage from '../../components/FeedbackMessage/FeedbackMessage';
 import { getCommentsOn } from "../../utilities/comments-service";
 import { getSideEssay } from "../../utilities/essays-service";
 
-export default function SideEssayDetailPage({loggedInUser}) {
+export default function SideEssayDetailPage() {
   const [sideEssay, setSideEssay] = useState(null);
   const { essayId } = useParams();
 
@@ -59,6 +60,7 @@ export default function SideEssayDetailPage({loggedInUser}) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
+  const { loggedInUser, setLoggedInUser } = useLoggedInUser();
   return (
     <>{sideEssay && (
       <>
@@ -67,7 +69,7 @@ export default function SideEssayDetailPage({loggedInUser}) {
           
         </div>
         <div dangerouslySetInnerHTML={{ __html: sideEssay.bodyHTML }} />
-        <CommentDisplaySection comments={comments} />
+        <CommentDisplaySection comments={comments} setComments={setComments}/>
         {loggedInUser ? <AddCommentForm entity={sideEssay} entityType='Essay' onNewComment={handleNewComment} />: <p>Log in to leave a comment.</p>}
         <FeedbackMessage error={error} message={message}/>
       </>)}

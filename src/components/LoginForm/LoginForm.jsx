@@ -1,11 +1,14 @@
 //LoginForm.jsx:
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLoggedInUser } from '../LoggedInUserContext/LoggedInUserContext';
 import * as usersService from '../../utilities/users-service';
 import FeedbackMessage from '../FeedbackMessage/FeedbackMessage';
 
-export default function LoginForm({ setUser }) {
+export default function LoginForm() {
   const navigate = useNavigate();
+
+
   const [credentials, setCredentials] = useState({
     email: '',
     password: ''
@@ -17,15 +20,15 @@ export default function LoginForm({ setUser }) {
     setError('');
   }
 
+  const { loggedInUser, setLoggedInUser } = useLoggedInUser();
   async function handleSubmit(evt) {
     // Prevent form from being submitted to the server
     evt.preventDefault();
     try {
       const user = await usersService.login(credentials);
-      console.log("MAde it past await login");
       console.log(user);
       if (!user.error) {
-        setUser(user);
+        setLoggedInUser(user);
         navigate('/');
       } else {
         console.log("user.error: ", user.error)

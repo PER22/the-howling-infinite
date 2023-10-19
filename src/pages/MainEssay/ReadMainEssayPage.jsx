@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { TitleContext } from '../../components/TitleBar/TitleContext';
+import { useLoggedInUser } from '../../components/LoggedInUserContext/LoggedInUserContext';
 import parse from 'html-react-parser';
 import sendRequest from '../../utilities/send-request';
 import Footnote from '../../components/Footnote/Footnote';
@@ -19,8 +20,9 @@ const options = {
 };
 
 
-export default function ReadMainEssayPage({ loggedInUser }) {
+export default function ReadMainEssayPage() {
     const { setTitle } = useContext(TitleContext);
+    const { loggedInUser, setLoggedInUser } = useLoggedInUser();
     const [mainEssay, setMainEssay] = useState(null);
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
@@ -88,8 +90,9 @@ export default function ReadMainEssayPage({ loggedInUser }) {
                     <p>Loading...</p>
                 )}
                 
-                <CommentDisplaySection comments={comments} />
-                {loggedInUser ? <AddCommentForm entity={mainEssay} entityType='Essay' onNewComment={handleNewComment} />: <p>Log in to leave a comment.</p>}
+                <CommentDisplaySection comments={comments} setComments={setComments}/>
+
+                {loggedInUser ? <AddCommentForm entity={mainEssay} entityType='Essay' onNewComment={handleNewComment}/>: <p>Log in to leave a comment.</p>}
                 <FeedbackMessage error={error} message={message}/>
             </div>
         </>

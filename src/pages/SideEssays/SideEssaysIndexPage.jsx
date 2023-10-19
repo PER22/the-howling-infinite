@@ -1,11 +1,12 @@
 import { useEffect, useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import { TitleContext } from "../../components/TitleBar/TitleContext";
+import { useLoggedInUser } from "../../components/LoggedInUserContext/LoggedInUserContext";
 import ContentPreviewCard from "../../components/ContentPreviewCard/ContentPreviewCard";
 import { getSideEssayPreviews } from "../../utilities/essays-service";
 
-export default function SideEssaysIndexPage({loggedInUser}) {
-  console.log("loggedInUser", loggedInUser);
+export default function SideEssaysIndexPage() {
+  const { loggedInUser, setLoggedInUser } = useLoggedInUser();
   const [sideEssays, setSideEssays] = useState([]);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);

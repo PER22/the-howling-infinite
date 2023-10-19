@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { TitleContext } from '../../components/TitleBar/TitleContext';
+import { useLoggedInUser } from '../../components/LoggedInUserContext/LoggedInUserContext';
 import { getMainEssay } from '../../utilities/essays-service';
 import { updateMainEssay } from '../../utilities/essays-service';
 import { createEssay } from '../../utilities/essays-service';
@@ -8,7 +9,7 @@ import 'react-quill/dist/quill.snow.css';
 import { useNavigate } from 'react-router-dom';
 import UnauthorizedBanner from '../../components/UnauthorizedBanner/UnauthorizedBanner';
 
-export default function EditMainEssayPage({loggedInUser}) {
+export default function EditMainEssayPage() {
     const [essayExists, setEssayExists] = useState(false); //decide whether to PUT or POST
     const [essayTitle, setEssayTitle] = useState(''); //form contents
     const [coverPhoto, setCoverPhoto] = useState(null);
@@ -109,6 +110,8 @@ export default function EditMainEssayPage({loggedInUser}) {
     useEffect(() => {
         setTitle(`Editing Main Essay`);
     }, [setTitle, essayTitle]);
+
+    const { loggedInUser, setLoggedInUser } = useLoggedInUser();
 
     if(!loggedInUser || !loggedInUser.isAdmin){
         return <UnauthorizedBanner/>

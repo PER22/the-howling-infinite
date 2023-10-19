@@ -2,10 +2,12 @@
 import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import { TitleContext } from "../../../components/TitleBar/TitleContext";
+import { useLoggedInUser } from "../../../components/LoggedInUserContext/LoggedInUserContext";
 import ContentPreviewCard from '../../../components/ContentPreviewCard/ContentPreviewCard'
 import { getBlogPostPreviews } from '../../../utilities/blog-service'
 
-export default function AllBlogPostsPage({loggedInUser}) {
+export default function AllBlogPostsPage() {
+  const { loggedInUser, setLoggedInUser } = useLoggedInUser();
   const { setTitle } = useContext(TitleContext);
   useEffect(() => {
     setTitle("Gene's Blog");
