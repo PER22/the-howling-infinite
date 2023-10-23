@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { TitleContext } from '../../../components/TitleBar/TitleContext';
 import { useLoggedInUser } from '../../../components/LoggedInUserContext/LoggedInUserContext';
 import { useNavigate, useParams } from 'react-router-dom';
+import { TextField, Button, FormControl, FormLabel} from '@mui/material';
 import Editor from '../../../components/TextEditor/Editor';
 import ConfirmationModal from '../../../components/ConfirmationModal/ConfirmationModal';
 import FeedbackMessage from '../../../components/FeedbackMessage/FeedbackMessage';
@@ -20,8 +21,6 @@ export default function BlogPostEditPage() {
   const [postTitle, setPostTitle] = useState('');
   const [bodyText, setBodyText] = useState(null);
   const [coverPhoto, setCoverPhoto] = useState(null);
-  //To preview cover photo if it exists
-  const [previewImageURL, setPreviewImageURL] = useState('');
 
   const [error, setError] = useState('');
   const [message, setMessage] = useState("");
@@ -34,10 +33,6 @@ export default function BlogPostEditPage() {
         if(!post.error){
           setPostTitle(post.data.title);
           setBodyText(post.data.bodyText);
-          if (post.data.coverPhotoS3Key) {
-            const imageResponse = await getSignedURLForImage(post.data.coverPhotoS3Key);
-            if (imageResponse) { setPreviewImageURL(imageResponse.data.signedURL); }
-          }
         }
         
       } catch (error) {
@@ -92,35 +87,47 @@ export default function BlogPostEditPage() {
   return (
     <>
       <div className="info-card">
-        <form onSubmit={handleUpdatePostSubmit}>
-          <label>
-            Title:<br />
-            <input
-              type="text"
-              name={"postTitleInput"}
-              value={postTitle}
-              onChange={(event) => setPostTitle(event.target.value)}
-              required
-            /><br />
-          </label>
-          <label>
-            Article:
-          </label>
-          {bodyText && <Editor innerHTML={bodyText} onChange={setBodyText} />}
-          <div>
-            <label>Cover Photo:
-              <input type="file" name={"coverPhotoInput"} onChange={e => setCoverPhoto(e.target.files[0])} />
-            </label>
-          </div>
-          {previewImageURL && <div>
-            <label>Current cover photo: </label><br />
-            <img src={previewImageURL} alt="Current cover img" style={{ maxWidth: '300px', maxHeight: '200px' }} />
-          </div>
-          }
-          <button type="submit">Update Post</button><br />
-        </form>
+      <form onSubmit={handleUpdatePostSubmit}>
+    <FormControl fullWidth margin="normal">
+      <TextField
+        label="Title"
+        name="postTitleInput"
+        value={postTitle}
+        onChange={(event) => setPostTitle(event.target.value)}
+        sx={{backgroundColor: 'white', borderRadius: '5px'}}
+        required
+      />
+    </FormControl>
+
+    <FormControl fullWidth margin="normal">
+      <FormLabel>Article</FormLabel>
+      {bodyText && <Editor innerHTML={bodyText} onChange={setBodyText} />}
+    </FormControl>
+
+    <FormControl fullWidth margin="normal">
+      <FormLabel>Cover Photo:</FormLabel>
+      <input
+        type="file"
+        name="coverPhotoInput"
+        onChange={e => setCoverPhoto(e.target.files[0])}
+        style={{ display: 'none' }}
+        id="cover-photo-update-input"
+      />
+      <label htmlFor="cover-photo-update-input">
+        <Button variant="contained" color="primary" component="span">
+          Upload
+        </Button>
+      </label>
+    </FormControl>
+
+    <Button type="submit" variant="contained" color="primary" style={{ marginTop: '16px' }}>
+      Update Post
+    </Button>
+  </form>
         <FeedbackMessage error={error} message={message}/>
-        <button className="open-delete-modal-button" onClick={openModal}>Delete Post</button>
+        <Button variant="contained" color="warning" onClick={openModal} sx={{marginTop: "3rem"}}>
+                        Delete
+                    </Button>
       </div>
       {showDeleteConfirmationModal && <div className="deletion-confirmation-modal">
         <ConfirmationModal closeFunction={closeModal}

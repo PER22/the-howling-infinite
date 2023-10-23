@@ -3,14 +3,16 @@ import { Link } from 'react-router-dom';
 import { TitleContext } from '../../components/TitleBar/TitleContext';
 import { useLoggedInUser } from '../../components/LoggedInUserContext/LoggedInUserContext';
 import parse from 'html-react-parser';
-import sendRequest from '../../utilities/send-request';
 import Footnote from '../../components/Footnote/Footnote';
 import AddCommentForm from '../../components/CommentSection/AddCommentForm';
 import CommentDisplaySection from '../../components/CommentSection/CommentDisplaySection';
 import "./ReadMainEssayPage.css"
 import { getCommentsOn } from '../../utilities/comments-service';
 import FeedbackMessage from '../../components/FeedbackMessage/FeedbackMessage';
+import { getMainEssay, starEssayById, unstarEssayById } from '../../utilities/essays-service';
 
+const greyStarIcon = require("../../assets/greystar.png");
+const starIcon = require('../../assets/star.png');
 const options = {
     replace: ({ attribs }) => {
         if (attribs && attribs['data-footnote-content'] && attribs['data-footnote-number']) {
@@ -22,54 +24,97 @@ const options = {
 
 export default function ReadMainEssayPage() {
     const { setTitle } = useContext(TitleContext);
+
+
     const { loggedInUser, setLoggedInUser } = useLoggedInUser();
     const [mainEssay, setMainEssay] = useState(null);
-    const [error, setError] = useState('');
-    const [message, setMessage] = useState('');
-
     useEffect(() => {
         if (mainEssay) { setTitle(mainEssay.title); }
     }, [setTitle, mainEssay]);
+    
+
+    const [essayIsStarred, setEssayIsStarred] = useState(loggedInUser?._id && mainEssay && mainEssay?.stars?.includes(loggedInUser?._id));
+    const [numStars, setNumStars] = useState(mainEssay && mainEssay.numStars);
+
+
+    const [error, setError] = useState('');
+    const [message, setMessage] = useState('');
+
+    const handleStarEssay = async (mainEssay) => {
+        if (!loggedInUser?.isVerified) { return; }
+        try {
+            const starredPost = await starEssayById(mainEssay);
+            console.log(starredPost)
+            if (!starredPost.error) { setMainEssay(starredPost.data); }
+            else { setError(starredPost.error); }
+        } catch (err) {
+            console.log(err);
+            setError("Error starring post.");
+        }
+    };
+
+    const handleUnstarEssay = async (mainEssay) => {
+        if (!loggedInUser?.isVerified) { return; }
+        try {
+            const updatedPost = await unstarEssayById(mainEssay);
+            if (!updatedPost.error) {
+                setMainEssay(updatedPost.data);
+                setError(null);
+            } else {
+                setError(updatedPost.error);
+            }
+            setMainEssay(updatedPost);
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+    useEffect(() => {
+        setEssayIsStarred(loggedInUser?._id && mainEssay && mainEssay?.stars?.includes(loggedInUser?._id));
+      }, [mainEssay, loggedInUser?._id]);
+    
+      useEffect(() => {
+        setNumStars(mainEssay && mainEssay.numStars);
+      }, [mainEssay?.numStars]);
+
 
     const [comments, setComments] = useState([]);
     useEffect(() => {
-      const fetchPostComments = async () => {
-        try {
-          if (mainEssay) {
-            const tempComments = await getCommentsOn("Essay", mainEssay._id);
-            console.log("tempComments;",tempComments);
-            if (!tempComments.error) {
-              if (Array.isArray(tempComments.data)) {
-                setComments(tempComments.data);
-              } else {
-                console.log('API did not return an array for comments:', tempComments);
-              }
+        const fetchPostComments = async () => {
+            try {
+                if (mainEssay) {
+                    const tempComments = await getCommentsOn("Essay", mainEssay._id);
+                    console.log("tempComments;", tempComments);
+                    if (!tempComments.error) {
+                        if (Array.isArray(tempComments.data)) {
+                            setComments(tempComments.data);
+                        } else {
+                            console.log('API did not return an array for comments:', tempComments);
+                        }
+                    }
+                }
+            } catch (error) {
             }
-          }
-        } catch (error) {
-        }
-      };
-      fetchPostComments();
+        };
+        fetchPostComments();
     }, [mainEssay]);
 
     const handleNewComment = (newComment) => {
         setComments(prevComments => [...prevComments, newComment]);
     };
 
-
-
     useEffect(() => {
         async function fetchMainEssay() {
             try {
-                const mainEssay = await sendRequest(`/api/essays/`);
-                setMainEssay(mainEssay);
-                if (mainEssay) {
+                const response = await getMainEssay();
+                if (!response.error) {
+                    setMainEssay(response.data);
                     setError("");
                 } else {
-                    setError('Essay not found');
+                    setError(response.error);
                 }
             } catch (err) {
-                setError('Failed to fetch main essay.')
+                setError('Failed to fetch main essay.');
             }
         }
         fetchMainEssay();
@@ -81,19 +126,27 @@ export default function ReadMainEssayPage() {
             <div className="navigation-container">
                 {loggedInUser && loggedInUser.isAdmin && <Link to={`/edit`} className="edit-content-button">Edit This Essay</Link>}
             </div>
-            <div className='article-container'>
-                {mainEssay ? (
+            <div className='article-container no-select'>
+                {mainEssay?.bodyHTML ? (
                     <>
                         {parse(mainEssay.bodyHTML, options)}
                     </>
                 ) : (
                     <p>Loading...</p>
                 )}
-                
-                <CommentDisplaySection comments={comments} setComments={setComments}/>
+                <div className="star-info">
+                    {loggedInUser && <img
+                        src={!essayIsStarred? greyStarIcon : starIcon}
+                        className="star-icon"
+                        alt="Star"
+                        onClick={!essayIsStarred ? () => handleStarEssay(mainEssay._id) : () => handleUnstarEssay(mainEssay._id)}
+                    />}
+                    <span className="num-stars">{numStars} star{numStars === 1 ? "" : "s"}</span>
+                </div>
+                <CommentDisplaySection comments={comments} setComments={setComments} />
 
-                {loggedInUser ? <AddCommentForm entity={mainEssay} entityType='Essay' onNewComment={handleNewComment}/>: <p>Log in to leave a comment.</p>}
-                <FeedbackMessage error={error} message={message}/>
+                {loggedInUser ? <AddCommentForm entity={mainEssay} entityType='Essay' onNewComment={handleNewComment} /> : <p>Log in to leave a comment.</p>}
+                <FeedbackMessage error={error} message={message} />
             </div>
         </>
     );

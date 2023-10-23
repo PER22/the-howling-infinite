@@ -1,5 +1,6 @@
 //controllers/blog.js:
 const BlogModel = require('../../models/blog');
+const CommentModel  = require('../../models/comment');
 const { uploadToS3, downloadFromS3, deleteFromS3, updateInS3 } = require('../../utilities/aws');
 const downsize = require("downsize");
 
@@ -144,6 +145,7 @@ async function deleteBlogPostById(req, res) {
             return res.status(403).json({ error: "You don't have permission to delete this content."});
         }
         if(blogPost.coverPhotoS3Key){await deleteFromS3(blogPost.coverPhotoS3Key);}
+        await CommentModel.deleteMany({entityType: 'Blog', entityId: blogPost._id});
         await blogPost.deleteOne();
         res.status(200).json({ message: 'Blog post deleted successfully' });
     } catch (error) {

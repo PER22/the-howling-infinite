@@ -5,6 +5,7 @@ const essayController = require('../../controllers/api/essay');
 const ensureLoggedIn = require('../../config/ensureLoggedIn');
 const adminOnly = require('../../config/adminOnly');
 const { uploadFiles } = require('../../utilities/aws');
+const essay = require('../../models/essay');
 
 //Anonymous
 // MAIN ESSAYS:
@@ -58,6 +59,8 @@ router.put('/:essayId', ensureLoggedIn, adminOnly, essayController.preUpdateSide
   {name: 'html', maxCount: 1},
   {name: 'folderFiles'}
 ]), essayController.postUpdateSideEssay);
+
+router.delete('/:essayId', ensureLoggedIn, adminOnly, essayController.deleteEssayById);
 //Logged In Users
 // POST /api/essays/star/:essayId
 router.post('/star/:essayId', ensureLoggedIn, essayController.starEssayById);

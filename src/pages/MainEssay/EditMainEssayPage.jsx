@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useContext } from 'react';
+import { Button, TextField, Input, InputLabel, FormControl, Box } from '@mui/material';
+import { CloudUpload } from '@mui/icons-material';
 import { TitleContext } from '../../components/TitleBar/TitleContext';
 import { useLoggedInUser } from '../../components/LoggedInUserContext/LoggedInUserContext';
 import { getMainEssay } from '../../utilities/essays-service';
 import { updateMainEssay } from '../../utilities/essays-service';
 import { createEssay } from '../../utilities/essays-service';
 import { getSignedURLForImage } from '../../utilities/images-service';
-import 'react-quill/dist/quill.snow.css';
+
 import { useNavigate } from 'react-router-dom';
 import UnauthorizedBanner from '../../components/UnauthorizedBanner/UnauthorizedBanner';
 
@@ -93,7 +95,7 @@ export default function EditMainEssayPage() {
                     setTimeout(() => {
                         navigate('/read');
                     }, 2000);
-                }else{
+                } else {
                     setError(newEssay.error);
                 }
 
@@ -113,33 +115,70 @@ export default function EditMainEssayPage() {
 
     const { loggedInUser, setLoggedInUser } = useLoggedInUser();
 
-    if(!loggedInUser || !loggedInUser.isAdmin){
-        return <UnauthorizedBanner/>
+    if (!loggedInUser || !loggedInUser.isAdmin) {
+        return <UnauthorizedBanner />
     }
     return (
         <div>
             <h1>Main Essay</h1>
             {loading ? <p>Loading...</p> :
-                <form onSubmit={handleSubmit}>
-                    <div>
-                        <label>Title:</label>
-                        <input type="text" value={essayTitle} onChange={e => setEssayTitle(e.target.value)} required />
-                    </div>
-                    <div>
-                        <label>HTML File:</label>
-                        <input type="file" onChange={e => setHtmlFile(e.target.files[0])} required />
-                    </div>
-                    <div>
-                        <label>Images Folder (.fld):</label>
-                        <input type="file" webkitdirectory="" directory="" onChange={e => setImageFolder(e.target.files)} required />
-                    </div>
-                    <div>
-                        <label>Cover Photo:</label>
-                        <input type="file" onChange={e => setCoverPhoto(e.target.files[0])} />
-                    </div>
-                    <div>
-                        <button type="submit">Submit</button>
-                    </div>
+                <form onSubmit={handleSubmit} noValidate autoComplete="off">
+                    <Box marginBottom={2}>
+                        <TextField
+                            fullWidth
+                            label="Title"
+                            variant="outlined"
+                            value={essayTitle}
+                            onChange={e => setEssayTitle(e.target.value)}
+                            required
+                        />
+                    </Box>
+
+                    <Box marginBottom={2}>
+                        <TextField
+                            fullWidth
+                            variant="outlined"
+                            label="HTML File"
+                            type="file"
+                            InputLabelProps={{ shrink: true }}
+                            onChange={e => setHtmlFile(e.target.files[0])}
+                            required
+                        />
+                    </Box>
+
+                    <Box marginBottom={2}>
+                        <InputLabel htmlFor="images-folder">Images Folder (.fld) *</InputLabel>
+                        <input
+                            style={{ display: 'none' }}
+                            id="images-folder"
+                            multiple
+                            type="file"
+                            webkitdirectory=""
+                            directory=""
+                            onChange={e => setImageFolder(e.target.files)}
+                        />
+                        <label htmlFor="images-folder">
+                            <Button variant="outlined" component="span">
+                                Choose Files
+                            </Button>
+                        </label>
+                    </Box>
+
+                    <Box marginBottom={2}>
+                        <TextField
+                            fullWidth
+                            variant="outlined"
+                            label="Cover Photo"
+                            type="file"
+                            InputLabelProps={{ shrink: true }}
+                            onChange={e => setCoverPhoto(e.target.files[0])}
+                            required
+                        />
+                    </Box>
+
+                    <Button variant="contained" color="primary" type="submit">
+                        Submit
+                    </Button>
                 </form>
             }
             {error && <p style={{ color: 'red' }}>{error}</p>}

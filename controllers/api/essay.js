@@ -2,6 +2,7 @@
 
 
 const EssayModel = require('../../models/essay');
+const CommentModel = require('../../models/comment');
 const { downloadFromS3, deleteFromS3, updateInS3, sanitizeTitleForS3 } = require('../../utilities/aws');
 const downsize = require("downsize");
 const cheerio = require('cheerio');
@@ -28,33 +29,7 @@ async function preCreateEssay(req, res, next) {
     }
 }
 
-function formatFootnotes(oldHTML){
-    const $ = cheerio.load(oldHTML);
-            const footnotes = {};
-
-            // Collect all the footnotes
-            $('a[href^="#_ftnref"]').each((i, element) => {
-                const href = $(element).attr('href');
-                const footnoteId = href.replace("#_ftnref", "");
-                const content = $(element).closest('p').text();
-                footnotes[footnoteId] = content;
-            });
-
-            // Replace the navigation links with tooltips
-            $('a[href^="#_ftn"]').each((i, element) => {
-                const href = $(element).attr('href');
-                const footnoteId = href.replace("#_ftn", "");
-                const footnoteNumber = footnoteId.replace("ref", "");
-                if (footnotes[footnoteId]) {
-                    const replacementHTML = `<span data-footnote-content="${footnotes[footnoteId]}" data-footnote-number="${footnoteNumber}"> [${footnoteNumber}]</span>`;
-                    $(element).replaceWith(replacementHTML);
-                }
-            });
-            $('div[style*="mso-element:footnote"]').remove();
-            return $.html();
-}
-
-function editImgSrc(oldHTML, postId){
+function editImgSrc(oldHTML, postId) {
     const $ = cheerio.load(oldHTML);
     const finalImageKeys = [];
     $('img').each((index, img) => {
@@ -64,7 +39,34 @@ function editImgSrc(oldHTML, postId){
         $(img).attr('src', newSrc);
         finalImageKeys.push(`essayimages-${postId}-${sanitizeTitleForS3(fileName)}`)
     });
-    return {html: $.html(), newImageKeys: finalImageKeys}; 
+    return { html: $.html(), newImageKeys: finalImageKeys };
+}
+
+function replaceQuoteEntity(oldHtml) {
+    return oldHtml.replace(`/&quot;/g`, '"');
+}
+
+async function formatEssay(originalHTML , essayId) {
+    const entitiesReplacedHTML = await replaceQuoteEntity(originalHTML);
+    const changedFontHTML = await replaceSegoe(entitiesReplacedHTML);
+    const imagesKeysAndHTML = await editImgSrc(changedFontHTML, essayId);
+    return imagesKeysAndHTML;
+}
+
+function replaceSegoe(startHTML) {
+    const $ = cheerio.load(startHTML);
+
+    // Find elements with "Segoe Print" as their font-family and replace it
+    $("span[style*='font-family:\"Segoe Print\"']").each((index, element) => {
+        const $element = $(element);
+        const originalStyle = $element.attr('style');
+        const newStyle = originalStyle.replace(/font-family:"Segoe Print"/, 'font-family:"Patrick Hand", cursive');
+        $element.attr('style', newStyle);
+    });
+
+    // Get the modified HTML
+    const modifiedHtml = $.html();
+    return modifiedHtml;
 }
 
 //Admin only
@@ -73,7 +75,7 @@ async function postCreateEssay(req, res) {
         let coverPhotoS3Key = null;
         let htmlS3Key = null;
         const folderFiles = [];
-        if(!req.file && !req.files){console.log("Files are not attached.")}
+        if (!req.file && !req.files) { console.log("Files are not attached.") }
 
         if (req.files.coverPhoto && req.files.coverPhoto[0]) {
             coverPhotoS3Key = req.files.coverPhoto[0].key;
@@ -89,10 +91,9 @@ async function postCreateEssay(req, res) {
         let preview = "";
         if (htmlS3Key) {
             const oldHTML = await downloadFromS3(htmlS3Key);
-            const htmlWithFootnotes = formatFootnotes(oldHTML);
-            const imagesKeysAndHTML = editImgSrc(htmlWithFootnotes, req.entity._id.toString());
-            imagesKeysAndHTML.newImageKeys.forEach((imgKey)=>{
-                req.entity.inlineImagesS3Keys.push(imgKey)    
+            const imagesKeysAndHTML = await formatEssay(oldHTML);
+            imagesKeysAndHTML.newImageKeys.forEach((imgKey) => {
+                req.entity.inlineImagesS3Keys.push(imgKey)
             });
             const modifiedHtmlContent = imagesKeysAndHTML.html;
             await updateInS3(htmlS3Key, modifiedHtmlContent);
@@ -129,8 +130,6 @@ async function getMainEssay(req, res) {
     }
 }
 
-
-
 //Anonymous
 async function getEssayById(req, res) {
     try {
@@ -165,7 +164,7 @@ async function getMainEssayPreview(req, res) {
 //Anonymous
 async function getAllSideEssayPreviews(req, res) {
     try {
-        const essays = await EssayModel.find({ isMain: false}).populate('author');
+        const essays = await EssayModel.find({ isMain: false }).populate('author');
         if (!essays || essays.length === 0) {
             return res.status(404).json({ error: 'Essays not found.' });
         }
@@ -183,23 +182,22 @@ async function getAllSideEssayPreviews(req, res) {
 }
 
 //Admin only
-//Admin only
 async function preUpdateMainEssay(req, res, next) {
     try {
         const mainEssay = await EssayModel.findOne({ isMain: true });
-        if(!mainEssay){res.status(400).json({ error: "Failed to find main essay." });}
+        if (!mainEssay) { res.status(400).json({ error: "Failed to find main essay." }); }
         //delete inline images
         for (const img of mainEssay.inlineImagesS3Keys) {
             await deleteFromS3(img);
         }
         mainEssay.inlineImagesS3Keys = [];
         //delete cover image
-        if(mainEssay.coverPhotoS3Key){
+        if (mainEssay.coverPhotoS3Key) {
             await deleteFromS3(mainEssay.coverPhotoS3Key);
         }
         mainEssay.coverPhotoS3Key = "null";
         //delete html
-        if(mainEssay.htmlS3Key){
+        if (mainEssay.htmlS3Key) {
             await deleteFromS3(mainEssay.htmlS3Key);
         }
         mainEssay.htmlS3Key = "null";
@@ -218,7 +216,7 @@ async function postUpdateMainEssay(req, res) {
     try {
         // Grab essay document
         const mainEssay = req.entity;
-
+        console.log("Hit postUpdateEssay");
         // Check authorship against the requesting user
         if (req.user._id.toString() !== mainEssay.author.toString()) {
             return res.status(403).json({ error: "You don't have permission to edit the main essay." });
@@ -236,12 +234,8 @@ async function postUpdateMainEssay(req, res) {
             const newHtmlS3Key = req.files.html[0].key;
             mainEssay.htmlS3Key = newHtmlS3Key;
             const oldHTML = await downloadFromS3(newHtmlS3Key);
-
-
-            // Format footnotes and edit image source
-            const htmlWithFootnotes = formatFootnotes(oldHTML);
-            const imagesKeysAndHTML = editImgSrc(htmlWithFootnotes, mainEssay._id.toString());
-
+            
+            const imagesKeysAndHTML = await formatEssay(oldHTML,mainEssay._id.toString());
             // Update essay's inline image keys
             imagesKeysAndHTML.newImageKeys.forEach(imgKey => mainEssay.inlineImagesS3Keys.push(imgKey));
 
@@ -269,20 +263,20 @@ async function postUpdateMainEssay(req, res) {
 
 async function preUpdateSideEssay(req, res, next) {
     try {
-        const sideEssay = await EssayModel.findById( req.params.essayId );
-        if(!sideEssay){res.status(400).json({ error: "preUpdateMainEssay(): Failed to find main essay." });}
+        const sideEssay = await EssayModel.findById(req.params.essayId);
+        if (!sideEssay) { res.status(400).json({ error: "preUpdateMainEssay(): Failed to find main essay." }); }
         //delete inline images
         for (const img of sideEssay.inlineImagesS3Keys) {
             await deleteFromS3(img);
         }
         sideEssay.inlineImagesS3Keys = [];
         //delete cover image
-        if(sideEssay.coverPhotoS3Key){
+        if (sideEssay.coverPhotoS3Key) {
             await deleteFromS3(sideEssay.coverPhotoS3Key);
         }
         sideEssay.coverPhotoS3Key = "null";
         //delete html
-        if(sideEssay.htmlS3Key){
+        if (sideEssay.htmlS3Key) {
             await deleteFromS3(sideEssay.htmlS3Key);
         }
         sideEssay.htmlS3Key = "null";
@@ -319,12 +313,9 @@ async function postUpdateSideEssay(req, res) {
             const newHtmlS3Key = req.files.html[0].key;
             essay.htmlS3Key = newHtmlS3Key;
             const oldHTML = await downloadFromS3(newHtmlS3Key);
-
-
+            
             // Format footnotes and edit image source
-            const htmlWithFootnotes = formatFootnotes(oldHTML);
-            const imagesKeysAndHTML = editImgSrc(htmlWithFootnotes, essay._id.toString());
-
+            const imagesKeysAndHTML = await formatEssay(oldHTML, essay._id.toString())
             // Update essay's inline image keys
             imagesKeysAndHTML.newImageKeys.forEach(imgKey => essay.inlineImagesS3Keys.push(imgKey));
 
@@ -353,16 +344,20 @@ async function postUpdateSideEssay(req, res) {
 //Admin only
 async function deleteEssayById(req, res) {
     try {
-        const content = await EssayModel.findById(req.params.essayId);
-        if (!content) {
-            return res.status(404).json({ error: 'Cont not found.' });
+        const essayToDelete = await EssayModel.findById(req.params.essayId);
+        if (!essayToDelete) {
+            return res.status(404).json({ error: 'Essay not found.' });
         }
-        if (req.user._id !== content.author.toString()) {
+        if ((req.user._id !== essayToDelete.author.toString()) || !req.user.isAdmin) {
             return res.status(403).json({ error: "You don't have permission to delete this content." });
         }
-        await deleteFromS3(content.contentS3Key);
-        if (content.coverPhotoS3Key) { await deleteFromS3(content.coverPhotoS3Key); }
-        await content.remove();
+        await deleteFromS3(essayToDelete.htmlS3Key);
+        if (essayToDelete.coverPhotoS3Key) { await deleteFromS3(essayToDelete.coverPhotoS3Key); }
+        for (const imgKey of essayToDelete.inlineImagesS3Keys) {
+            await deleteFromS3(imgKey);
+        }
+        await CommentModel.deleteMany({ entityType: "Essay", entityId: essayToDelete._id });
+        await essayToDelete.deleteOne();
         res.status(200).json({ message: 'Content deleted successfully' });
     } catch (error) {
         console.error('Error deleting content:', error);
@@ -377,7 +372,7 @@ async function starEssayById(req, res) {
         const userId = req.user._id;
         const foundPost = await EssayModel.findById(essayId);
         if (!foundPost) {
-            return res.status(404).json({ eror: "Post not found." });
+            return res.status(404).json({ error: "Post not found." });
         }
         // Add the user's reference to the post's stars array
         await EssayModel.findByIdAndUpdate(
@@ -392,7 +387,7 @@ async function starEssayById(req, res) {
             { $set: { numStars } },
             { new: true }
         );
-        res.status(200).json(post);
+        res.status(200).json({data: true, error:null});
     } catch (error) {
         console.error('Error starring post:', error);
         res.status(500).json({ error: 'Failed to star post' });
@@ -402,26 +397,26 @@ async function starEssayById(req, res) {
 //All logged in users
 async function unstarEssayById(req, res) {
     try {
-        const postId = req.params.postId;
+        const essayId = req.params.essayId;
         const userId = req.user._id;
 
-        const foundPost = await EssayModel.findById(postId);
+        const foundPost = await EssayModel.findById(essayId);
         if (!foundPost) {
-            return res.status(404).json({ eror: "Post not found." });
+            return res.status(404).json({ error: "Post not found." });
         }
         let post = await EssayModel.findByIdAndUpdate(
-            postId,
+            essayId,
             { $pull: { stars: userId } },
             { new: true }
         );
-        post = await EssayModel.findById(postId);
+        post = await EssayModel.findById(essayId);
         const numStars = post.stars.length;
         post = await EssayModel.findByIdAndUpdate(
-            postId,
+            essayId,
             { $set: { numStars } },
             { new: true }
         );
-        res.status(200).json(post);
+        res.status(200).json({data: false, error:null});
     } catch (error) {
         console.error('Error unstarring post:', error);
         res.status(500).json({ error: 'Failed to unstar post' });

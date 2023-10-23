@@ -13,6 +13,7 @@ import AuthPage from '../Authentication/AuthPage/AuthPage'
 import RequestPasswordResetPage from '../Authentication/RequestPasswordReset/RequestPasswordResetPage';
 import PerformPasswordResetPage from '../Authentication/PerformPasswordResetPage/PerformPasswordResetPage';
 import EmailVerificationPage from '../EmailVerification/EmailVerificationPage';
+import AwaitingVerificationPage from '../EmailVerification/AwaitingVerificationPage';
   //Home
 import HomePage from '../Home/HomePage';
 
@@ -61,6 +62,7 @@ export default function App() {
               <Route path="/request-password-reset" exact element={<RequestPasswordResetPage />}/>
               <Route path="/reset-password" exact element={<PerformPasswordResetPage />}/>
               <Route path="/verify-email" element={<EmailVerificationPage/>} />
+              <Route path="/verification-notice" element={<AwaitingVerificationPage/>} />
 
               <Route path="/" exact element={<HomePage />} />
               

@@ -57,6 +57,12 @@ export default function ResponsiveDrawer() {
         </ListItem>
       ))}
       <Divider  sx={{backgroundColor: "white"}}/>
+      {loggedInUser?.isAdmin && <><ListItem disablePadding>
+        <ListItemButton component={Link} to="/moderate">
+          <ListItemText primary={"Moderate Comments"}  sx={{color: "white"}}/>
+        </ListItemButton>
+      </ListItem>
+      <Divider  sx={{backgroundColor: "white"}}/></>}
       <ListItem disablePadding>
         <ListItemButton component={Link} to="/auth" onClick={loggedInUser ? handleLogOut : null}>
           <ListItemText primary={loggedInUser ? "Log Out" : "Log In"}  sx={{color: "white"}}/>

@@ -71,7 +71,7 @@ async function verifyEmail(req, res){
     //If token is expired, send a new one, and update the user document in database.
     if (!user || user.verificationExpires < new Date()) {
       const response = await resendVerification(user);
-      return res.status(response.status).json(null);
+      return res.status(response.status).json({error: "The verification link you clicked has expired. A new one has been sent to your email."});
     }
     
     // Otherwise, set the user as verified, 
@@ -82,7 +82,7 @@ async function verifyEmail(req, res){
     await user.save();
 
     // Create and send the JWT to the client, automatically logging them in.
-    res.status(200).json({message: "You are verfied, and can now log in."});
+    res.status(200).json({message: "You are verified, and can now log in."});
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

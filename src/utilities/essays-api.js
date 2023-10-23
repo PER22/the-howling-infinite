@@ -31,3 +31,15 @@ export function updateSideEssay(essayId, formData){
     return sendRequest(`${BASE_URL}/${essayId}`, "PUT", formData);
 }
 
+export function deleteEssay(essayId){
+    return sendRequest(`${BASE_URL}/${essayId}`, "DELETE");
+}
+
+export function starEssayById(essayId){
+    return sendRequest(`${BASE_URL}/star/${essayId}`, "POST");
+}
+
+export function unstarEssayById(essayId){
+    return sendRequest(`${BASE_URL}/star/${essayId}`, "DELETE");
+}
+

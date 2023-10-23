@@ -91,3 +91,43 @@ export async function updateSideEssay(essayId, formData){
         return {data: null, error: "Failed to update requested essay."};
     }
 }
+
+export async function deleteEssay(essayId){
+    try{
+        const deletedEssay = await essayAPI.deleteEssay(essayId);
+        if(!deletedEssay.error) {
+            return {message: deletedEssay.message};
+        }
+        return {data : null, error: deletedEssay.error};
+    }catch(err){
+        console.log("Failed to delete requested essay:", err);
+        return {data: null, error: "Failed to delete requested essay."};
+    }
+}
+
+
+export async function starEssayById(essayId){
+    try{
+        const response = await essayAPI.starEssayById(essayId);
+        if(!response.error) {
+            return {data: response.data, error: null};
+        }
+        return {data : null, error: response.error};
+    }catch(err){
+        console.log("Failed to star requested essay:", err);
+        return {data: null, error: "Failed to star requested essay."};
+    }
+}
+
+export async function unstarEssayById(essayId){
+    try{
+        const unstarredEssay = await essayAPI.unstarEssayById(essayId);
+        if(!unstarredEssay.error) {
+            return {data: unstarredEssay.data};
+        }
+        return {data : null, error: unstarredEssay.error};
+    }catch(err){
+        console.log("Failed to unstar requested essay:", err);
+        return {data: null, error: "Failed to unstar requested essay."};
+    }
+}

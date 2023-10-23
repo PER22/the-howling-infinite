@@ -29,7 +29,7 @@ export default function SignUpForm(){
       // payload of the JSON Web Token (JWT)
       await signUp(form);
       // Update user state with user
-      navigate('/');
+      navigate('/verification-notice');
     } catch(err) {
       // Invalid signup
       // console.log(err);

@@ -7,8 +7,8 @@ import AddCommentForm from '../../../components/CommentSection/AddCommentForm';
 import CommentDisplaySection from '../../../components/CommentSection/CommentDisplaySection';
 import "./BlogPostDetailPage.css"
 import { getCommentsOn } from '../../../utilities/comments-service'; //TODO: this should be routed through the service.
-import { getBlogPostById, unstarPostById } from '../../../utilities/blog-service';
-import { starPostById } from '../../../utilities/blog-service';
+import { getBlogPostById, starPostById, unstarPostById } from '../../../utilities/blog-service';
+
 
 const greyStarIcon = require('../../../assets/greystar.png')
 const starIcon = require('../../../assets/star.png')

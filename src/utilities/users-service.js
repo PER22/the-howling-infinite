@@ -8,10 +8,10 @@ export async function signUp(userData) {
 
 export async function verifyEmail(token) {
     const response = await usersAPI.verifyEmail(token);
-    if (response) {
-        return;
+    if (!response.error) {
+        return {message: response.message};
     } else {
-        throw new Error(response.error || 'Email verification failed');
+        return {error: response.error};
     }
 }
 

@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { TitleContext } from '../../../components/TitleBar/TitleContext';
 import { useNavigate } from 'react-router-dom';
+import { TextField, Button, FormControl, FormLabel } from '@mui/material';
 import { createBlogPost } from '../../../utilities/blog-service';
 import Editor from '../../../components/TextEditor/Editor';
 import FeedbackMessage from '../../../components/FeedbackMessage/FeedbackMessage'
@@ -47,28 +48,41 @@ export default function NewPostForm() {
   return (
     <>
       <form onSubmit={handleCreatePostSubmit} className='post-create-form info-card'>
-        <label>
-          Title:
-          <input
-            type="text"
-            value={postTitle}
-            onChange={(event) => setPostTitle(event.target.value)}
-            required
-          />
+      <FormControl fullWidth margin="normal">
+        <TextField
+          label="Title"
+          value={postTitle}
+          onChange={(event) => setPostTitle(event.target.value)}
+          required
+          sx={{backgroundColor:'white', borderRadius: '5px'}}
+        />
+      </FormControl>
+
+      <FormControl fullWidth margin="normal">
+      <FormLabel>Article</FormLabel>
+        <Editor innerHTML={bodyText} onChange={setBodyText} />
+      </FormControl>
+
+      <FormControl fullWidth margin="normal">
+        <FormLabel>Cover Photo:</FormLabel>
+        <input
+          type="file"
+          onChange={e => setCoverPhoto(e.target.files[0])}
+          style={{ display: 'none' }} // hide the default input
+          id="cover-photo-input"
+        />
+        <label htmlFor="cover-photo-input">
+          <Button variant="contained" color="primary" component="span">
+            Upload
+          </Button>
         </label>
-        <br />
-        <label>
-          Article:<br />
-          <Editor innerHTML={bodyText} onChange={setBodyText} />
-        </label>
-        <div>
-          <label>Cover Photo:</label>
-          <input type="file" onChange={e => setCoverPhoto(e.target.files[0])} />
-          {/* {!imageError $$ <img src=`${getSignedURLForEssayCoverImage}`} */}
-        </div>
-        <br />
-        <button type="submit">Create Post</button>
-      </form>
+        {/* {!imageError && <img src={`${getSignedURLForEssayCoverImage}`} */}
+      </FormControl>
+
+      <Button type="submit" variant="contained" color="primary" style={{ marginTop: '16px' }}>
+        Create Post
+      </Button>
+    </form>
       <FeedbackMessage error={error} message={message} />
     </>
   );
