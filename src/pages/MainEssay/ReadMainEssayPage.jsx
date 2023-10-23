@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { TitleContext } from '../../components/TitleBar/TitleContext';
 import { useLoggedInUser } from '../../components/LoggedInUserContext/LoggedInUserContext';
 import parse from 'html-react-parser';
-import Footnote from '../../components/Footnote/Footnote';
 import AddCommentForm from '../../components/CommentSection/AddCommentForm';
 import CommentDisplaySection from '../../components/CommentSection/CommentDisplaySection';
 import "./ReadMainEssayPage.css"
@@ -13,13 +12,6 @@ import { getMainEssay, starEssayById, unstarEssayById } from '../../utilities/es
 
 const greyStarIcon = require("../../assets/greystar.png");
 const starIcon = require('../../assets/star.png');
-const options = {
-    replace: ({ attribs }) => {
-        if (attribs && attribs['data-footnote-content'] && attribs['data-footnote-number']) {
-            return <Footnote content={attribs['data-footnote-content']} number={attribs['data-footnote-number']} />;
-        }
-    }
-};
 
 
 export default function ReadMainEssayPage() {
@@ -43,10 +35,16 @@ export default function ReadMainEssayPage() {
     const handleStarEssay = async (mainEssay) => {
         if (!loggedInUser?.isVerified) { return; }
         try {
-            const starredPost = await starEssayById(mainEssay);
-            console.log(starredPost)
-            if (!starredPost.error) { setMainEssay(starredPost.data); }
-            else { setError(starredPost.error); }
+            const response = await starEssayById(mainEssay);
+            if (!response.error) {
+                setMainEssay(prevEssay => ({
+                    ...prevEssay,
+                    stars: response.data.stars,
+                    numStars: response.data.numStars
+                }));
+                setError(null);
+            }
+            else { setError(response.error); }
         } catch (err) {
             console.log(err);
             setError("Error starring post.");
@@ -56,14 +54,17 @@ export default function ReadMainEssayPage() {
     const handleUnstarEssay = async (mainEssay) => {
         if (!loggedInUser?.isVerified) { return; }
         try {
-            const updatedPost = await unstarEssayById(mainEssay);
-            if (!updatedPost.error) {
-                setMainEssay(updatedPost.data);
+            const response = await unstarEssayById(mainEssay);
+            if (!response.error) {
+                setMainEssay(prevEssay => ({
+                    ...prevEssay,
+                    stars: response.data.stars,
+                    numStars: response.data.numStars
+                }));
                 setError(null);
             } else {
-                setError(updatedPost.error);
+                setError(response.error);
             }
-            setMainEssay(updatedPost);
         } catch (err) {
             console.log(err);
         }
@@ -75,7 +76,7 @@ export default function ReadMainEssayPage() {
     
       useEffect(() => {
         setNumStars(mainEssay && mainEssay.numStars);
-      }, [mainEssay?.numStars]);
+      }, [mainEssay]);
 
 
     const [comments, setComments] = useState([]);
@@ -129,7 +130,7 @@ export default function ReadMainEssayPage() {
             <div className='article-container no-select'>
                 {mainEssay?.bodyHTML ? (
                     <>
-                        {parse(mainEssay.bodyHTML, options)}
+                        {parse(mainEssay.bodyHTML)}
                     </>
                 ) : (
                     <p>Loading...</p>

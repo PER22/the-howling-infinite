@@ -91,7 +91,7 @@ async function postCreateEssay(req, res) {
         let preview = "";
         if (htmlS3Key) {
             const oldHTML = await downloadFromS3(htmlS3Key);
-            const imagesKeysAndHTML = await formatEssay(oldHTML);
+            const imagesKeysAndHTML = await formatEssay(oldHTML, req.entity._id.toString());
             imagesKeysAndHTML.newImageKeys.forEach((imgKey) => {
                 req.entity.inlineImagesS3Keys.push(imgKey)
             });
@@ -387,7 +387,7 @@ async function starEssayById(req, res) {
             { $set: { numStars } },
             { new: true }
         );
-        res.status(200).json({data: true, error:null});
+        res.status(200).json({data: post, error:null});
     } catch (error) {
         console.error('Error starring post:', error);
         res.status(500).json({ error: 'Failed to star post' });
@@ -416,7 +416,7 @@ async function unstarEssayById(req, res) {
             { $set: { numStars } },
             { new: true }
         );
-        res.status(200).json({data: false, error:null});
+        res.status(200).json({data: post, error:null});
     } catch (error) {
         console.error('Error unstarring post:', error);
         res.status(500).json({ error: 'Failed to unstar post' });

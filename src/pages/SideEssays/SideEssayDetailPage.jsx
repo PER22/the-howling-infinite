@@ -6,11 +6,14 @@ import AddCommentForm from '../../components/CommentSection/AddCommentForm';
 import CommentDisplaySection from '../../components/CommentSection/CommentDisplaySection';
 import FeedbackMessage from '../../components/FeedbackMessage/FeedbackMessage';
 import { getCommentsOn } from "../../utilities/comments-service";
-import { getSideEssay } from "../../utilities/essays-service";
+import { getSideEssay, starEssayById, unstarEssayById } from "../../utilities/essays-service";
+const greyStarIcon = require("../../assets/greystar.png");
+const starIcon = require('../../assets/star.png');
 
 export default function SideEssayDetailPage() {
   const [sideEssay, setSideEssay] = useState(null);
   const { essayId } = useParams();
+  const { loggedInUser, setLoggedInUser } = useLoggedInUser();
 
   useEffect(() => {
     async function fetchSideEssay() {
@@ -60,18 +63,75 @@ export default function SideEssayDetailPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  const { loggedInUser, setLoggedInUser } = useLoggedInUser();
+  const [essayIsStarred, setEssayIsStarred] = useState(loggedInUser?._id && sideEssay && sideEssay?.stars?.includes(loggedInUser?._id));
+  const [numStars, setNumStars] = useState(sideEssay && sideEssay.numStars);
+
+  const handleStarEssay = async (sideEssay) => {
+    if (!loggedInUser?.isVerified) { return; }
+    try {
+      const response = await starEssayById(sideEssay);
+      if (!response.error) {
+        setSideEssay(prevEssay => ({
+          ...prevEssay,
+          stars: response.data.stars,
+          numStars: response.data.numStars
+        }));
+        setError(null);
+      }
+      else { setError(response.error); }
+    } catch (err) {
+      console.log(err);
+      setError("Error starring post.");
+    }
+  };
+
+  const handleUnstarEssay = async (mainEssay) => {
+    if (!loggedInUser?.isVerified) { return; }
+    try {
+      const response = await unstarEssayById(mainEssay);
+      if (!response.error) {
+        setSideEssay(prevEssay => ({
+          ...prevEssay,
+          stars: response.data.stars,
+          numStars: response.data.numStars
+        }));
+        setError(null);
+      } else {
+        setError(response.error);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  useEffect(() => {
+    setEssayIsStarred(loggedInUser?._id && sideEssay && sideEssay?.stars?.includes(loggedInUser?._id));
+  }, [sideEssay, loggedInUser?._id]);
+
+  useEffect(() => {
+    setNumStars(sideEssay && sideEssay.numStars);
+  }, [sideEssay]);
+
+
   return (
     <>{sideEssay && (
       <>
         <div className="navigation-container">
-        {loggedInUser && loggedInUser.isAdmin && <Link to={`/side-essays/${sideEssay._id}/edit`} className="edit-content-button">Edit This Essay</Link>}
-          
+          {loggedInUser && loggedInUser.isAdmin && <Link to={`/side-essays/${sideEssay._id}/edit`} className="edit-content-button">Edit This Essay</Link>}
+
         </div>
         <div dangerouslySetInnerHTML={{ __html: sideEssay.bodyHTML }} />
-        <CommentDisplaySection comments={comments} setComments={setComments}/>
-        {loggedInUser ? <AddCommentForm entity={sideEssay} entityType='Essay' onNewComment={handleNewComment} />: <p>Log in to leave a comment.</p>}
-        <FeedbackMessage error={error} message={message}/>
+        <div className="star-info">
+          {loggedInUser && <img
+            src={!essayIsStarred ? greyStarIcon : starIcon}
+            className="star-icon"
+            alt="Star"
+            onClick={!essayIsStarred ? () => handleStarEssay(sideEssay._id) : () => handleUnstarEssay(sideEssay._id)}
+          />}
+          <span className="num-stars">{numStars} star{numStars === 1 ? "" : "s"}</span>
+        </div>
+        <CommentDisplaySection comments={comments} setComments={setComments} />
+        {loggedInUser ? <AddCommentForm entity={sideEssay} entityType='Essay' onNewComment={handleNewComment} /> : <p>Log in to leave a comment.</p>}
+        <FeedbackMessage error={error} message={message} />
       </>)}
     </>
   );

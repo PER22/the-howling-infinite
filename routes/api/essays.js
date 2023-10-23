@@ -15,29 +15,15 @@ router.get("/mainEssayPreview", essayController.getMainEssayPreview);
 //Anonymous
 // GET /api/essays
 router.get('/', essayController.getMainEssay);
-const afterUpload = (req, res, next) => {
-  console.log("Got past the uploadFiles function.")
-  next();
-};
-const logFiles = (req, res, next) => {
-  console.log("Files uploaded: ", req.files);
-  next();
-};
+
 
 //Admin only
 // POST /api/essays
-router.post('/', 
-// ensureLoggedIn, 
-// adminOnly, 
-essayController.preCreateEssay, 
-uploadFiles.fields([
+router.post('/', ensureLoggedIn, adminOnly,essayController.preCreateEssay, uploadFiles.fields([
     {name: 'coverPhoto', maxCount: 1},
     {name: 'html', maxCount: 1},
     {name: 'folderFiles'}
-  ]), 
-  // afterUpload, 
-  // logFiles, 
-  essayController.postCreateEssay);
+  ]), essayController.postCreateEssay);
 
 //Admin only
 // PUT /api/essays/mainEssay
@@ -61,6 +47,7 @@ router.put('/:essayId', ensureLoggedIn, adminOnly, essayController.preUpdateSide
 ]), essayController.postUpdateSideEssay);
 
 router.delete('/:essayId', ensureLoggedIn, adminOnly, essayController.deleteEssayById);
+
 //Logged In Users
 // POST /api/essays/star/:essayId
 router.post('/star/:essayId', ensureLoggedIn, essayController.starEssayById);

@@ -70,7 +70,9 @@ const uploadFiles = multer({
         else if (file.fieldname === 'folderFiles') {
           folder = 'essayimages';
         }
-        cb(null, `${folder}-${req.entity._id}-`+  sanitizeTitleForS3(file.originalname));
+        console.log("uploadFiles(): req.entity._id.toString():", req.entity._id.toString());
+        const entityId = req.entity._id.toString();
+        cb(null, `${folder}-${entityId}-${sanitizeTitleForS3(file.originalname)}`);
     }
   })
 });
