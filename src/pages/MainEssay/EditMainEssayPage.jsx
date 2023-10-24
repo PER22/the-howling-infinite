@@ -10,6 +10,7 @@ import { getSignedURLForImage } from '../../utilities/images-service';
 
 import { useNavigate } from 'react-router-dom';
 import UnauthorizedBanner from '../../components/UnauthorizedBanner/UnauthorizedBanner';
+import FeedbackMessage from '../../components/FeedbackMessage/FeedbackMessage';
 
 export default function EditMainEssayPage() {
     const [essayExists, setEssayExists] = useState(false); //decide whether to PUT or POST
@@ -45,11 +46,9 @@ export default function EditMainEssayPage() {
                     setError(response.error);
                 }
             } catch (err) {
-                if (err.message !== 'sendRequest failed: {"error":"Essay not found."}') {
                     // Only set error if it's not about essay absence
                     setError(err.message);
                     setEssayExists(false);
-                }
             } finally {
                 setLoading(false);
             }
@@ -181,8 +180,7 @@ export default function EditMainEssayPage() {
                     </Button>
                 </form>
             }
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            {message && <p style={{ color: 'green' }}>{message}</p>}
+            <FeedbackMessage error={error} message={message}/>
         </div>
     );
 }

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { postComment } from '../../utilities/comments-api';
 import { Button, TextField, Typography, Box, FormControl } from '@mui/material';
 
-function AddCommentForm({ entityType, entity, onNewComment }) {
+function AddCommentForm({ entityType, entity }) {
   const [text, setText] = useState('');
 
   const handleSubmit = async (e) => {
@@ -15,7 +15,7 @@ function AddCommentForm({ entityType, entity, onNewComment }) {
       });
       if (response && !response.error) {
         setText('');
-        onNewComment(response);
+        //display modal
       } else {
         // Handle any errors, maybe show an error message to the user.
       }

@@ -7,6 +7,7 @@ import { getSideEssay, updateSideEssay, deleteEssay } from '../../utilities/essa
 import UnauthorizedBanner from '../../components/UnauthorizedBanner/UnauthorizedBanner';
 import ConfirmationModal from '../../components/ConfirmationModal/ConfirmationModal';
 import 'react-quill/dist/quill.snow.css'; // note the change in import for styles
+import FeedbackMessage from '../../components/FeedbackMessage/FeedbackMessage';
 
 
 function EditSideEssayPage() {
@@ -169,8 +170,7 @@ function EditSideEssayPage() {
                     {showDeleteConfirmationModal && <ConfirmationModal closeFunction={closeModal} deleteFunction={handleDelete} confirmationText={"This will permanently delete this essay, and can not be undone."} contentId={essayId}/>}
                 </>
             }
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            {message && <p style={{ color: 'green' }}>{message}</p>}
+            <FeedbackMessage error={error} message={message}/>
         </div>
     );
 }

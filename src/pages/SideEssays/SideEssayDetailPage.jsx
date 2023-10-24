@@ -56,10 +56,6 @@ export default function SideEssayDetailPage() {
     fetchPostComments();
   }, [sideEssay]);
 
-  const handleNewComment = (newComment) => {
-    setComments(prevComments => [...prevComments, newComment]);
-  };
-
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -130,7 +126,7 @@ export default function SideEssayDetailPage() {
           <span className="num-stars">{numStars} star{numStars === 1 ? "" : "s"}</span>
         </div>
         <CommentDisplaySection comments={comments} setComments={setComments} />
-        {loggedInUser ? <AddCommentForm entity={sideEssay} entityType='Essay' onNewComment={handleNewComment} /> : <p>Log in to leave a comment.</p>}
+        {loggedInUser ? <AddCommentForm entity={sideEssay} entityType='Essay'/> : <p>Log in to leave a comment.</p>}
         <FeedbackMessage error={error} message={message} />
       </>)}
     </>

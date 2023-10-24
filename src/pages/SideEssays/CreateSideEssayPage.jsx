@@ -3,6 +3,7 @@ import { Button, TextField, Input, InputLabel, FormControl, Box } from '@mui/mat
 import { TitleContext } from '../../components/TitleBar/TitleContext';
 import { createEssay } from '../../utilities/essays-service';
 import { useNavigate } from 'react-router-dom';
+import FeedbackMessage from '../../components/FeedbackMessage/FeedbackMessage';
 
 function CreateSideEssayPage() {
     const [essayTitle, setEssayTitle] = useState(''); //form contents
@@ -127,8 +128,7 @@ function CreateSideEssayPage() {
                     </Button>
                 </form>
             }
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            {message && <p style={{ color: 'green' }}>{message}</p>}
+            <FeedbackMessage error={error} message={message} />
         </div>
     );
 }

@@ -1,10 +1,12 @@
 // /src/pages/Blog/AllBlogPosts/AllBlogPostsPage.jsx:
 import { useState, useEffect, useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
+import { Button } from "@mui/material";
 import { TitleContext } from "../../../components/TitleBar/TitleContext";
 import { useLoggedInUser } from "../../../components/LoggedInUserContext/LoggedInUserContext";
 import ContentPreviewCard from '../../../components/ContentPreviewCard/ContentPreviewCard'
 import { getBlogPostPreviews } from '../../../utilities/blog-service'
+import FeedbackMessage from "../../../components/FeedbackMessage/FeedbackMessage";
 
 export default function AllBlogPostsPage() {
   const { loggedInUser, setLoggedInUser } = useLoggedInUser();
@@ -15,6 +17,7 @@ export default function AllBlogPostsPage() {
 
   const [posts, setPosts] = useState(null);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     async function fetchBlogPosts() {
@@ -36,14 +39,25 @@ export default function AllBlogPostsPage() {
   return (
     <>
       <div className="navigation-container">
-        {loggedInUser && loggedInUser.isAdmin &&<Link to="/blog/new" className="new-content-button">New Blog Post</Link>}
+      {loggedInUser && loggedInUser.isAdmin && (
+          <Button
+            component={RouterLink}
+            to="/blog/new"
+            variant="contained"
+            color="primary"
+            className="edit-content-button"
+          >
+            New Blog Post
+          </Button>
+        )}
+        
       </div>
       <div id="card-container">
         {posts && posts.map((eachPost, index) => (
           <ContentPreviewCard key={index} content={eachPost} type={'blog'} />
         ))}
       </div>
-      {error && <p>{error}</p>}
+      <FeedbackMessage error={error} mesage={message}/>
     </>
   );
 }

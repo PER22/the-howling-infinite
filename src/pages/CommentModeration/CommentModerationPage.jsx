@@ -4,8 +4,13 @@ import { TitleContext } from "../../components/TitleBar/TitleContext";
 import { useLoggedInUser } from "../../components/LoggedInUserContext/LoggedInUserContext";
 import CommentModerationCard from "../../components/CommentSection/CommentModerationCard";
 import UnauthorizedBanner from "../../components/UnauthorizedBanner/UnauthorizedBanner";
+import FeedbackMessage from "../../components/FeedbackMessage/FeedbackMessage";
+
 export default function CommentModerationPage(){
     const { setTitle } = useContext(TitleContext);
+    const [error, setError] = useState('');
+    const [message, setMessage] = useState('');
+
     useEffect(()=>{
         setTitle("Moderate Comments");
     },[setTitle]);
@@ -37,5 +42,6 @@ export default function CommentModerationPage(){
         {commentsAwaitingApproval.map(
             (eachComment) => <CommentModerationCard comment={eachComment} key={eachComment._id} onCommentRemoved={handleCommentRemoved}/>
         )}
+        <FeedbackMessage error={error} message={message}/>
     </>
 }

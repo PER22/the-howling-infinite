@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { useLocation } from 'react-router-dom';
 import { TitleContext } from "../../../components/TitleBar/TitleContext";
 import { resetPassword } from "../../../utilities/users-api";
+import FeedbackMessage from "../../../components/FeedbackMessage/FeedbackMessage";
 
 
 function useQuery() {
@@ -21,6 +22,7 @@ export default function PerformPasswordResetPage() {
 
     const [token, setToken] = useState('');
     const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -63,8 +65,7 @@ export default function PerformPasswordResetPage() {
             </label>
             <button type="submit">Reset Password</button>
           </form>
-          {message && <p>{message}</p>}
+          <FeedbackMessage error={error} message={message}/>
         </>
       );
-
 }

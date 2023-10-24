@@ -19,6 +19,10 @@ export function getBlogPostById(postId){
     return sendRequest(`${BASE_URL}/${postId}`);
 }
 
+export function deleteBlogPostById(postId){
+    return sendRequest(`${BASE_URL}/${postId}`, "DELETE")
+}
+
 export function starPostById(postId){
     return sendRequest(`${BASE_URL}/star/${postId}`, "POST");
 }

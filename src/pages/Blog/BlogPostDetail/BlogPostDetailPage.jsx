@@ -8,6 +8,7 @@ import CommentDisplaySection from '../../../components/CommentSection/CommentDis
 import "./BlogPostDetailPage.css"
 import { getCommentsOn } from '../../../utilities/comments-service'; //TODO: this should be routed through the service.
 import { getBlogPostById, starPostById, unstarPostById } from '../../../utilities/blog-service';
+import FeedbackMessage from '../../../components/FeedbackMessage/FeedbackMessage';
 
 
 const greyStarIcon = require('../../../assets/greystar.png')
@@ -128,11 +129,6 @@ export default function BlogPostDetailPage() {
     return <p>Post not found.</p>;
   }
 
-  const handleNewComment = (newComment) => {
-    setComments(prevComments => [...prevComments, newComment]);
-  };
-
-
   return (
     <>
 
@@ -150,7 +146,8 @@ export default function BlogPostDetailPage() {
             <span className="num-stars">{numStars} star{numStars !== 1 ? "s" : ""}</span>
           </div>
           <CommentDisplaySection comments={comments} setComments={setComments} />
-          {loggedInUser ? <AddCommentForm entity={post} entityType='Blog' onNewComment={handleNewComment} /> : <p>Log in to leave a comment.</p>}
+          {loggedInUser ? <AddCommentForm entity={post} entityType='Blog' /> : <p>Log in to leave a comment.</p>}
+          <FeedbackMessage error={error} message={message}/>
         </>}
     </>
   );

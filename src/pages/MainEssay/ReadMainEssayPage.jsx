@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
+import Button from '@mui/material/Button';
 import { TitleContext } from '../../components/TitleBar/TitleContext';
 import { useLoggedInUser } from '../../components/LoggedInUserContext/LoggedInUserContext';
 import parse from 'html-react-parser';
@@ -100,10 +101,6 @@ export default function ReadMainEssayPage() {
         fetchPostComments();
     }, [mainEssay]);
 
-    const handleNewComment = (newComment) => {
-        setComments(prevComments => [...prevComments, newComment]);
-    };
-
     useEffect(() => {
         async function fetchMainEssay() {
             try {
@@ -125,7 +122,17 @@ export default function ReadMainEssayPage() {
     return (
         <>
             <div className="navigation-container">
-                {loggedInUser && loggedInUser.isAdmin && <Link to={`/edit`} className="edit-content-button">Edit This Essay</Link>}
+            {loggedInUser && loggedInUser.isAdmin && (
+        <Button 
+          component={RouterLink} 
+          to="/edit" 
+          variant="contained" 
+          color="primary" 
+          className="edit-content-button"
+        >
+          Edit This Essay
+        </Button>
+      )}
             </div>
             <div className='article-container no-select'>
                 {mainEssay?.bodyHTML ? (
@@ -146,7 +153,7 @@ export default function ReadMainEssayPage() {
                 </div>
                 <CommentDisplaySection comments={comments} setComments={setComments} />
 
-                {loggedInUser ? <AddCommentForm entity={mainEssay} entityType='Essay' onNewComment={handleNewComment} /> : <p>Log in to leave a comment.</p>}
+                {loggedInUser ? <AddCommentForm entity={mainEssay} entityType='Essay'/> : <p>Log in to leave a comment.</p>}
                 <FeedbackMessage error={error} message={message} />
             </div>
         </>

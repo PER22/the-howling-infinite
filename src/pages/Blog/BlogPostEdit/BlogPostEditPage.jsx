@@ -6,9 +6,7 @@ import { TextField, Button, FormControl, FormLabel} from '@mui/material';
 import Editor from '../../../components/TextEditor/Editor';
 import ConfirmationModal from '../../../components/ConfirmationModal/ConfirmationModal';
 import FeedbackMessage from '../../../components/FeedbackMessage/FeedbackMessage';
-import { editBlogPost, getBlogPostById } from '../../../utilities/blog-service';
-import { getSignedURLForImage } from '../../../utilities/images-service';
-import sendRequest from '../../../utilities/send-request';
+import { editBlogPost, getBlogPostById, deleteBlogPostById } from '../../../utilities/blog-service';
 import UnauthorizedBanner from '../../../components/UnauthorizedBanner/UnauthorizedBanner';
 
 
@@ -69,8 +67,12 @@ export default function BlogPostEditPage() {
 
   const handleDeletePost = async () => {
     try {
-      await sendRequest(`/api/blog/${postId}`, "DELETE");
-      navigate(`/blog`);
+      const response = await deleteBlogPostById(postId);
+      if(!response.error){
+        navigate(`/blog`);
+      }else{
+        setError(response.error);
+      }
     } catch (error) {
       console.log('Error deleting post:', error);
       setError("Deleting post failed.")

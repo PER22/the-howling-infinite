@@ -53,6 +53,19 @@ export async function getBlogPostById(postId){
     }
 }
 
+export async function deleteBlogPostById(postId){
+    try{
+        const deletedPost = await blogAPI.deleteBlogPostById(postId);
+        if(!deletedPost.error) {
+            return {data: deletedPost, error: null};
+        }
+        return {data : null, error: "Failed to delete requested blog post."};
+    }catch(err){
+        console.log("Error deleting blog post: ", err);
+        return {data: null, error: "Error deleteing requested blog post."};
+    }
+}
+
 export async function starPostById(postId){
     try{
         const starredPost = await blogAPI.starPostById(postId);
