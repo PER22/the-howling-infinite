@@ -46,13 +46,6 @@ function replaceQuoteEntity(oldHtml) {
     return oldHtml.replace(`/&quot;/g`, '"');
 }
 
-async function formatEssay(originalHTML , essayId) {
-    const entitiesReplacedHTML = await replaceQuoteEntity(originalHTML);
-    const changedFontHTML = await replaceSegoe(entitiesReplacedHTML);
-    const imagesKeysAndHTML = await editImgSrc(changedFontHTML, essayId);
-    return imagesKeysAndHTML;
-}
-
 function replaceSegoe(startHTML) {
     const $ = cheerio.load(startHTML);
 
@@ -68,6 +61,50 @@ function replaceSegoe(startHTML) {
     const modifiedHtml = $.html();
     return modifiedHtml;
 }
+
+function addTextAligments(htmlContent) {
+    const $ = cheerio.load(htmlContent);
+
+    // For each <p> element with the class MsoNormal
+    $('p.MsoNormal').each((index, element) => {
+        const $el = $(element);
+
+        // Check if it has the align attribute with value "left"
+        if ($el.attr('align') === 'left') {
+            // Remove the align attribute
+            $el.removeAttr('align');
+
+            // Add the "left-aligned-text" class
+            $el.addClass('left-aligned-text');
+        } else {
+            // If not, add the "centered-text" class
+            $el.addClass('centered-text');
+        }
+    });
+    return $.html();
+}
+
+function removeHead(htmlContent) {
+    const $ = cheerio.load(htmlContent);
+    const bodyContent = $('body').html();
+    return bodyContent;
+}
+
+function resetNegativeMargins(htmlContent){
+    return htmlContent.replace(/margin-(left|right):[^;]+;/g, '');
+}
+
+async function formatEssay(originalHTML, essayId) {
+    const headlessHTML = await removeHead(originalHTML);
+    const entitiesReplacedHTML = await replaceQuoteEntity(headlessHTML);
+    const changedFontHTML = await replaceSegoe(entitiesReplacedHTML);
+    const noNegativeMarginsHTML = await resetNegativeMargins( changedFontHTML);
+    const alignedHTML = await addTextAligments(noNegativeMarginsHTML);
+    const imagesKeysAndHTML = await editImgSrc(alignedHTML, essayId);
+    return imagesKeysAndHTML;
+}
+
+
 
 //Admin only
 async function postCreateEssay(req, res) {
@@ -234,8 +271,8 @@ async function postUpdateMainEssay(req, res) {
             const newHtmlS3Key = req.files.html[0].key;
             mainEssay.htmlS3Key = newHtmlS3Key;
             const oldHTML = await downloadFromS3(newHtmlS3Key);
-            
-            const imagesKeysAndHTML = await formatEssay(oldHTML,mainEssay._id.toString());
+
+            const imagesKeysAndHTML = await formatEssay(oldHTML, mainEssay._id.toString());
             // Update essay's inline image keys
             imagesKeysAndHTML.newImageKeys.forEach(imgKey => mainEssay.inlineImagesS3Keys.push(imgKey));
 
@@ -313,7 +350,7 @@ async function postUpdateSideEssay(req, res) {
             const newHtmlS3Key = req.files.html[0].key;
             essay.htmlS3Key = newHtmlS3Key;
             const oldHTML = await downloadFromS3(newHtmlS3Key);
-            
+
             // Format footnotes and edit image source
             const imagesKeysAndHTML = await formatEssay(oldHTML, essay._id.toString())
             // Update essay's inline image keys
@@ -387,7 +424,7 @@ async function starEssayById(req, res) {
             { $set: { numStars } },
             { new: true }
         );
-        res.status(200).json({data: post, error:null});
+        res.status(200).json({ data: post, error: null });
     } catch (error) {
         console.error('Error starring post:', error);
         res.status(500).json({ error: 'Failed to star post' });
@@ -416,7 +453,7 @@ async function unstarEssayById(req, res) {
             { $set: { numStars } },
             { new: true }
         );
-        res.status(200).json({data: post, error:null});
+        res.status(200).json({ data: post, error: null });
     } catch (error) {
         console.error('Error unstarring post:', error);
         res.status(500).json({ error: 'Failed to unstar post' });

@@ -134,14 +134,8 @@ export default function ReadMainEssayPage() {
         </Button>
       )}
             </div>
-            <div className='article-container no-select'>
-                {mainEssay?.bodyHTML ? (
-                    <>
-                        {parse(mainEssay.bodyHTML)}
-                    </>
-                ) : (
-                    <p>Loading...</p>
-                )}
+            <div className='article-container'>
+                { mainEssay?.bodyHTML && <div className='no-select' dangerouslySetInnerHTML={{__html: mainEssay.bodyHTML}}/>}
                 <div className="star-info">
                     {loggedInUser && <img
                         src={!essayIsStarred? greyStarIcon : starIcon}
