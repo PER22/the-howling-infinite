@@ -1,5 +1,7 @@
 # The-Howling-Infinite.com
-The-Howling-Infinite.com is a project I was commissioned to create by a retired clinical psychologist with 30+ years of experience. Since retiring in 2020, my client has been creating a screenplay about Lee Harvey Oswald and the experiences that led him to assassinate JFK. The name is a reference to a quote from *Moby Dick*.
+The-Howling-Infinite.com is a recent project I was commissioned to create by a retired clinical psychologist with 30+ years of experience. Since retiring in 2020, my client has been creating a screenplay about Lee Harvey Oswald, his underlying psychology, his childhood, and the experiences that led up to him assassinating JFK. The name is a reference to a quote from *Moby Dick*.
+
+I handled the project from start to finish, doing everything from wireframing, API/backend development, frontend development, styling, testing, domain and DNS management, hosting, and deploying.
 
 # Project Constraints
 
@@ -40,5 +42,3 @@ The-Howling-Infinite.com is a project I was commissioned to create by a retired 
 
  - `multer`, `multer-s3`,  and `quill-image-uploader` are used to handle the uploading of multipart/form-data  and inline images. 
  - `react-quill` and `quill-image-resize-module-react` are used to create a rich text editor for the blog posts. This feature may be replaced, if the client finds it unwieldy. 
-
-
