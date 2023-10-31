@@ -127,7 +127,7 @@ async function login(req, res) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       console.log("Users controller: login(): Error in validation");
-      return res.status(400).json({ error: "Errors in validation." });
+      return res.status(400).json({ error: "Email address is incorrectly formatted." });
     }
 
     // Find the user by their email address
@@ -139,7 +139,7 @@ async function login(req, res) {
       return res.status(402).json({error: "Email address not verified."});
     }
     // Check if the password matches
-    const match = bcrypt.compare(req.body.password, user.password);
+    const match = await bcrypt.compare(req.body.password, user.password);
     if (!match) {
       return res.status(403).json({error: "Password doesn't match."});
     }

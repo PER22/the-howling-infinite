@@ -24,7 +24,7 @@ export default function ContentPreviewCard({ content , type}) {
                 }}>
                 {content.coverPhotoS3Key && <CardMedia
                     component="img"
-                    height="140"
+                    height="100%"
                     image={`/api/images/${content.coverPhotoS3Key}`}
                     alt="Cover Image"
                     className='essay-cover-image'
@@ -36,9 +36,7 @@ export default function ContentPreviewCard({ content , type}) {
                     }}
                 />}
                 <CardContent sx={{}} className='essay-card-body'>
-                    <Typography variant="h5" component="div">
-                        {content.title}
-                    </Typography>
+
                     <Typography variant="body2" color="text.secondary">
                         <span dangerouslySetInnerHTML={{ __html: content.preview }} />
                     </Typography>

@@ -1,6 +1,7 @@
 //LoginForm.jsx:
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { TextField, Button, Card, CardContent, Typography } from '@mui/material';
 import { useLoggedInUser } from '../LoggedInUserContext/LoggedInUserContext';
 import * as usersService from '../../utilities/users-service';
 import FeedbackMessage from '../FeedbackMessage/FeedbackMessage';
@@ -42,17 +43,46 @@ export default function LoginForm() {
 
 
   return (
-    <>
-      <div className="info-card">
-        <form autoComplete="off" onSubmit={handleSubmit}>
-          <label>Email</label><br />
-          <input type="text" name="email" value={credentials.email} onChange={handleChange} required /><br />
-          <label>Password</label><br />
-          <input type="password" name="password" value={credentials.password} onChange={handleChange} required /><br />
-          <button className="auth-submit-button" type="submit">Log In</button>
+    <Card className="info-card">
+      <CardContent>
+        <form autoComplete="on" onSubmit={handleSubmit}>
+          
+          <Typography variant="h6">Email</Typography>
+          <TextField
+            fullWidth
+            margin="normal"
+            type="text"
+            name="email"
+            value={credentials.email}
+            onChange={handleChange}
+            required
+            variant="outlined"
+          />
+
+          <Typography variant="h6">Password</Typography>
+          <TextField
+            fullWidth
+            margin="normal"
+            type="password"
+            name="password"
+            value={credentials.password}
+            onChange={handleChange}
+            required
+            variant="outlined"
+          />
+
+          <Button
+            className="auth-submit-button"
+            type="submit"
+            variant="contained"
+            color="primary"
+            style={{ marginTop: '1rem' }}
+          >
+            Log In
+          </Button>
         </form>
-      </div>
+      </CardContent>
       <FeedbackMessage error={error} message={null} />
-    </>
+    </Card>
   );
 }

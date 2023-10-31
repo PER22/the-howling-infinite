@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { TextField, Button, Card, CardContent, Typography } from '@mui/material';
 import { signUp } from '../../utilities/users-service';
 import FeedbackMessage from '../FeedbackMessage/FeedbackMessage';
 
@@ -52,62 +53,83 @@ export default function SignUpForm(){
 
   
   return (
-    <>
-      <div className="info-card">
+    <Card className="info-card">
+      <CardContent>
         <form autoComplete="off" onSubmit={handleSubmit}>
-          <label>Name</label>
-          <input 
-            type="text" 
-            name="name" 
-            value={formData.name} 
-            onChange={handleChange} 
-            required 
-          /><br/>
 
-          <label>Username</label>
-          <input 
-            type="text" 
-            name="username" 
-            value={formData.username} 
-            onChange={handleChange} 
-            required 
-          /><br/>
+          <Typography variant="h6">Name</Typography>
+          <TextField
+            fullWidth
+            margin="normal"
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            variant="outlined"
+          />
 
-          <label>Email</label><br/>
-          <input 
-            type="email" 
-            name="email" 
-            value={formData.email} 
-            onChange={handleChange} 
-            required 
-          /><br/>
+          <Typography variant="h6">Username</Typography>
+          <TextField
+            fullWidth
+            margin="normal"
+            type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            required
+            variant="outlined"
+          />
 
-          <label>Password</label><br/>
-          <input 
-            type="password" 
-            name="password" 
-            value={formData.password} 
-            onChange={handleChange} 
-            required 
-          /><br/>
+          <Typography variant="h6">Email</Typography>
+          <TextField
+            fullWidth
+            margin="normal"
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            variant="outlined"
+          />
 
-          <label>Confirm</label><br/>
-          <input 
-            type="password" 
-            name="confirm" 
-            value={formData.confirm} 
-            onChange={handleChange} 
-            required 
-          /><br/>
+          <Typography variant="h6">Password</Typography>
+          <TextField
+            fullWidth
+            margin="normal"
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            variant="outlined"
+          />
 
-          <button 
-            className="auth-submit-button" 
-            type="submit" 
+          <Typography variant="h6">Confirm</Typography>
+          <TextField
+            fullWidth
+            margin="normal"
+            type="password"
+            name="confirm"
+            value={formData.confirm}
+            onChange={handleChange}
+            required
+            variant="outlined"
+          />
+
+          <Button
+            className="auth-submit-button"
+            type="submit"
+            variant="contained"
+            color="primary"
+            style={{ marginTop: '1rem' }}
             disabled={formData.password !== formData.confirm}
-          >Sign Up</button>
+          >
+            Sign Up
+          </Button>
         </form>
-      </div>
-      <FeedbackMessage error={formData.error} message={message}/>
-    </>
+      </CardContent>
+      <FeedbackMessage error={formData.error} message={message} />
+    </Card>
   );
 }

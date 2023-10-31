@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import Star from '@mui/icons-material/Star';
+import StarBorder from '@mui/icons-material/StarBorder';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
 import { TitleContext } from '../../components/TitleBar/TitleContext';
 import { useLoggedInUser } from '../../components/LoggedInUserContext/LoggedInUserContext';
 import "./ReadMainEssayPage.css"
@@ -113,15 +118,19 @@ export default function ReadMainEssayPage() {
             </div>
             <div className='article-container'>
                 { mainEssay?.bodyHTML && <div className='no-select' dangerouslySetInnerHTML={{__html: mainEssay.bodyHTML}}/>}
-                <div className="star-info">
-                    {loggedInUser && <img
-                        src={!essayIsStarred? greyStarIcon : starIcon}
-                        className="star-icon"
-                        alt="Star"
-                        onClick={!essayIsStarred ? () => handleStarEssay(mainEssay._id) : () => handleUnstarEssay(mainEssay._id)}
-                    />}
-                    <span className="num-stars">{numStars} star{numStars === 1 ? "" : "s"}</span>
-                </div>
+                <Box className="star-info" display="flex" alignItems="center">
+      {loggedInUser && 
+        <IconButton onClick={!essayIsStarred ? () => handleStarEssay(mainEssay._id) : () => handleUnstarEssay(mainEssay._id)}>
+          {!essayIsStarred ? 
+            <StarBorder color="action" /> :
+            <Star color="primary" />
+          }
+        </IconButton>
+      }
+      <Typography variant="body1" className="num-stars">
+        {numStars} star{numStars === 1 ? "" : "s"}
+      </Typography>
+    </Box>
 
                 <FeedbackMessage error={error} message={message} />
             </div>
