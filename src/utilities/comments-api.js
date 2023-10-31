@@ -6,8 +6,8 @@ export function postComment(comment){
     return sendRequest(BASE_URL, 'POST', comment)
 }
 
-export function getCommentsOn(contentType, contentId){
-    return sendRequest(`${BASE_URL}/on/${contentType}/${contentId}`);
+export function getComments(){
+    return sendRequest(`${BASE_URL}`);
 }
 
 export function getCommentsAwaitingApproval(){

@@ -2,20 +2,19 @@ import React, { useState } from 'react';
 import { postComment } from '../../utilities/comments-api';
 import { Button, TextField, Typography, Box, FormControl } from '@mui/material';
 
-function AddCommentForm({ entityType, entity }) {
+function AddCommentForm({parentCommentId, addCommentToList}) {
   const [text, setText] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await postComment({
-        entityType,
-        entityId: entity._id,
-        text
+        text,
+        parentCommentId
       });
       if (response && !response.error) {
         setText('');
-        //display modal
+        addCommentToList(response.data)
       } else {
         // Handle any errors, maybe show an error message to the user.
       }

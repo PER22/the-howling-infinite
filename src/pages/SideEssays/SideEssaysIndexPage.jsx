@@ -38,7 +38,7 @@ export default function SideEssaysIndexPage() {
   return (<>
     <>
       <div className="navigation-container">
-        {loggedInUser && loggedInUser.isAdmin && (
+        {loggedInUser?.isAdmin && (
           <Button
             component={RouterLink}
             to="/side-essays/new"

@@ -35,39 +35,39 @@ export default function HomePage() {
     fetchMainEssay();
   }, []);
 
-  const [sideEssays, setSideEssays] = useState([]);
-  useEffect(() => {
-    async function fetchSideEssays() {
-      try {
-        const response = await getSideEssayPreviews();
-        if (!response.error) { 
-          setSideEssays(response.data); 
-        }
-        else{
-          setError(response.error);
-        }
-      } catch (err) {
-        console.log("Error fetching side essays: ", err);
-      }
-    }
-    fetchSideEssays();
-  }, []);
+  // const [sideEssays, setSideEssays] = useState([]);
+  // useEffect(() => {
+  //   async function fetchSideEssays() {
+  //     try {
+  //       const response = await getSideEssayPreviews();
+  //       if (!response.error) { 
+  //         setSideEssays(response.data); 
+  //       }
+  //       else{
+  //         setError(response.error);
+  //       }
+  //     } catch (err) {
+  //       console.log("Error fetching side essays: ", err);
+  //     }
+  //   }
+  //   fetchSideEssays();
+  // }, []);
 
-  const [blogPosts, setBlogPosts] = useState([]);
-  useEffect(() => {
-    async function fetchBlogPosts() {
-      try {
-        const response = await getBlogPostPreviews();
-        if (!response.error) { setBlogPosts(response.data); }
-        else{
-          setError(response.error);
-        }
-      } catch (err) {
-        console.log("Error fetching blog posts: ", err);
-      }
-    }
-    fetchBlogPosts();
-  }, []);
+  // const [blogPosts, setBlogPosts] = useState([]);
+  // useEffect(() => {
+  //   async function fetchBlogPosts() {
+  //     try {
+  //       const response = await getBlogPostPreviews();
+  //       if (!response.error) { setBlogPosts(response.data); }
+  //       else{
+  //         setError(response.error);
+  //       }
+  //     } catch (err) {
+  //       console.log("Error fetching blog posts: ", err);
+  //     }
+  //   }
+  //   fetchBlogPosts();
+  // }, []);
 
 
   return (<>
@@ -87,12 +87,12 @@ export default function HomePage() {
     </p>
     <div id="card-container" className="content-card">
       {mainEssay && <ContentPreviewCard content={mainEssay} />}
-      {sideEssays.map(essay => (
+      {/* {sideEssays.map(essay => (
         <ContentPreviewCard key={essay._id} content={essay} type={"essay"} />
       ))}
       {blogPosts.map(post => (
         <ContentPreviewCard key={post._id} content={post} type={"blog"} />
-      ))}
+      ))} */}
 
     </div>
     <FeedbackMessage error={error} message={message} />

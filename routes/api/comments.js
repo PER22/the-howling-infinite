@@ -11,10 +11,7 @@ router.post('/', ensureLoggedIn, commentController.createComment);
 
 //Anonymous
 // GET route to comments associated with the entity ID
-router.get('/on/:entityType/:entityId', commentController.getCommentsByEntity);
-
-
-
+router.get('/', commentController.getComments);
 
 //AdminOnly
 // GET route to fetch all unapproved comments

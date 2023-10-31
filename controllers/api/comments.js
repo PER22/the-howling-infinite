@@ -1,42 +1,30 @@
 //controllers/comment.js:
 const commentModel = require('../../models/comment');
-const blogModel = require('../../models/blog');
-const essayModel = require('../../models/essay');
 
 async function createComment(req, res) {
   try {
-    const { text, entityType, entityId } = req.body;
-    if (!entityType || !entityId) {
-      return res.status(400).json({ error: "Both entityType and entityId are required." });
-    }
+    const { text, parentCommentId} = req.body;
+    
     if (!text) {
       return res.status(400).json({ error: "Comment text is required." });
     }
-    if (entityType !== 'Essay' && entityType !== 'Blog'){
-      return res.status(400).json({error: 'Invalid entity type'});
-    }
-    let modelToQuery;
-    if (entityType === 'Blog') {
-      modelToQuery = blogModel;
-    } else if (entityType === 'Essay') {
-      modelToQuery = essayModel;
-    } else {
-      return res.status(400).json({ error: 'Invalid entity type' });
-    }
-    const entity = await modelToQuery.findById(entityId);
-    if (!entity) {
-      return res.status(400).json({ error: `${entityType} does not exist` });         
-    }
 
+    if(parentCommentId){
+      const parentComment = await commentModel.findById(parentCommentId);
+      if(!parentComment){
+        return res.status(404).json({error: "Invalid parent comment."});
+      }
+    }
+  
+   
     const newComment = await commentModel.create({
       text,
       author : req.user._id,
-      entityType,
-      entityId,
-      isApproved: req.user.isAdmin
+      isApproved: req.user.isAdmin,
+      parent: parentCommentId || null
     });
 
-    return res.status(201).json(newComment);
+    return res.status(201).json({data: newComment});
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -45,7 +33,7 @@ async function createComment(req, res) {
 
 async function getCommentById(req, res) {
   try {
-    const requestedComment = commentModel.findById(req.params.commentId).populate("author");
+    const requestedComment = await commentModel.findById(req.params.commentId).populate("author");
     if (requestedComment) { return res.status(200).json(requestedComment); }
   } catch (err) {
     return res.status(200).json({ error: "Comment could not be located." });
@@ -53,11 +41,9 @@ async function getCommentById(req, res) {
   res.status(200).json({ message: 'Get comment by ID not implemented yet' });
 };
 
-async function getCommentsByEntity(req, res){
+async function getComments(req, res){
   try {
-    const entityType = req.params.entityType;
-    const entityId = req.params.entityId;
-    const requestedComments = await commentModel.find({entityType: entityType, entityId: entityId, isApproved: true}).populate("author");
+    const requestedComments = await commentModel.find({isApproved: true}).populate("author"); //TODO: Only show approved comments
     if (requestedComments) { 
       return res.status(200).json(requestedComments); 
     }
@@ -65,7 +51,7 @@ async function getCommentsByEntity(req, res){
       return [];
     }
   } catch (err) {
-    res.status(404).json("Failed to get comments by entity.");
+    res.status(404).json({error: "Failed to get comments by entity."});
   }
 }
 
@@ -101,13 +87,26 @@ async function updateCommentById(req, res) {
 async function deleteCommentById(req, res) {
   try {
     const commentToDelete = await commentModel.findById(req.params.commentId).populate('author');
-    
+
     if (commentToDelete) {
       if (req.user._id.toString() === commentToDelete.author._id.toString() || req.user.isAdmin) {
-        await commentToDelete.deleteOne();
-        return res.status(200).json({message: "Comment deleted!"});
-      }
-      else {
+
+        // Check for children of this comment
+        const childrenCount = await commentModel.countDocuments({ parent: commentToDelete._id });
+
+        if (childrenCount > 0) {
+          // If the comment has children, mark it as [deleted]
+          commentToDelete.text = "[deleted]";
+          await commentToDelete.save();
+
+          return res.status(200).json({ message: "Comment marked as [deleted]." });
+        } else {
+          // If the comment has no children, delete it
+          await commentToDelete.deleteOne();
+          return res.status(200).json({ message: "Comment deleted!" });
+        }
+
+      } else {
         return res.status(400).json({ error: "You can only delete comments you wrote, unless you are an administrator." });
       }
     } else {
@@ -119,6 +118,7 @@ async function deleteCommentById(req, res) {
     return res.status(400).json({ error: 'Error deleting comment by ID.' });
   }
 };
+
 
 // Fetch all unapproved comments
 async function getAllUnapprovedComments(req, res) {
@@ -154,5 +154,5 @@ module.exports = {
   deleteCommentById,
   getAllUnapprovedComments,
   approveCommentById, 
-  getCommentsByEntity
+  getComments
 };

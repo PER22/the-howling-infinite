@@ -2,7 +2,7 @@
 
 
 const EssayModel = require('../../models/essay');
-const CommentModel = require('../../models/comment');
+
 const { downloadFromS3, deleteFromS3, updateInS3, sanitizeTitleForS3 } = require('../../utilities/aws');
 const downsize = require("downsize");
 const cheerio = require('cheerio');
@@ -29,41 +29,30 @@ async function preCreateEssay(req, res, next) {
     }
 }
 
-function editImgSrc(oldHTML, postId) {
-    const $ = cheerio.load(oldHTML);
-    const finalImageKeys = [];
-    $('img').each((index, img) => {
-        const src = $(img).attr('src');
-        const fileName = src.split('/').pop();
-        const newSrc = `/api/images/essayimages-${postId}-${sanitizeTitleForS3(fileName)}`;
-        $(img).attr('src', newSrc);
-        finalImageKeys.push(`essayimages-${postId}-${sanitizeTitleForS3(fileName)}`)
-    });
-    return { html: $.html(), newImageKeys: finalImageKeys };
-}
 
 function replaceQuoteEntity(oldHtml) {
     return oldHtml.replace(`/&quot;/g`, '"');
 }
 
 function replaceSegoe(startHTML) {
-    const $ = cheerio.load(startHTML);
+    let replacedHTML = startHTML.replace(/Segoe Print/g, 'Patrick Hand');
+    replacedHTML = replacedHTML.replace(/Quattrocento Sans/g, "Patrick Hand")
+    return replacedHTML;
+}
 
-    // Find elements with "Segoe Print" as their font-family and replace it
-    $("span[style*='font-family:\"Segoe Print\"']").each((index, element) => {
-        const $element = $(element);
-        const originalStyle = $element.attr('style');
-        const newStyle = originalStyle.replace(/font-family:"Segoe Print"/, 'font-family:"Patrick Hand", cursive');
-        $element.attr('style', newStyle);
-    });
-
-    // Get the modified HTML
-    const modifiedHtml = $.html();
-    return modifiedHtml;
+function resetMargins(htmlContent){
+    htmlContent = htmlContent.replace(/margin-left:.5in/g, "");
+    htmlContent = htmlContent.replace(/margin-left:-.5in/g, "");
+    htmlContent = htmlContent.replace(/margin-right:.5in/g, "");
+    htmlContent = htmlContent.replace(/margin-right:-.5in/g, "");
+    return htmlContent;
 }
 
 function addTextAligments(htmlContent) {
-    const $ = cheerio.load(htmlContent);
+    const $ = cheerio.load(htmlContent, {
+        decodeEntities: false,
+        encodeEntities: false
+    });
 
     // For each <p> element with the class MsoNormal
     $('p.MsoNormal').each((index, element) => {
@@ -81,26 +70,43 @@ function addTextAligments(htmlContent) {
             $el.addClass('centered-text');
         }
     });
-    return $.html();
+    return $('body').html();
 }
 
-function removeHead(htmlContent) {
-    const $ = cheerio.load(htmlContent);
-    const bodyContent = $('body').html();
-    return bodyContent;
-}
-
-function resetNegativeMargins(htmlContent){
-    return htmlContent.replace(/margin-(left|right):[^;]+;/g, '');
+function editImgSrc(oldHTML, postId) {
+    const $ = cheerio.load(oldHTML, {
+        decodeEntities: false,
+        encodeEntities: false
+    });
+    const finalImageKeys = [];
+    $('img').each((index, img) => {
+        const src = $(img).attr('src');
+        const fileName = src.split('/').pop();
+        const newSrc = `/api/images/essayimages-${postId}-${sanitizeTitleForS3(fileName)}`;
+        $(img).attr('src', newSrc);
+        finalImageKeys.push(`essayimages-${postId}-${sanitizeTitleForS3(fileName)}`)
+    });
+    return { html: $('body').html(), newImageKeys: finalImageKeys };
 }
 
 async function formatEssay(originalHTML, essayId) {
-    const headlessHTML = await removeHead(originalHTML);
-    const entitiesReplacedHTML = await replaceQuoteEntity(headlessHTML);
+    // console.log("Original HTML:")
+    // console.log(originalHTML);
+    const entitiesReplacedHTML = await replaceQuoteEntity(originalHTML);
+    // console.log("After quote entity replaced:");
+    // console.log(entitiesReplacedHTML);
     const changedFontHTML = await replaceSegoe(entitiesReplacedHTML);
-    const noNegativeMarginsHTML = await resetNegativeMargins( changedFontHTML);
+    // console.log("After font changed: ");
+    // console.log(changedFontHTML);
+    const noNegativeMarginsHTML = await resetMargins( changedFontHTML);
+    // console.log("After negative margins replaced:");
+    // console.log(noNegativeMarginsHTML);
     const alignedHTML = await addTextAligments(noNegativeMarginsHTML);
+    // console.log("After text alignments replaced:");
+    // console.log(alignedHTML);
     const imagesKeysAndHTML = await editImgSrc(alignedHTML, essayId);
+    // console.log("After image src's replaced:");
+    // console.log(imagesKeysAndHTML.html);
     return imagesKeysAndHTML;
 }
 
@@ -393,7 +399,6 @@ async function deleteEssayById(req, res) {
         for (const imgKey of essayToDelete.inlineImagesS3Keys) {
             await deleteFromS3(imgKey);
         }
-        await CommentModel.deleteMany({ entityType: "Essay", entityId: essayToDelete._id });
         await essayToDelete.deleteOne();
         res.status(200).json({ message: 'Content deleted successfully' });
     } catch (error) {

@@ -1,19 +1,27 @@
 import { Card, CardContent, Typography, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
 import { deleteCommentById } from "../../utilities/comments-service";
 import { useLoggedInUser } from "../LoggedInUserContext/LoggedInUserContext";
 
-export default function CommentCard({ comment, removeCardFromUI }) {
+export default function CommentCard({ comment, deleteInUI, setParentCommentId }) {
   const { loggedInUser, setLoggedInUser } = useLoggedInUser();
 
   const handleDelete = async () => {
     try {
-      await deleteCommentById(comment._id);
-      removeCardFromUI(comment._id);
+      const response = await deleteCommentById(comment._id);
+      if(!response.error){
+        console.log("in theory no errors?");
+        deleteInUI(comment._id);
+      }
     } catch (err) {
-      // Handle error if needed.
+      console.log("Error deleting comment.");
     }
   };
+
+  const handleReplyClick = () => {
+    setParentCommentId(comment._id);
+  }
 
   return (
     <Card elevation={3} className="comment-card" sx={{ marginBottom: '1rem', width: '100%' }}>
@@ -27,7 +35,12 @@ export default function CommentCard({ comment, removeCardFromUI }) {
         <Typography variant="caption" className="comment-timestamp">
           {new Date(comment.createdAt).toLocaleString()}
         </Typography>
-        {((loggedInUser?._id === comment.author._id) || (loggedInUser.isAdmin)) && 
+        {loggedInUser &&
+          <IconButton size="small" onClick={handleReplyClick}sx={{ alignSelf: 'flex-end' }}>
+            <AddIcon fontSize="inherit"/>
+          </IconButton>
+        }
+        {((loggedInUser?._id === (comment.author._id || comment.author)) || (loggedInUser?.isAdmin)) &&
           <IconButton size="small" onClick={handleDelete} sx={{ alignSelf: 'flex-end' }}>
             <DeleteIcon fontSize="inherit" />
           </IconButton>

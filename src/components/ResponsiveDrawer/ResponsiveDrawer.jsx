@@ -47,8 +47,9 @@ export default function ResponsiveDrawer() {
       {[
         { name: 'Home', path: '/' },
         { name: 'The Howling Infinite', path: '/read' },
-        { name: 'Side Essays', path: '/side-essays' },
-        { name: 'Blog', path: '/blog' },
+        // { name: 'Side Essays', path: '/side-essays' },
+        // { name: 'Blog', path: '/blog' },
+        { name: 'Discussion', path: '/discuss' },
         { name: 'About', path: '/about' },
         { name: 'Contact', path: '/contact' },
       ].map((item) => (

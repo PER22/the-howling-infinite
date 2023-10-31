@@ -3,9 +3,6 @@ import { Link as RouterLink } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import { TitleContext } from '../../components/TitleBar/TitleContext';
 import { useLoggedInUser } from '../../components/LoggedInUserContext/LoggedInUserContext';
-import parse from 'html-react-parser';
-import AddCommentForm from '../../components/CommentSection/AddCommentForm';
-import CommentDisplaySection from '../../components/CommentSection/CommentDisplaySection';
 import "./ReadMainEssayPage.css"
 import { getCommentsOn } from '../../utilities/comments-service';
 import FeedbackMessage from '../../components/FeedbackMessage/FeedbackMessage';
@@ -80,27 +77,7 @@ export default function ReadMainEssayPage() {
       }, [mainEssay]);
 
 
-    const [comments, setComments] = useState([]);
-    useEffect(() => {
-        const fetchPostComments = async () => {
-            try {
-                if (mainEssay) {
-                    const tempComments = await getCommentsOn("Essay", mainEssay._id);
-                    console.log("tempComments;", tempComments);
-                    if (!tempComments.error) {
-                        if (Array.isArray(tempComments.data)) {
-                            setComments(tempComments.data);
-                        } else {
-                            console.log('API did not return an array for comments:', tempComments);
-                        }
-                    }
-                }
-            } catch (error) {
-            }
-        };
-        fetchPostComments();
-    }, [mainEssay]);
-
+    
     useEffect(() => {
         async function fetchMainEssay() {
             try {
@@ -122,7 +99,7 @@ export default function ReadMainEssayPage() {
     return (
         <>
             <div className="navigation-container">
-            {loggedInUser && loggedInUser.isAdmin && (
+            {loggedInUser?.isAdmin && (
         <Button 
           component={RouterLink} 
           to="/edit" 
@@ -145,9 +122,7 @@ export default function ReadMainEssayPage() {
                     />}
                     <span className="num-stars">{numStars} star{numStars === 1 ? "" : "s"}</span>
                 </div>
-                <CommentDisplaySection comments={comments} setComments={setComments} />
 
-                {loggedInUser ? <AddCommentForm entity={mainEssay} entityType='Essay'/> : <p>Log in to leave a comment.</p>}
                 <FeedbackMessage error={error} message={message} />
             </div>
         </>

@@ -2,16 +2,16 @@
 import * as commentAPI from './comments-api'
 
 
-export async function getCommentsOn(contentType, contentId){
+export async function getComments(){
     try{
-        const comments = await commentAPI.getCommentsOn(contentType, contentId);
+        const comments = await commentAPI.getComments();
         if(!comments.error) {
             return {data: comments, error: null};
         }
         return {data : null, error: comments.error};
     }catch(err){
-        console.log(`Failed to comments on ${contentType}: ${contentId} :`, err);
-        return {data: null, error: `Failed to comments on ${contentType}: ${contentId} :`};
+        console.log(`Failed to get comments :`, err);
+        return {data: null, error: `Failed to get comments:`};
     }
 }
 

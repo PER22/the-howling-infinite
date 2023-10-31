@@ -3,10 +3,7 @@ import { TitleContext } from '../../../components/TitleBar/TitleContext';
 import { useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { useLoggedInUser } from '../../../components/LoggedInUserContext/LoggedInUserContext';
-import AddCommentForm from '../../../components/CommentSection/AddCommentForm';
-import CommentDisplaySection from '../../../components/CommentSection/CommentDisplaySection';
 import "./BlogPostDetailPage.css"
-import { getCommentsOn } from '../../../utilities/comments-service'; //TODO: this should be routed through the service.
 import { getBlogPostById, starPostById, unstarPostById } from '../../../utilities/blog-service';
 import FeedbackMessage from '../../../components/FeedbackMessage/FeedbackMessage';
 
@@ -101,25 +98,6 @@ export default function BlogPostDetailPage() {
     fetchPost();
   }, [postId]);
 
-  const [comments, setComments] = useState([]);
-  useEffect(() => {
-    const fetchPostComments = async () => {
-      try {
-        if (post) {
-          const tempComments = await getCommentsOn("Blog", post._id);
-          console.log("tempComments;", tempComments);
-          if (!tempComments.error) {
-            if (Array.isArray(tempComments.data)) {
-              setComments(tempComments.data);
-            }
-          }
-        }
-      } catch (error) {
-      }
-    };
-    fetchPostComments();
-  }, [post]);
-
 
   if (loading) {
     return <p>Loading...</p>;
@@ -145,8 +123,6 @@ export default function BlogPostDetailPage() {
             />}
             <span className="num-stars">{numStars} star{numStars !== 1 ? "s" : ""}</span>
           </div>
-          <CommentDisplaySection comments={comments} setComments={setComments} />
-          {loggedInUser ? <AddCommentForm entity={post} entityType='Blog' /> : <p>Log in to leave a comment.</p>}
           <FeedbackMessage error={error} message={message}/>
         </>}
     </>

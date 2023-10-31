@@ -18,15 +18,12 @@ const commentSchema = new Schema({
     ref: 'User',
     required: true
   },
-  entityType: { 
-    type: String, 
-    enum: ["Blog", "Essay"], 
-    required: true 
-  },
-  entityId: { 
-    type: Schema.Types.ObjectId, 
-    required: true 
+  parent: {
+    type: Schema.Types.ObjectId,
+    ref: "Comment",
+    default: null
   }
+
 },
   {
     timestamps: true

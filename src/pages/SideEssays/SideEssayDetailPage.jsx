@@ -112,7 +112,7 @@ export default function SideEssayDetailPage() {
     <>{sideEssay && (
       <>
         <div className="navigation-container">
-          {loggedInUser && loggedInUser.isAdmin && <Link to={`/side-essays/${sideEssay._id}/edit`} className="edit-content-button">Edit This Essay</Link>}
+          {loggedInUser?.isAdmin && <Link to={`/side-essays/${sideEssay._id}/edit`} className="edit-content-button">Edit This Essay</Link>}
 
         </div>
         <div dangerouslySetInnerHTML={{ __html: sideEssay.bodyHTML }} />

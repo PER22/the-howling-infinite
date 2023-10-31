@@ -39,7 +39,7 @@ export default function AllBlogPostsPage() {
   return (
     <>
       <div className="navigation-container">
-      {loggedInUser && loggedInUser.isAdmin && (
+      {loggedInUser?.isAdmin && (
           <Button
             component={RouterLink}
             to="/blog/new"
