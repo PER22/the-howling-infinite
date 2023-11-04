@@ -8,7 +8,6 @@ export default function SignUpForm(){
   const navigate = useNavigate();
   const [formData, setFormData] = useState ({
     name: '',
-    username: '',
     email: '',
     password: '',
     confirm: '',
@@ -21,7 +20,6 @@ export default function SignUpForm(){
     try {
       const form = {
         name: formData.name,
-        username: formData.username,
         email: formData.email,
         password: formData.password
       };
@@ -64,18 +62,6 @@ export default function SignUpForm(){
             type="text"
             name="name"
             value={formData.name}
-            onChange={handleChange}
-            required
-            variant="outlined"
-          />
-
-          <Typography variant="h6">Username</Typography>
-          <TextField
-            fullWidth
-            margin="normal"
-            type="text"
-            name="username"
-            value={formData.username}
             onChange={handleChange}
             required
             variant="outlined"

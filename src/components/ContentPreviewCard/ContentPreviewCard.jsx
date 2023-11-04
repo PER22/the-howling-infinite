@@ -29,8 +29,8 @@ export default function ContentPreviewCard({ content , type}) {
                     alt="Cover Image"
                     className='essay-cover-image'
                     sx={{
-                        width: '10rem',
-                        height: '10rem',
+                        width: '16rem',
+                        height: '16rem',
                         objectFit: 'cover',
                         objectPosition: 'center'
                     }}

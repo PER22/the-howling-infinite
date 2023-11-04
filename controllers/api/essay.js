@@ -140,7 +140,7 @@ async function postCreateEssay(req, res) {
             });
             const modifiedHtmlContent = imagesKeysAndHTML.html;
             await updateInS3(htmlS3Key, modifiedHtmlContent);
-            preview = downsize(modifiedHtmlContent, { words: 20, append: "..." });
+            preview = downsize(modifiedHtmlContent, { words: 20});
         }
         req.entity.title = req.body.title
         req.entity.isMain = req.body.isMain
@@ -287,7 +287,7 @@ async function postUpdateMainEssay(req, res) {
             await updateInS3(newHtmlS3Key, modifiedHtmlContent);
 
             // Update the preview
-            preview = downsize(modifiedHtmlContent, { words: 20, append: "..." });
+            preview = downsize(modifiedHtmlContent, { words: 20});
         }
 
         // Update the main essay's title if provided
@@ -367,7 +367,7 @@ async function postUpdateSideEssay(req, res) {
             await updateInS3(newHtmlS3Key, modifiedHtmlContent);
 
             // Update the preview
-            preview = downsize(modifiedHtmlContent, { words: 20, append: "..." });
+            preview = downsize(modifiedHtmlContent, { words: 20});
         }
 
         // Update the main essay's title if provided

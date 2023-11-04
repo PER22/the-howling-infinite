@@ -47,7 +47,7 @@ async function postCreateBlogPost(req, res) {
         newPost.title = title;
         newPost.htmlS3Key = htmlS3Key;    
         newPost.coverPhotoS3Key = coverPhotoS3Key;
-        newPost.preview = downsize(req.body.bodyText , {words: 20, append: "..."});
+        newPost.preview = downsize(req.body.bodyText , {words: 20});
         await newPost.save();
         res.status(201).json(newPost);
     } catch (error) {
@@ -123,7 +123,7 @@ async function postUpdateBlogPost(req, res) {
         }        
         if (bodyText) {
             await updateInS3(blogPost.htmlS3Key, bodyText);
-            blogPost.preview = downsize(bodyText , {words: 20, append: "..."});
+            blogPost.preview = downsize(bodyText , {words: 20});
         }
         await blogPost.save();
         res.status(200).json(blogPost);

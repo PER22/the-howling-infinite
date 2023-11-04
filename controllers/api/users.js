@@ -7,13 +7,6 @@ const { body, validationResult } = require('express-validator');
 
 const validateAndSanitizeSignup = [
   body('name').notEmpty().trim().escape(),
-  body('username').notEmpty().trim().escape().custom(async (value) => {
-    const existingUser = await User.findOne({ username: value });
-    if (existingUser) {
-      return Promise.reject('Username already exists');
-    }
-    return true;
-  }),
   body('email').isEmail().normalizeEmail().custom(
     async (value) => {
       const existingEmail = await User.findOne({ email: value });
