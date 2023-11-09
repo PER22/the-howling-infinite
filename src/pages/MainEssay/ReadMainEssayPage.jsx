@@ -81,7 +81,6 @@ export default function ReadMainEssayPage() {
         setNumStars(mainEssay && mainEssay.numStars);
       }, [mainEssay]);
 
-
     
     useEffect(() => {
         async function fetchMainEssay() {

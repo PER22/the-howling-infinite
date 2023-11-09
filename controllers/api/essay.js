@@ -34,18 +34,14 @@ function replaceQuoteEntity(oldHtml) {
     return oldHtml.replace(`/&quot;/g`, '"');
 }
 
+function insertPrelude1(oldHTML){
+    return oldHTML.replace(`<p class=MsoNormal style='margin-bottom:0in'>!!!PRELUDE!!!</p>`, '<iframe width="560" class="center-aligned-text" height="315" src="https://www.youtube-nocookie.com/embed/rroFw2rnqQk?si=9-0QufQ1SSyEleg1" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>');
+}
+
 function replaceSegoe(startHTML) {
     let replacedHTML = startHTML.replace(/Segoe Print/g, 'Patrick Hand');
     replacedHTML = replacedHTML.replace(/Quattrocento Sans/g, "Patrick Hand")
     return replacedHTML;
-}
-
-function resetMargins(htmlContent){
-    htmlContent = htmlContent.replace(/margin-left:.5in/g, "");
-    htmlContent = htmlContent.replace(/margin-left:-.5in/g, "");
-    htmlContent = htmlContent.replace(/margin-right:.5in/g, "");
-    htmlContent = htmlContent.replace(/margin-right:-.5in/g, "");
-    return htmlContent;
 }
 
 function addTextAligments(htmlContent) {
@@ -98,10 +94,10 @@ async function formatEssay(originalHTML, essayId) {
     const changedFontHTML = await replaceSegoe(entitiesReplacedHTML);
     // console.log("After font changed: ");
     // console.log(changedFontHTML);
-    const noNegativeMarginsHTML = await resetMargins( changedFontHTML);
+    const preludeAddedHTML = await insertPrelude1(changedFontHTML);
     // console.log("After negative margins replaced:");
     // console.log(noNegativeMarginsHTML);
-    const alignedHTML = await addTextAligments(noNegativeMarginsHTML);
+    const alignedHTML = await addTextAligments(preludeAddedHTML);
     // console.log("After text alignments replaced:");
     // console.log(alignedHTML);
     const imagesKeysAndHTML = await editImgSrc(alignedHTML, essayId);

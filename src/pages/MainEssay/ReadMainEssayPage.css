@@ -1,3 +1,8 @@
 .centered-text *, .centered-text{
     text-align: center;
 }
+
+iframe {
+    margin: 0 auto;
+    display: block;
+}
