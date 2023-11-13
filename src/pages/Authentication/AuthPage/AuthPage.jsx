@@ -1,5 +1,6 @@
 //AuthPage.jsx:
 import { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Container, Typography, Button } from '@mui/material';
 import { TitleContext } from '../../../components/TitleBar/TitleContext';
 import LoginForm from '../../../components/LoginForm/LoginForm';
@@ -13,6 +14,8 @@ export default function AuthPage() {
         if(showLogin ){setTitle("Log In");}
         else{setTitle("Sign Up");} 
     }, [showLogin, setTitle]);
+
+    const navigate = useNavigate();
   
     return (
       <Container className="auth-page" maxWidth="sm">
@@ -25,7 +28,7 @@ export default function AuthPage() {
         </Typography>
 {showLogin && (
         <Typography align="center" style={{ margin: '1rem 0' }}>
-          <Button color="primary" variant='contained' onClick={() => setShowLogin(!showLogin)}>
+          <Button color="primary" variant='contained' onClick={()=>{navigate("/request-password-reset");}}>
             Reset Password
           </Button>
         </Typography>)

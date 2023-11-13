@@ -168,8 +168,8 @@ async function sendPasswordResetEmail(req, res){
       "From": "preil001@ucr.edu",
       "To": `${req.body.email}`,
       "Subject": "Password Reset from The-Howling-Infinite.com",
-      "HtmlBody": `Here is your password reset link: <a href="http://localhost:3000/reset-password?token=${resetToken}">Reset Password</a>`,
-      "TextBody": `Copy and paste this link into your URL bar to reset your password: http://localhost:3000/reset-password?token=${resetToken}`,
+      "HtmlBody": `Here is your password reset link: <a href="http://www.the-howling-infinite.com/reset-password?token=${resetToken}">Reset Password</a>`,
+      "TextBody": `Copy and paste this link into your URL bar to reset your password: http://www.the-howling-infinite.com/reset-password?token=${resetToken}`,
       "MessageStream": "outbound"
     });
     return res.status(200).json("Successfully sent password reset email.")
