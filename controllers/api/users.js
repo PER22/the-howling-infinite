@@ -155,7 +155,7 @@ async function sendPasswordResetEmail(req, res){
     console.log(req.body);
     const user = await User.findOne({email : req.body.email});
     if(!user){
-      return res.status(40).json({error: `User with email address '${req.body.email}' not found.`});
+      return res.status(404).json({error: `User with email address '${req.body.email}' not found.`});
     }
     const resetToken = crypto.randomBytes(32).toString('hex');
     const expirationTime = new Date();
@@ -166,7 +166,7 @@ async function sendPasswordResetEmail(req, res){
 
     var client = new postmark.ServerClient(process.env.POSTMARK_KEY);
     await client.sendEmail({
-      "From": "preil001@ucr.edu",
+      "From": "patrick@blackcatweb.dev",
       "To": `${req.body.email}`,
       "Subject": "Password Reset from The-Howling-Infinite.com",
       "HtmlBody": `Here is your password reset link: <a href="http://www.the-howling-infinite.com/reset-password?token=${resetToken}">Reset Password</a>`,
@@ -175,6 +175,7 @@ async function sendPasswordResetEmail(req, res){
     });
     return res.status(200).json({message: "Successfully sent password reset email."});
   }catch(err){
+    console.log(err);
     return res.status(500).json({error: err});
   }
 }
