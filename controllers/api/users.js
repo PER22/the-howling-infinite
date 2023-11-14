@@ -154,7 +154,7 @@ async function sendPasswordResetEmail(req, res){
   try{
     const user = await User.findOne({email : req.body.email});
     if(!user){
-      return res.status(404).json({error: `User with email address '${req.body.email}' not found.`});
+      return res.status(409).json({error: `User with email address '${req.body.email}' not found.`});
     }
     const resetToken = crypto.randomBytes(32).toString('hex');
     const expirationTime = new Date();
@@ -172,7 +172,7 @@ async function sendPasswordResetEmail(req, res){
       "TextBody": `Copy and paste this link into your URL bar to reset your password: http://www.the-howling-infinite.com/reset-password?token=${resetToken}`,
       "MessageStream": "outbound"
     });
-    return res.status(200).json("Successfully sent password reset email.")
+    return res.status(200).json({message: "Successfully sent password reset email."});
   }catch(err){
     return res.status(500).json({error: err});
   }
@@ -186,7 +186,7 @@ async function performPasswordReset(req, res){
     const user = await User.findOne({ passwordResetToken: token });
 
     if (!user) {
-      return res.status(400).send('Invalid token.');
+      return res.status(400).json({error:'Invalid token.'});
     }
 
     // Check if token is expired
@@ -196,6 +196,7 @@ async function performPasswordReset(req, res){
     }
 
     // Hash the new password
+    console.log("New password:", newPassword);
     user.password = await bcrypt.hash(newPassword, user.SALT_ROUNDS || 6);
 
     // Clear the reset token and expiration date
@@ -206,11 +207,11 @@ async function performPasswordReset(req, res){
     await user.save();
 
     // Send a success response
-    res.status(200).send('Password has been reset successfully.');
+    res.status(200).send({message:'Password has been reset successfully.'});
 
   } catch (error) {
     console.error(error);
-    res.status(500).send('An error occurred while resetting the password.');
+    res.status(500).send({error: 'An error occurred while resetting the password.'});
   }
 };
 
