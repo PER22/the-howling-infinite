@@ -152,9 +152,10 @@ function createJWT(user) {
 
 async function sendPasswordResetEmail(req, res){
   try{
+    console.log(req.body);
     const user = await User.findOne({email : req.body.email});
     if(!user){
-      return res.status(409).json({error: `User with email address '${req.body.email}' not found.`});
+      return res.status(40).json({error: `User with email address '${req.body.email}' not found.`});
     }
     const resetToken = crypto.randomBytes(32).toString('hex');
     const expirationTime = new Date();
@@ -192,13 +193,13 @@ async function performPasswordReset(req, res){
     // Check if token is expired
     const now = new Date();
     if (user.passwordResetExpires < now) {
-      return res.status(400).send('Token has expired.');
+      return res.status(400).send({error:'Token has expired.'});
     }
 
     // Hash the new password
     console.log("New password:", newPassword);
     user.password = await bcrypt.hash(newPassword, user.SALT_ROUNDS || 6);
-
+    
     // Clear the reset token and expiration date
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
