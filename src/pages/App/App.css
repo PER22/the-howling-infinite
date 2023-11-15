@@ -21,7 +21,7 @@ a, a:visited {
   
   .content {
     flex-grow: 1;
-    width: 80%;
+    width: 80rem;
     margin: 0 auto;
   }
   
