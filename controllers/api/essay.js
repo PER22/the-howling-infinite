@@ -35,7 +35,7 @@ function replaceQuoteEntity(oldHtml) {
 }
 
 function insertPrelude1(oldHTML){
-    return oldHTML.replace(`<p class=MsoNormal style='margin-bottom:0in'>!!!PRELUDE!!!</p>`, '<iframe width="560" class="center-aligned-text" height="315" src="https://www.youtube.com/embed/WTuLCWCbuq0?si=SCNdEPqMmJ8_d538" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>');
+    return oldHTML.replace(`!!!PRELUDE!!!`, '<iframe width="560" class="center-aligned-text" height="315" src="https://www.youtube.com/embed/WTuLCWCbuq0?si=SCNdEPqMmJ8_d538" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>');
 }
 
 function replaceSegoe(startHTML) {
