@@ -113,6 +113,7 @@ const validateAndSanitizeLogin = [
 ];
 
 async function login(req, res) {
+  console.log("Entering login()");
   try {
     // Validate and sanitize the login form data
     await Promise.all(validateAndSanitizeLogin.map((middleware) => middleware.run(req)));
@@ -126,6 +127,7 @@ async function login(req, res) {
     // Find the user by their email address
     const user = await User.findOne({email: req.body.email});
     if (!user){ 
+      console.log("User not found.");
       return res.status(401).json({error: "User not found."});
     }
     if(!user.isVerified){
@@ -133,6 +135,7 @@ async function login(req, res) {
     }
     // Check if the password matches
     const match = await bcrypt.compare(req.body.password, user.password);
+    console.log("req.body.password: ", req.body.password);
     if (!match) {
       return res.status(403).json({error: "Password doesn't match."});
     }
@@ -151,12 +154,15 @@ function createJWT(user) {
 }
 
 async function sendPasswordResetEmail(req, res){
+  console.log("Entering sendPasswordResetEmail()");
   try{
-    console.log(req.body);
+    console.log("req.body", req.body);
     const user = await User.findOne({email : req.body.email});
     if(!user){
+      console.log("User not found.");
       return res.status(404).json({error: `User with email address '${req.body.email}' not found.`});
     }
+
     const resetToken = crypto.randomBytes(32).toString('hex');
     const expirationTime = new Date();
     expirationTime.setHours(expirationTime.getHours() + 1); // token valid for 1 hour
@@ -181,32 +187,39 @@ async function sendPasswordResetEmail(req, res){
 }
 
 async function performPasswordReset(req, res){
+  console.log("Entering performPasswordReset()");
   const { token, newPassword } = req.body;
+  console.log("req.body:", req.body);
 
   try {
     // Find the user by reset token
     const user = await User.findOne({ passwordResetToken: token });
 
     if (!user) {
+      console.log("Failed to find user");
       return res.status(400).json({error:'Invalid token.'});
-    }
+    } 
+    console.log("Found the requested user!");
 
     // Check if token is expired
     const now = new Date();
     if (user.passwordResetExpires < now) {
+      console.log("Token is expired");
       return res.status(400).send({error:'Token has expired.'});
     }
 
     // Hash the new password
-    console.log("New password:", newPassword);
-    user.password = await bcrypt.hash(newPassword, user.SALT_ROUNDS || 6);
-    
+    console.log("New password! :", newPassword);
+    console.log("Old password hash:", user.password);
+    user.password = newPassword;
+    console.log("New password hash:", user.password);
     // Clear the reset token and expiration date
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
-
+    console.log("Cleared reset token from user document!")
     // Save the updated user back to the database
     await user.save();
+    console.log("Saved user document!");
 
     // Send a success response
     res.status(200).send({message:'Password has been reset successfully.'});
