@@ -39,8 +39,8 @@ function insertPrelude1(oldHTML){
 }
 
 function replaceSegoe(startHTML) {
-    let replacedHTML = startHTML.replace(/Segoe Print/g, 'Patrick Hand');
-    replacedHTML = replacedHTML.replace(/Quattrocento Sans/g, "Patrick Hand")
+    let replacedHTML = startHTML.replace(/Segoe Print/g, 'Satisfy');
+    replacedHTML = replacedHTML.replace(/Quattrocento Sans/g, 'Satisfy')
     return replacedHTML;
 }
 

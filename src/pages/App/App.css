@@ -10,6 +10,8 @@ a, a:visited {
     color: red;
 }
 
+p{margin-bottom: .6rem;}
+
 
 
 .App {
@@ -21,7 +23,7 @@ a, a:visited {
   
   .content {
     flex-grow: 1;
-    width: 40rem;
+    width: 35rem;
     margin: 0 auto;
   }
   
