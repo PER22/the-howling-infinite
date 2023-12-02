@@ -255,11 +255,6 @@ async function postUpdateMainEssay(req, res) {
     try {
         // Grab essay document
         const mainEssay = req.entity;
-        console.log("Hit postUpdateEssay");
-        // Check authorship against the requesting user
-        if (req.user._id.toString() !== mainEssay.author.toString()) {
-            return res.status(403).json({ error: "You don't have permission to edit the main essay." });
-        }
         mainEssay.coverPhotoS3Key = req.files.coverPhoto[0].key;
 
         // Process HTML file if uploaded
@@ -335,10 +330,6 @@ async function postUpdateSideEssay(req, res) {
         // Grab essay document
         const essay = req.entity;
 
-        // Check authorship against the requesting user
-        if (req.user._id.toString() !== essay.author.toString()) {
-            return res.status(403).json({ error: "You don't have permission to edit the main essay." });
-        }
         essay.coverPhotoS3Key = req.files.coverPhoto[0].key;
 
         // Process HTML file if uploaded
@@ -386,9 +377,6 @@ async function deleteEssayById(req, res) {
         const essayToDelete = await EssayModel.findById(req.params.essayId);
         if (!essayToDelete) {
             return res.status(404).json({ error: 'Essay not found.' });
-        }
-        if ((req.user._id !== essayToDelete.author.toString()) || !req.user.isAdmin) {
-            return res.status(403).json({ error: "You don't have permission to delete this content." });
         }
         await deleteFromS3(essayToDelete.htmlS3Key);
         if (essayToDelete.coverPhotoS3Key) { await deleteFromS3(essayToDelete.coverPhotoS3Key); }

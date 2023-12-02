@@ -112,9 +112,6 @@ async function postUpdateBlogPost(req, res) {
         if (!blogPost) {
             return res.status(404).json({ error: 'Blog post not found.' });
         }
-        if(req.user._id !== blogPost.author.toString()){
-            return res.status(403).json({ error: "You don't have permission to edit this blog post."});
-        }
         if (title) {
             blogPost.title = title;
         }
@@ -139,9 +136,6 @@ async function deleteBlogPostById(req, res) {
         const blogPost = await BlogModel.findById(req.params.postId);
         if (!blogPost) {
             return res.status(404).json({ error: 'Post not found.' });
-        }
-        if(req.user._id.toString() !== blogPost.author.toString()){
-            return res.status(403).json({ error: "You don't have permission to delete this content."});
         }
         if(blogPost.coverPhotoS3Key){await deleteFromS3(blogPost.coverPhotoS3Key);}
         await blogPost.deleteOne();
