@@ -57,22 +57,7 @@ const uploadFiles = multer({
           cb(null, {fieldName: file.fieldname});
       },
       key: function (req, file, cb) {
-        let folder = '';
-        if (file.fieldname === 'pdf') {
-          folder = 'pdfs';
-        } else if (file.fieldname === 'coverPhoto' || file.fieldname === 'image') {
-          folder = 'coverimages';
-          console.log("MulterS3: found a coverPhoto");
-        }
-        else if (file.fieldname === 'html') {
-          folder = 'html';
-        }
-        else if (file.fieldname === 'folderFiles') {
-          folder = 'essayimages';
-        }
-        console.log("uploadFiles(): req.entity._id.toString():", req.entity._id.toString());
-        const entityId = req.entity._id.toString();
-        cb(null, `${folder}-${entityId}-${sanitizeTitleForS3(file.originalname)}`);
+        cb(null, `${req.folderName}/${sanitizeTitleForS3(file.originalname)}`);
     }
   })
 });

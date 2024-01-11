@@ -5,12 +5,10 @@ const essayController = require('../../controllers/api/essay');
 const ensureLoggedIn = require('../../config/ensureLoggedIn');
 const adminOnly = require('../../config/adminOnly');
 const { uploadFiles } = require('../../utilities/aws');
-const essay = require('../../models/essay');
 
 //Anonymous
 // MAIN ESSAYS:
-// GET /api/essays
-router.get("/mainEssayPreview", essayController.getMainEssayPreview);
+
 
 //Anonymous
 // GET /api/essays
@@ -19,17 +17,16 @@ router.get('/', essayController.getMainEssay);
 
 //Admin only
 // POST /api/essays
-router.post('/', ensureLoggedIn, adminOnly,essayController.preCreateEssay, uploadFiles.fields([
+router.post('/', ensureLoggedIn, adminOnly, essayController.getDate, uploadFiles.fields([
     {name: 'coverPhoto', maxCount: 1},
-    {name: 'html', maxCount: 1},
-    {name: 'folderFiles'}
-  ]), essayController.postCreateEssay);
+    {name: 'pdfs'},
+  ]), essayController.createEssay);
 
 //Admin only
 // PUT /api/essays/mainEssay
 router.put('/', ensureLoggedIn, adminOnly, essayController.preUpdateMainEssay, uploadFiles.fields([
   {name: 'coverPhoto', maxCount: 1},
-  {name: 'html', maxCount: 1},
+  {name: 'pdfs', maxCount: 1},
   {name: 'folderFiles'}
 ]), essayController.postUpdateMainEssay);
 

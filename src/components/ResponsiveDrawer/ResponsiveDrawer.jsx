@@ -89,7 +89,7 @@ export default function ResponsiveDrawer() {
         anchor={drawerAnchor}
         open={open}
         onClose={toggleDrawer(false)}
-        PaperProps={{ style: { height: 'fit-content', ...getBorderRadiusStyle(drawerAnchor), border: "solid 3px grey"} }}
+        PaperProps={{ style: { height: 'fit-content', ...getBorderRadiusStyle(drawerAnchor), border: "solid 1px white"} }}
       >
         {list()}
       </Drawer>

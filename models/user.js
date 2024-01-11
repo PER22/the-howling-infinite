@@ -35,7 +35,6 @@ const userSchema = new Schema({
   passwordResetExpires: {type: Date},
   verificationToken: {type: String},
   verificationExpires: {type: Date},
-  profile: { type: Schema.Types.ObjectId, ref: 'Profile' }
 }, {
   timestamps: true,
   toJSON: {

@@ -9,26 +9,32 @@ const EssaySchema = new Schema({
   },
   title: {
     type: String,
-    required:true
+    required: true
   },
   isMain: {
     type: Boolean,
     required: true,
     default: false
   },
-  htmlS3Key: {
-    type: String,
-    required: true
-  },
+  sections: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Section',
+    required: true,
+    default: []
+  }],
   coverPhotoS3Key: {
-    type: String
+    type: String,
+    default: null
   },
-  inlineImagesS3Keys : [String],
-  preview: {
-    type: String
+  stars: [{
+    type: Schema.Types.ObjectId,
+    ref: 'User', 
+    default: []
+  }],
+  numStars: {
+    type: Number,
+    default: 0
   },
-  stars: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-  numStars: { type: Number, default: 0 },
 }, {
   timestamps: true
 });
