@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { useNavigate } from 'react-router-dom';
 import EssayForm from '../../components/EssayUploadComponents/EssayForm';
 import { TitleContext } from '../../components/TitleBar/TitleContext';
@@ -6,7 +7,7 @@ import { useLoggedInUser } from '../../components/LoggedInUserContext/LoggedInUs
 import { getMainEssay, updateMainEssay, createEssay } from '../../utilities/essays-service';
 import UnauthorizedBanner from '../../components/UnauthorizedBanner/UnauthorizedBanner';
 import FeedbackMessage from '../../components/FeedbackMessage/FeedbackMessage';
-import {getSignedURLForImage} from '../../utilities/images-service'
+import { getSignedURLForImage } from '../../utilities/images-service'
 
 export default function EditMainEssayPage() {
     const [loading, setLoading] = useState(true);
@@ -21,10 +22,38 @@ export default function EditMainEssayPage() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        setTitle('Editing Main Essay'); 
+        setTitle('Editing Main Essay');
     }, [setTitle]);
+
     
+
     useEffect(() => {
+
+        const addSection = (type, initData) => {
+            console.log("Section added with initData = ", initData);
+            const newSection = { type, id: uuidv4(), data: initData || {} };
+            if (!initData) {
+                if (type === 'Chapter') {
+                    newSection.data = {
+                        ...newSection.data,
+                        title: '',
+                        number: sections.filter(s => s.type === 'Chapter').length,
+                        pdf: null,
+                        pdfS3Key: ''
+    
+                    };
+                } else if (type === 'Interlude') {
+                    newSection.data = {
+                        ...newSection.data,
+                        title: '',
+                        number: sections.filter(s => s.type === 'Chapter').length,
+                        youtubeLink: ''
+                    };
+                }
+            }
+            setSections(prevSections => [...prevSections, newSection]);
+        };
+
         const fetchMainEssayToEdit = async () => {
             try {
                 const response = await getMainEssay();
@@ -32,14 +61,14 @@ export default function EditMainEssayPage() {
                     setError(response.error);
                     setEssayExists(false);
                 } else {
-                    setEssayTitle(response.title);
-                    setSections(response.sections); // This assumes sections is part of the response
+                    setEssayTitle(response.data.title);
                     setEssayExists(true);
-                    // If there's a cover photo, fetch its signed URL
-                    if (response.coverPhotoS3Key) {
-                        const imageResponse = await getSignedURLForImage(response.coverPhotoS3Key);
-                        // Here you'd do something with imageResponse, such as setting a state
-                    }
+    
+                    response.data.sections.forEach(section => {
+                        addSection(section.type, section);
+                    });
+    
+                    
                 }
             } catch (err) {
                 setError(err.message);
@@ -48,27 +77,30 @@ export default function EditMainEssayPage() {
                 setLoading(false);
             }
         };
-
+    
         fetchMainEssayToEdit();
     }, []);
+    
+
+    
 
     const handleEssaySubmit = async (title, sections) => {
         setError(null);
         setMessage(null);
         setLoading(true);
-    
+
         try {
             const formData = new FormData();
             formData.append('title', title);
             formData.append('isMain', true);
-    
+
             // Add files for each chapter
             sections.forEach((section, index) => {
                 if (section.type === 'Chapter' && section.data.pdf) {
                     formData.append(`pdfs`, section.data.pdf.file);
                 }
             });
-    
+
             // Stringify the entire array of sections and add it to formData
             const sectionsData = sections.map(section => ({
                 title: section.data.title,
@@ -78,9 +110,9 @@ export default function EditMainEssayPage() {
                 youtubeLink: section.type === 'Interlude' ? section.data.youtubeLink : undefined,
                 pdfS3Key: section.type === 'Chapter' ? section.data.pdfS3Key : undefined
             }));
-    
+
             formData.append('sections', JSON.stringify(sectionsData));
-    
+
             const response = essayExists ? await updateMainEssay(formData) : await createEssay(formData);
             if (response.error) {
                 setError(response.error);
@@ -94,9 +126,9 @@ export default function EditMainEssayPage() {
             setLoading(false);
         }
     };
-    
 
-   
+
+
 
     if (!loggedInUser || !loggedInUser.isAdmin) {
         return <UnauthorizedBanner />;
