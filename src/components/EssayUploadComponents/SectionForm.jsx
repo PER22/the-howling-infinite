@@ -11,7 +11,9 @@ function SectionForm({ section, index, updateSectionData, removeSection }) {
                     <TextField
                         label="Chapter Number"
                         value={section.data.number || ''}
-                        onChange={(e) => updateSectionData(index, 'number', e.target.value)}
+                        onChange={(e) => {
+                            console.log(e.target.value);
+                            updateSectionData(index, 'number', e.target.value)}}
                         style={{ marginRight: 8 }}
                     />
                     <TextField

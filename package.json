@@ -6,6 +6,9 @@
     "@aws-sdk/client-s3": "^3.413.0",
     "@aws-sdk/lib-storage": "^3.413.0",
     "@aws-sdk/s3-request-presigner": "^3.413.0",
+    "@dnd-kit/core": "^6.1.0",
+    "@dnd-kit/sortable": "^8.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@fontsource/roboto": "^5.0.8",
@@ -38,6 +41,7 @@
     "react-router-dom": "^6.15.0",
     "react-scripts": "5.0.1",
     "serve-favicon": "^2.5.0",
+    "uuidv4": "^6.2.13",
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {

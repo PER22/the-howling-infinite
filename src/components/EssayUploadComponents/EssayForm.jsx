@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { TextField, Box, Button } from '@mui/material';
 import SectionList from './SectionList';
+import { v4 as uuidv4 } from 'uuid';
 
 function EssayForm({ essayExists, onSubmit }) {
     const [title, setTitle] = useState('');
     const [sections, setSections] = useState([]);
     const addSection = (type) => {
-        const newSection = { type, data: {} };
+        const newSection = { type, id: uuidv4(),  data: {} };
         if (type === 'Chapter') {
             newSection.data = {
                 ...newSection.data,
@@ -14,6 +15,7 @@ function EssayForm({ essayExists, onSubmit }) {
                 number: sections.filter(s => s.type === 'Chapter').length,
                 pdf: null,
                 pdfS3Key: ''
+            
             };
         } else if (type === 'Interlude') {
             newSection.data = {
@@ -29,6 +31,7 @@ function EssayForm({ essayExists, onSubmit }) {
     const removeSection = (index) => {
         setSections(sections.filter((_, i) => i !== index));
     };
+
     const updateSectionData = (index, key, value) => {
         const updatedSections = sections.map((section, i) => {
             if (i === index) {
@@ -64,6 +67,7 @@ function EssayForm({ essayExists, onSubmit }) {
             </Box>
             <SectionList
                 sections={sections}
+                setSections={setSections}
                 updateSectionData={updateSectionData}
                 removeSection={removeSection}
                 addSection={addSection}
