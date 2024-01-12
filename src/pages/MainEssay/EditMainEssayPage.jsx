@@ -1,186 +1,120 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Button, TextField, Input, InputLabel, FormControl, Box } from '@mui/material';
-import { CloudUpload } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import EssayForm from '../../components/EssayUploadComponents/EssayForm';
 import { TitleContext } from '../../components/TitleBar/TitleContext';
 import { useLoggedInUser } from '../../components/LoggedInUserContext/LoggedInUserContext';
-import { getMainEssay } from '../../utilities/essays-service';
-import { updateMainEssay } from '../../utilities/essays-service';
-import { createEssay } from '../../utilities/essays-service';
-import { getSignedURLForImage } from '../../utilities/images-service';
-
-import { useNavigate } from 'react-router-dom';
+import { getMainEssay, updateMainEssay, createEssay } from '../../utilities/essays-service';
 import UnauthorizedBanner from '../../components/UnauthorizedBanner/UnauthorizedBanner';
 import FeedbackMessage from '../../components/FeedbackMessage/FeedbackMessage';
+import {getSignedURLForImage} from '../../utilities/images-service'
 
 export default function EditMainEssayPage() {
-    const [essayExists, setEssayExists] = useState(false); //decide whether to PUT or POST
-    const [essayTitle, setEssayTitle] = useState(''); //form contents
-    const [coverPhoto, setCoverPhoto] = useState(null);
-    const [htmlFile, setHtmlFile] = useState(null);  // To store the uploaded HTML
-    const [imageFolder, setImageFolder] = useState([]);
-
-    const [coverPhotoURL, setCoverPhotoURL] = useState('');
-
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [message, setMessage] = useState(null);
+    const [message, setMessage] = useState('');
+    const [essayTitle, setEssayTitle] = useState('');
+    const [sections, setSections] = useState([]);
+    const [essayExists, setEssayExists] = useState(false);
 
+    const { setTitle } = useContext(TitleContext);
+    const { loggedInUser } = useLoggedInUser();
     const navigate = useNavigate();
 
-    //Fetch main essay if it exists
     useEffect(() => {
-        async function fetchMainEssayToEdit() {
+        setTitle('Editing Main Essay'); 
+    }, [setTitle]);
+    
+    useEffect(() => {
+        const fetchMainEssayToEdit = async () => {
             try {
                 const response = await getMainEssay();
-                if (!response.error) {
-                    setEssayTitle(response.title);
-                    setEssayExists(true); // Set essayExists to true
-                    if (response.coverPhotoS3Key) {
-                        console.log(response.coverPhotoS3Key);
-                        const imageResponse = await getSignedURLForImage(response.coverPhotoS3Key);
-                        if (imageResponse) {
-                            setCoverPhotoURL(imageResponse.signedURL);
-                        }
-                    }
-                } else {
+                if (response.error) {
                     setError(response.error);
+                    setEssayExists(false);
+                } else {
+                    setEssayTitle(response.title);
+                    setSections(response.sections); // This assumes sections is part of the response
+                    setEssayExists(true);
+                    // If there's a cover photo, fetch its signed URL
+                    if (response.coverPhotoS3Key) {
+                        const imageResponse = await getSignedURLForImage(response.coverPhotoS3Key);
+                        // Here you'd do something with imageResponse, such as setting a state
+                    }
                 }
             } catch (err) {
-                    // Only set error if it's not about essay absence
-                    setError(err.message);
-                    setEssayExists(false);
+                setError(err.message);
+                setEssayExists(false);
             } finally {
                 setLoading(false);
             }
-        }
+        };
+
         fetchMainEssayToEdit();
     }, []);
 
-    //Handle submission of form
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleEssaySubmit = async (title, sections) => {
         setError(null);
-        const formData = new FormData();
-        formData.append('title', essayTitle);
-        formData.append('isMain', true);
-        if (coverPhoto) {
-            formData.append('coverPhoto', coverPhoto);
-        }
-        if (htmlFile) {
-            formData.append('html', htmlFile);
-        }
-        if (imageFolder) {
-            for (let i = 0; i < imageFolder.length; i++) {
-                formData.append('folderFiles', imageFolder[i]);
-            }
-        }
+        setMessage(null);
+        setLoading(true);
+    
         try {
-            if (essayExists) {
-                // Update existing essay
-                const response = await updateMainEssay(formData);
-                if (!response.error) {
-                    setMessage('Essay successfully updated!');
-                    setError(null);
-                    setTimeout(() => {
-                        navigate('/read');
-                    }, 2000);
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('isMain', true);
+    
+            // Add files for each chapter
+            sections.forEach((section, index) => {
+                if (section.type === 'Chapter' && section.data.pdf) {
+                    formData.append(`pdfs`, section.data.pdf.file);
                 }
+            });
+    
+            // Stringify the entire array of sections and add it to formData
+            const sectionsData = sections.map(section => ({
+                title: section.data.title,
+                number: section.data.number,
+                type: section.type,
+                index: section.index,
+                youtubeLink: section.type === 'Interlude' ? section.data.youtubeLink : undefined,
+                pdfS3Key: section.type === 'Chapter' ? section.data.pdfS3Key : undefined
+            }));
+    
+            formData.append('sections', JSON.stringify(sectionsData));
+    
+            const response = essayExists ? await updateMainEssay(formData) : await createEssay(formData);
+            if (response.error) {
+                setError(response.error);
             } else {
-                // Create new essay
-                const newEssay = await createEssay(formData);
-                if (!newEssay.error) {
-                    // setMessage(newEssay.message);
-                    setError(null);
-                    setTimeout(() => {
-                        navigate('/read');
-                    }, 2000);
-                } else {
-                    setError(newEssay.error);
-                }
-
+                setMessage(essayExists ? 'Essay successfully updated!' : 'Essay successfully created!');
+                // setTimeout(() => navigate('/read'), 2000); // Navigate after a delay
             }
-            setError('');
         } catch (err) {
             setError('Error creating/updating main essay: ' + err.message);
-            setMessage('');
+        } finally {
+            setLoading(false);
         }
     };
+    
 
-    //Set page title dynamically
-    const { setTitle } = useContext(TitleContext);
-    useEffect(() => {
-        setTitle(`Editing Main Essay`);
-    }, [setTitle, essayTitle]);
-
-    const { loggedInUser, setLoggedInUser } = useLoggedInUser();
+   
 
     if (!loggedInUser || !loggedInUser.isAdmin) {
-        return <UnauthorizedBanner />
+        return <UnauthorizedBanner />;
     }
+
     return (
         <div>
-            <h1>Main Essay</h1>
-            {loading ? <p>Loading...</p> :
-                <form onSubmit={handleSubmit} noValidate autoComplete="off">
-                    <Box marginBottom={2}>
-                        <TextField
-                            fullWidth
-                            label="Title"
-                            variant="outlined"
-                            value={essayTitle}
-                            onChange={e => setEssayTitle(e.target.value)}
-                            required
-                        />
-                    </Box>
-
-                    <Box marginBottom={2}>
-                        <TextField
-                            fullWidth
-                            variant="outlined"
-                            label="HTML File"
-                            type="file"
-                            InputLabelProps={{ shrink: true }}
-                            onChange={e => setHtmlFile(e.target.files[0])}
-                            required
-                        />
-                    </Box>
-
-                    <Box marginBottom={2}>
-                        <InputLabel htmlFor="images-folder">Images Folder (.fld) *</InputLabel>
-                        <input
-                            style={{ display: 'none' }}
-                            id="images-folder"
-                            multiple
-                            type="file"
-                            webkitdirectory=""
-                            directory=""
-                            onChange={e => setImageFolder(e.target.files)}
-                        />
-                        <label htmlFor="images-folder">
-                            <Button variant="outlined" component="span">
-                                Choose Files
-                            </Button>
-                        </label>
-                    </Box>
-
-                    <Box marginBottom={2}>
-                        <TextField
-                            fullWidth
-                            variant="outlined"
-                            label="Cover Photo"
-                            type="file"
-                            InputLabelProps={{ shrink: true }}
-                            onChange={e => setCoverPhoto(e.target.files[0])}
-                            required
-                        />
-                    </Box>
-
-                    <Button variant="contained" color="primary" type="submit">
-                        Submit
-                    </Button>
-                </form>
-            }
-            <FeedbackMessage error={error} message={message}/>
+            <h1>Edit Main Essay</h1>
+            {loading ? (
+                <p>Loading...</p>
+            ) : (
+                <EssayForm
+                    initialTitle={essayTitle}
+                    initialSections={sections}
+                    onSubmit={handleEssaySubmit}
+                />
+            )}
+            <FeedbackMessage error={error} message={message} />
         </div>
     );
 }

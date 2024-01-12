@@ -1,0 +1,8 @@
+.sortable-section-container {
+    display: flex;
+    border: 1px solid grey;
+    align-items: center;
+    justify-items: center;
+    padding-top: 1rem;
+    border-radius: 1rem;
+}

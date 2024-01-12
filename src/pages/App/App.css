@@ -82,3 +82,5 @@ body {
 .centered-text *, .centered-text{
     text-align: center;
 }
+
+* {transition: all .25s ease-out;}

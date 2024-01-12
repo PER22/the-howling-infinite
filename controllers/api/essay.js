@@ -1,156 +1,86 @@
 //controllers/essay.js:
-
-
 const EssayModel = require('../../models/essay');
+const InterludeModel = require('../../models/interlude');
+const ChapterModel = require('../../models/chapter');
 
-const { downloadFromS3, deleteFromS3, updateInS3, sanitizeTitleForS3 } = require('../../utilities/aws');
-const downsize = require("downsize");
-const cheerio = require('cheerio');
+const { downloadFromS3, deleteFromS3, updateInS3 } = require('../../utilities/aws');
+
+async function formatDate(now){
+    let month = now.getMonth() + 1; 
+    let day = now.getDate();
+    let year = now.getFullYear().toString().substr(-2);
+
+    let hours = now.getHours();
+    let minutes = now.getMinutes();
+
+    month = month < 10 ? '0' + month : month;
+    day = day < 10 ? '0' + day : day;
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+    console.log(`${month}-${day}-${year}--${hours}:${minutes}`);
+    return `${month}-${day}-${year}--${hours}:${minutes}`;
+}
 
 //Admin only
-async function preCreateEssay(req, res, next) {
+async function getDate(req, res, next) {
     try {
-        // Create the essay without actual content just to get _id back
-        const newEssay = await EssayModel.create({
-            title: "temporary",
-            author: req.user?._id,
-            isMain: true,
-            htmlS3Key: "not a real key"
-        });
-        console.log(newEssay);
-        // Attach the newEssay to the req object
-        req.entity = newEssay;
-
+        req.folderName = await formatDate(new Date());
         // Move to the next middleware (which should be multer)
         next();
     } catch (error) {
-        console.error('Error during preCreateEssay middleware:', error);
-        res.status(400).json({ error: 'Failed during preCreateEssay middleware' });
+        console.error('Error during getDate middleware:', error);
+        res.status(400).json({ error: 'Failed during getDate middleware.' });
     }
 }
 
-
-function replaceQuoteEntity(oldHtml) {
-    return oldHtml.replace(`/&quot;/g`, '"');
-}
-
-function insertPrelude1(oldHTML){
-    return oldHTML.replace(`!!!PRELUDE!!!`, '<iframe width="560" class="center-aligned-text" height="315" src="https://www.youtube.com/embed/WTuLCWCbuq0?si=SCNdEPqMmJ8_d538" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>');
-}
-
-function replaceSegoe(startHTML) {
-    let replacedHTML = startHTML.replace(/Segoe Print/g, 'Satisfy');
-    replacedHTML = replacedHTML.replace(/Quattrocento Sans/g, 'Satisfy')
-    return replacedHTML;
-}
-
-function addTextAligments(htmlContent) {
-    const $ = cheerio.load(htmlContent, {
-        decodeEntities: false,
-        encodeEntities: false
-    });
-
-    // For each <p> element with the class MsoNormal
-    $('p.MsoNormal').each((index, element) => {
-        const $el = $(element);
-
-        // Check if it has the align attribute with value "left"
-        if ($el.attr('align') === 'left') {
-            // Remove the align attribute
-            $el.removeAttr('align');
-
-            // Add the "left-aligned-text" class
-            $el.addClass('left-aligned-text');
-        } else {
-            // If not, add the "centered-text" class
-            $el.addClass('centered-text');
-        }
-    });
-    return $('body').html();
-}
-
-function editImgSrc(oldHTML, postId) {
-    const $ = cheerio.load(oldHTML, {
-        decodeEntities: false,
-        encodeEntities: false
-    });
-    const finalImageKeys = [];
-    $('img').each((index, img) => {
-        const src = $(img).attr('src');
-        const fileName = src.split('/').pop();
-        const newSrc = `/api/images/essayimages-${postId}-${sanitizeTitleForS3(fileName)}`;
-        $(img).attr('src', newSrc);
-        finalImageKeys.push(`essayimages-${postId}-${sanitizeTitleForS3(fileName)}`)
-    });
-    return { html: $('body').html(), newImageKeys: finalImageKeys };
-}
-
-async function formatEssay(originalHTML, essayId) {
-    // console.log("Original HTML:")
-    // console.log(originalHTML);
-    const entitiesReplacedHTML = await replaceQuoteEntity(originalHTML);
-    // console.log("After quote entity replaced:");
-    // console.log(entitiesReplacedHTML);
-    const changedFontHTML = await replaceSegoe(entitiesReplacedHTML);
-    // console.log("After font changed: ");
-    // console.log(changedFontHTML);
-    const preludeAddedHTML = await insertPrelude1(changedFontHTML);
-    // console.log("After negative margins replaced:");
-    // console.log(noNegativeMarginsHTML);
-    const alignedHTML = await addTextAligments(preludeAddedHTML);
-    // console.log("After text alignments replaced:");
-    // console.log(alignedHTML);
-    const imagesKeysAndHTML = await editImgSrc(alignedHTML, essayId);
-    // console.log("After image src's replaced:");
-    // console.log(imagesKeysAndHTML.html);
-    return imagesKeysAndHTML;
-}
-
-
-
-//Admin only
-async function postCreateEssay(req, res) {
+async function createEssay(req, res) {    
     try {
         let coverPhotoS3Key = null;
-        let htmlS3Key = null;
-        const folderFiles = [];
-        if (!req.file && !req.files) { console.log("Files are not attached.") }
-
         if (req.files.coverPhoto && req.files.coverPhoto[0]) {
             coverPhotoS3Key = req.files.coverPhoto[0].key;
         }
-        if (req.files.html && req.files.html[0]) {
-            htmlS3Key = req.files.html[0].key;
-        }
-        if (req.files.folderFiles) {
-            for (let file of req.files.folderFiles) {
-                folderFiles.push(file.key);
+        // Parse text data from sections
+        console.log('Sections data:', req.body.sections);
+        const sectionsData = JSON.parse(req.body.sections);
+        const sections = [];
+
+        for (const [index, sectionData] of sectionsData.entries()) {
+            console.log(`sectionsData[${index}]:`, sectionData)
+            let section;
+            if (sectionData.type === 'Interlude') {
+                section = await InterludeModel.create({...sectionData, index});
+            } else if (sectionData.type === 'Chapter') {
+                // Retrieve the corresponding file for this chapter
+                const pdfFile = req.files['pdfs'] ? req.files['pdfs'][index] : "oooof"; //TODO
+                const pdfS3Key = pdfFile ? pdfFile.key : null;
+
+                // Create chapter with text data and pdfS3Key
+                section = await ChapterModel.create({ 
+                    ...sectionData, 
+                    pdfS3Key : pdfS3Key || "uploadFailed?",  //TODO 
+                    index 
+                });
+            } else {
+                throw new Error(`Invalid section type: ${sectionData.type}`);
             }
+            sections.push(section._id);
         }
-        let preview = "";
-        if (htmlS3Key) {
-            const oldHTML = await downloadFromS3(htmlS3Key);
-            const imagesKeysAndHTML = await formatEssay(oldHTML, req.entity._id.toString());
-            imagesKeysAndHTML.newImageKeys.forEach((imgKey) => {
-                req.entity.inlineImagesS3Keys.push(imgKey)
-            });
-            const modifiedHtmlContent = imagesKeysAndHTML.html;
-            await updateInS3(htmlS3Key, modifiedHtmlContent);
-            preview = downsize(modifiedHtmlContent, { words: 20});
-        }
-        req.entity.title = req.body.title
-        req.entity.isMain = req.body.isMain
-        req.entity.htmlS3Key = htmlS3Key;
-        req.entity.status = "completed";
-        req.entity.coverPhotoS3Key = coverPhotoS3Key;
-        req.entity.preview = preview;
-        await req.entity.save();
-        res.status(201).json(req.entity);
+
+        // Create Essay with sections and cover photo
+        const newEssay = await EssayModel.create({
+            author: req.user?._id,
+            title: req.body.title,
+            isMain: req.body.isMain === 'true',
+            sections: sections,
+            coverPhotoS3Key
+        });
+
+        res.status(201).json(newEssay);
     } catch (error) {
-        console.error('Error creating content:', error);
-        res.status(400).json({ error: 'Failed to create content' });
+        console.error('Error creating essay:', error);
+        res.status(400).json({ error: 'Failed to create essay', details: error.message });
     }
 }
+
 
 //Anonymous
 async function getMainEssay(req, res) {
@@ -159,7 +89,7 @@ async function getMainEssay(req, res) {
         if (!essay) {
             return res.status(404).json({ error: 'Essay not found.' });
         }
-        const contentBody = await downloadFromS3(essay.htmlS3Key);
+        const contentBody = await downloadFromS3(essay.pdfS3Key);
         const essayObj = essay.toObject();
         essayObj.bodyHTML = contentBody;
         res.status(200).json(essayObj);
@@ -452,8 +382,8 @@ async function unstarEssayById(req, res) {
 
 module.exports = {
     //Create
-    preCreateEssay,
-    postCreateEssay,
+    getDate,
+    createEssay,
     //Read
     getMainEssay,
     getEssayById,
