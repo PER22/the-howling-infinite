@@ -1,13 +1,8 @@
-import { Button} from '@mui/material';
-
-import React from 'react';
-import { useState } from 'react';
-
+import React, { useState } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
-import SortableSection from './SortableSection'
 import SectionForm from './SectionForm';
-import './SortableSection.css'
+import { Button } from '@mui/material';
 
 function SectionList({ sections, setSections, updateSectionData, removeSection, addSection }) {
     const sensors = useSensors(
@@ -36,29 +31,28 @@ function SectionList({ sections, setSections, updateSectionData, removeSection, 
 
     return (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <SortableContext items={sections.map(section => section.id)} strategy={verticalListSortingStrategy}>
-          {sections.map((section, index) => (
-            // Use the new SortableSection component
-            <SortableSection
-              key={section.id}
-              id={section.id}
-              section={section}
-              index={index}
-              updateSectionData={updateSectionData}
-              removeSection={removeSection}
-            />
-          ))}
-        </SortableContext>
-        <DragOverlay>
-        {activeId ? (
-                    <SortableSection
+            <SortableContext items={sections.map(section => section.id)} strategy={verticalListSortingStrategy}>
+                {sections.map((section, index) => (
+                    <SectionForm
+                        key={section.id}
+                        id={section.id}
+                        section={section}
+                        index={index}
+                        updateSectionData={updateSectionData}
+                        removeSection={removeSection}
+                    />
+                ))}
+            </SortableContext>
+            <DragOverlay>
+                {activeId ? (
+                    <SectionForm
                         id={activeId}
                         section={sections.find(section => section.id === activeId)}
                         updateSectionData={updateSectionData}
                         removeSection={removeSection}
                     />
                 ) : null}
-        </DragOverlay>
+            </DragOverlay>
             <Button onClick={() => addSection('Chapter')}>Add Chapter</Button>
             <Button onClick={() => addSection('Interlude')}>Add Interlude</Button>
         </DndContext>

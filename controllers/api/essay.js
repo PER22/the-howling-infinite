@@ -38,8 +38,6 @@ async function createEssay(req, res) {
         if (req.files.coverPhoto && req.files.coverPhoto[0]) {
             coverPhotoS3Key = req.files.coverPhoto[0].key;
         }
-        // Parse text data from sections
-        console.log('Sections data:', req.body.sections);
         const sectionsData = JSON.parse(req.body.sections);
         const sections = [];
 
@@ -85,14 +83,13 @@ async function createEssay(req, res) {
 //Anonymous
 async function getMainEssay(req, res) {
     try {
-        const essay = await EssayModel.findOne({ isMain: true }).populate('author');
+        const essay = await EssayModel.findOne({ isMain: true }).populate('author').populate('sections');
         if (!essay) {
             return res.status(404).json({ error: 'Essay not found.' });
         }
-        const contentBody = await downloadFromS3(essay.pdfS3Key);
-        const essayObj = essay.toObject();
-        essayObj.bodyHTML = contentBody;
-        res.status(200).json(essayObj);
+        console.log('found a main essay');
+        console.log(essay);
+        return res.status(200).json(essay);
     } catch (error) {
         console.error('Error fetching main essay:', error);
         res.status(400).json({ error: 'Failed to fetch main essay' });

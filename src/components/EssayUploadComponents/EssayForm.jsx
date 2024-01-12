@@ -3,29 +3,34 @@ import { TextField, Box, Button } from '@mui/material';
 import SectionList from './SectionList';
 import { v4 as uuidv4 } from 'uuid';
 
-function EssayForm({ essayExists, onSubmit }) {
-    const [title, setTitle] = useState('');
-    const [sections, setSections] = useState([]);
-    const addSection = (type) => {
-        const newSection = { type, id: uuidv4(),  data: {} };
-        if (type === 'Chapter') {
-            newSection.data = {
-                ...newSection.data,
-                title: '',
-                number: sections.filter(s => s.type === 'Chapter').length,
-                pdf: null,
-                pdfS3Key: ''
-            
-            };
-        } else if (type === 'Interlude') {
-            newSection.data = {
-                ...newSection.data,
-                title: '',
-                number: sections.filter(s => s.type === 'Chapter').length,
-                youtubeLink: ''
-            };
+function EssayForm({ essayExists, initialTitle, initialSections, onSubmit}) {
+    const [title, setTitle] = useState(initialTitle || '');
+    const [sections, setSections] = useState(initialSections || []);
+
+    const addSection = (type, initData) => {
+        console.log("Section added");
+        const newSection = { type, id: uuidv4(), data: initData || {} };
+        if (!initData) {
+            console.log("it was empty");
+            if (type === 'Chapter') {
+                newSection.data = {
+                    ...newSection.data,
+                    title: '',
+                    number: sections.filter(s => s.type === 'Chapter').length,
+                    pdf: null,
+                    pdfS3Key: ''
+
+                };
+            } else if (type === 'Interlude') {
+                newSection.data = {
+                    ...newSection.data,
+                    title: '',
+                    number: sections.filter(s => s.type === 'Chapter').length,
+                    youtubeLink: ''
+                };
+            }
         }
-        setSections([...sections, newSection]);
+        setSections(prevSections => [...prevSections, newSection]);
     };
 
     const removeSection = (index) => {
@@ -45,13 +50,14 @@ function EssayForm({ essayExists, onSubmit }) {
             }
             return section;
         });
-        setSections(updatedSections);
+        setSections(prevSections => updatedSections)
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         onSubmit(title, sections);
     };
+
 
     return (
         <form onSubmit={handleSubmit} noValidate autoComplete="off">
