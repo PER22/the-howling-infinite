@@ -36,6 +36,7 @@ function SectionList({ sections, setSections, updateSectionData, removeSection, 
                     <SectionForm
                         key={section.id}
                         id={section.id}
+                        _id={section._id}
                         section={section}
                         index={index}
                         updateSectionData={updateSectionData}

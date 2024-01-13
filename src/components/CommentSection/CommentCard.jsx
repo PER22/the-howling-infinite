@@ -11,7 +11,6 @@ export default function CommentCard({ comment, deleteInUI, setParentCommentId })
     try {
       const response = await deleteCommentById(comment._id);
       if(!response.error){
-        console.log("in theory no errors?");
         deleteInUI(comment._id);
       }
     } catch (err) {
