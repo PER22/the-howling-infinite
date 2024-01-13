@@ -8,24 +8,25 @@ function EssayForm({ essayExists, initialTitle, initialSections, onSubmit}) {
     const [sections, setSections] = useState(initialSections || []);
 
     const addSection = (type, initData) => {
+        console.log("Section added");
         const newSection = { type, id: uuidv4(), data: initData || {} };
         if (!initData) {
+            console.log("it was empty");
             if (type === 'Chapter') {
                 newSection.data = {
                     ...newSection.data,
                     title: '',
-                    number: sections.filter(s => s.type === 'Chapter').length + 1,
+                    number: sections.filter(s => s.type === 'Chapter').length,
                     pdf: null,
-                    pdfS3Key: '',
-                    // _id: null
+                    pdfS3Key: ''
+
                 };
             } else if (type === 'Interlude') {
                 newSection.data = {
                     ...newSection.data,
                     title: '',
                     number: sections.filter(s => s.type === 'Chapter').length,
-                    youtubeLink: '',
-                    // _id: null
+                    youtubeLink: ''
                 };
             }
         }
@@ -37,19 +38,19 @@ function EssayForm({ essayExists, initialTitle, initialSections, onSubmit}) {
     };
 
     const updateSectionData = (index, key, value) => {
-        setSections(prevSections => prevSections.map((section, i) => {
+        const updatedSections = sections.map((section, i) => {
             if (i === index) {
                 const updatedData = { ...section.data };
                 if (key === 'pdf' && value) {
-                    // Create a new File object to ensure we're not storing a live state
-                    updatedData[key] = new File([value], value.name, { type: value.type });
+                    updatedData[key] = { name: value.name, file: value };
                 } else {
                     updatedData[key] = value;
                 }
                 return { ...section, data: updatedData };
             }
             return section;
-        }));
+        });
+        setSections(prevSections => updatedSections)
     };
 
     const handleSubmit = (e) => {

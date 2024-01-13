@@ -22,6 +22,7 @@ function SectionForm({ id, section, index, updateSectionData, removeSection }) {
         transform: CSS.Transform.toString(transform),
         transition,
     };
+
     return (
         <Box className="section-form-container" key={index} marginBottom={2} display="flex" alignItems="center" ref={setNodeRef} style={style} modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}>
             <IconButton {...attributes} {...listeners} style={{ marginRight: 8 }}>
@@ -62,14 +63,14 @@ function SectionForm({ id, section, index, updateSectionData, removeSection }) {
                 <>
                     <TextField
                         label="Interlude Title"
-                        value={section.data.title || ''}
+                        value={section.title || ''}
                         onChange={(e) => updateSectionData(index, 'title', e.target.value)}
                         style={{ marginRight: 8 }}
                     />
                     <TextField
                         fullWidth
                         label="YouTube Link"
-                        value={section.data.youtubeLink || ''}
+                        value={section.youtubeLink || ''}
                         onChange={(e) => updateSectionData(index, 'youtubeLink', e.target.value)}
                         style={{ marginRight: 8 }}
                     />

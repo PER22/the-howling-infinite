@@ -24,10 +24,11 @@ router.post('/', ensureLoggedIn, adminOnly, essayController.getDate, uploadFiles
 
 //Admin only
 // PUT /api/essays/mainEssay
-router.put('/', ensureLoggedIn, adminOnly, essayController.getDate, uploadFiles.fields([
+router.put('/', ensureLoggedIn, adminOnly, essayController.preUpdateMainEssay, uploadFiles.fields([
   {name: 'coverPhoto', maxCount: 1},
-  {name: 'pdfs'},
-]), essayController.updateMainEssay);
+  {name: 'pdfs', maxCount: 1},
+  {name: 'folderFiles'}
+]), essayController.postUpdateMainEssay);
 
 //Anonymous
 // SIDE ESSAYS: 
@@ -36,7 +37,7 @@ router.get('/sideEssayPreviews', essayController.getAllSideEssayPreviews);
 
 router.get('/:essayId', essayController.getEssayById);
 
-router.put('/:essayId', ensureLoggedIn, adminOnly, essayController.getDate, uploadFiles.fields([
+router.put('/:essayId', ensureLoggedIn, adminOnly, essayController.preUpdateSideEssay, uploadFiles.fields([
   {name: 'coverPhoto', maxCount: 1},
   {name: 'html', maxCount: 1},
   {name: 'folderFiles'}

@@ -135,6 +135,7 @@ async function login(req, res) {
     }
     // Check if the password matches
     const match = await bcrypt.compare(req.body.password, user.password);
+    console.log("req.body.password: ", req.body.password);
     if (!match) {
       return res.status(403).json({error: "Password doesn't match."});
     }
@@ -155,6 +156,7 @@ function createJWT(user) {
 async function sendPasswordResetEmail(req, res){
   console.log("Entering sendPasswordResetEmail()");
   try{
+    console.log("req.body", req.body);
     const user = await User.findOne({email : req.body.email});
     if(!user){
       console.log("User not found.");
@@ -187,6 +189,7 @@ async function sendPasswordResetEmail(req, res){
 async function performPasswordReset(req, res){
   console.log("Entering performPasswordReset()");
   const { token, newPassword } = req.body;
+  console.log("req.body:", req.body);
 
   try {
     // Find the user by reset token

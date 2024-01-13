@@ -7,6 +7,7 @@ import { useLoggedInUser } from '../../components/LoggedInUserContext/LoggedInUs
 import { getMainEssay, updateMainEssay, createEssay } from '../../utilities/essays-service';
 import UnauthorizedBanner from '../../components/UnauthorizedBanner/UnauthorizedBanner';
 import FeedbackMessage from '../../components/FeedbackMessage/FeedbackMessage';
+import { getSignedURLForImage } from '../../utilities/images-service'
 
 export default function EditMainEssayPage() {
     const [loading, setLoading] = useState(true);
@@ -29,6 +30,7 @@ export default function EditMainEssayPage() {
     useEffect(() => {
 
         const addSection = (type, initData) => {
+            console.log("Section added with initData = ", initData);
             const newSection = { type, id: uuidv4(), data: initData || {} };
             if (!initData) {
                 if (type === 'Chapter') {
@@ -38,7 +40,7 @@ export default function EditMainEssayPage() {
                         number: sections.filter(s => s.type === 'Chapter').length,
                         pdf: null,
                         pdfS3Key: ''
-                        
+    
                     };
                 } else if (type === 'Interlude') {
                     newSection.data = {
@@ -64,7 +66,9 @@ export default function EditMainEssayPage() {
     
                     response.data.sections.forEach(section => {
                         addSection(section.type, section);
-                    }); 
+                    });
+    
+                    
                 }
             } catch (err) {
                 setError(err.message);
@@ -90,6 +94,12 @@ export default function EditMainEssayPage() {
             formData.append('title', title);
             formData.append('isMain', true);
 
+            // Add files for each chapter
+            sections.forEach((section, index) => {
+                if (section.type === 'Chapter' && section.data.pdf) {
+                    formData.append(`pdfs`, section.data.pdf.file);
+                }
+            });
 
             // Stringify the entire array of sections and add it to formData
             const sectionsData = sections.map(section => ({
@@ -108,7 +118,7 @@ export default function EditMainEssayPage() {
                 setError(response.error);
             } else {
                 setMessage(essayExists ? 'Essay successfully updated!' : 'Essay successfully created!');
-                setTimeout(() => navigate('/read'), 2000); // Navigate after a delay
+                // setTimeout(() => navigate('/read'), 2000); // Navigate after a delay
             }
         } catch (err) {
             setError('Error creating/updating main essay: ' + err.message);
