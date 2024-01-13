@@ -23,7 +23,7 @@ function EssayForm({ essayExists, initialTitle, initialSections, onSubmit}) {
                 newSection.data = {
                     ...newSection.data,
                     title: '',
-                    number: sections.filter(s => s.type === 'Chapter').length,
+                    number: sections.filter(s => s.type === 'Chapter').length + 1,
                     youtubeLink: '',
                     // _id: null
                 };
@@ -37,19 +37,19 @@ function EssayForm({ essayExists, initialTitle, initialSections, onSubmit}) {
     };
 
     const updateSectionData = (index, key, value) => {
-        setSections(prevSections => prevSections.map((section, i) => {
+        const updatedSections = sections.map((section, i) => {
             if (i === index) {
                 const updatedData = { ...section.data };
                 if (key === 'pdf' && value) {
-                    // Create a new File object to ensure we're not storing a live state
-                    updatedData[key] = new File([value], value.name, { type: value.type });
+                    updatedData[key] = { name: value.name, file: value };
                 } else {
                     updatedData[key] = value;
                 }
                 return { ...section, data: updatedData };
             }
             return section;
-        }));
+        });
+        setSections(prevSections => updatedSections)
     };
 
     const handleSubmit = (e) => {
