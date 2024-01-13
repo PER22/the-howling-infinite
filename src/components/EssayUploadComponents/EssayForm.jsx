@@ -8,10 +8,8 @@ function EssayForm({ essayExists, initialTitle, initialSections, onSubmit}) {
     const [sections, setSections] = useState(initialSections || []);
 
     const addSection = (type, initData) => {
-        console.log("Section added");
         const newSection = { type, id: uuidv4(), data: initData || {} };
         if (!initData) {
-            console.log("it was empty");
             if (type === 'Chapter') {
                 newSection.data = {
                     ...newSection.data,

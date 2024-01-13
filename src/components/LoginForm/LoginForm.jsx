@@ -27,7 +27,6 @@ export default function LoginForm() {
     evt.preventDefault();
     try {
       const user = await usersService.login(credentials);
-      console.log(user);
       if (!user.error) {
         setLoggedInUser(user);
         navigate('/');

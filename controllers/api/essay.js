@@ -16,7 +16,6 @@ async function formatDate(now){
     month = month < 10 ? '0' + month : month;
     day = day < 10 ? '0' + day : day;
     minutes = minutes < 10 ? '0' + minutes : minutes;
-    console.log(`${month}-${day}-${year}--${hours}:${minutes}`);
     return `${month}-${day}-${year}--${hours}:${minutes}`;
 }
 
@@ -42,7 +41,6 @@ async function createEssay(req, res) {
         const sections = [];
 
         for (const [index, sectionData] of sectionsData.entries()) {
-            console.log(`sectionsData[${index}]:`, sectionData)
             let section;
             if (sectionData.type === 'Interlude') {
                 section = await InterludeModel.create({...sectionData, index});
@@ -87,8 +85,7 @@ async function getMainEssay(req, res) {
         if (!essay) {
             return res.status(404).json({ error: 'Essay not found.' });
         }
-        console.log('found a main essay');
-        console.log(essay);
+        console.log("Essay being returned by backend:",essay, "\n\n");
         return res.status(200).json(essay);
     } catch (error) {
         console.error('Error fetching main essay:', error);
