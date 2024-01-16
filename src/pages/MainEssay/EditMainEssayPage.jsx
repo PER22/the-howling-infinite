@@ -7,7 +7,7 @@ import { useLoggedInUser } from '../../components/LoggedInUserContext/LoggedInUs
 import { getMainEssay, updateMainEssay, createEssay } from '../../utilities/essays-service';
 import UnauthorizedBanner from '../../components/UnauthorizedBanner/UnauthorizedBanner';
 import FeedbackMessage from '../../components/FeedbackMessage/FeedbackMessage';
-import { getSignedURLForImage } from '../../utilities/images-service'
+import { Button } from '@mui/material';
 
 export default function EditMainEssayPage() {
     const [loading, setLoading] = useState(true);
@@ -37,17 +37,18 @@ export default function EditMainEssayPage() {
                     newSection.data = {
                         ...newSection.data,
                         title: '',
-                        number: sections.filter(s => s.type === 'Chapter').length,
+                        number: sections.filter(s => s.type === 'Chapter').length + 1,
                         pdf: null,
-                        pdfS3Key: ''
-    
+                        pdfS3Key: '',
+                        _id: null,
                     };
                 } else if (type === 'Interlude') {
                     newSection.data = {
                         ...newSection.data,
                         title: '',
-                        number: sections.filter(s => s.type === 'Chapter').length,
-                        youtubeLink: ''
+                        number: sections.filter(s => s.type === 'Chapter').length + 1 || 1,
+                        youtubeLink: '',
+                        _id: null,
                     };
                 }
             }
@@ -56,6 +57,7 @@ export default function EditMainEssayPage() {
 
         const fetchMainEssayToEdit = async () => {
             try {
+                setSections(oldSections => []);
                 const response = await getMainEssay();
                 if (response.error) {
                     setError(response.error);
@@ -67,8 +69,6 @@ export default function EditMainEssayPage() {
                     response.data.sections.forEach(section => {
                         addSection(section.type, section);
                     });
-    
-                    
                 }
             } catch (err) {
                 setError(err.message);
@@ -77,7 +77,6 @@ export default function EditMainEssayPage() {
                 setLoading(false);
             }
         };
-    
         fetchMainEssayToEdit();
     }, []);
     
@@ -96,20 +95,22 @@ export default function EditMainEssayPage() {
 
             // Add files for each chapter
             sections.forEach((section, index) => {
-                if (section.type === 'Chapter' && section.data.pdf) {
+                if (section.type === 'Chapter' && section.data.pdf?.file) {
                     formData.append(`pdfs`, section.data.pdf.file);
                 }
             });
 
             // Stringify the entire array of sections and add it to formData
-            const sectionsData = sections.map(section => ({
-                title: section.data.title,
-                number: section.data.number,
-                type: section.type,
-                index: section.index,
-                youtubeLink: section.type === 'Interlude' ? section.data.youtubeLink : undefined,
-                pdfS3Key: section.type === 'Chapter' ? section.data.pdfS3Key : undefined
-            }));
+            const sectionsData = sections.map((section, index) => (
+                {
+                    _id: section.data._id,
+                    title: section.data.title,
+                    number: section.data.number,
+                    type: section.type,
+                    index: index,
+                    youtubeLink: section.type === 'Interlude' ? section.data.youtubeLink : undefined,
+                }
+            ));
 
             formData.append('sections', JSON.stringify(sectionsData));
 
@@ -146,6 +147,9 @@ export default function EditMainEssayPage() {
                     onSubmit={handleEssaySubmit}
                 />
             )}
+            <Button onClick={() => {
+                console.log(sections);
+                }}>Log Form Contents</Button>
             <FeedbackMessage error={error} message={message} />
         </div>
     );

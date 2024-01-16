@@ -17,18 +17,20 @@ router.get('/', essayController.getMainEssay);
 
 //Admin only
 // POST /api/essays
-router.post('/', ensureLoggedIn, adminOnly, essayController.getDate, uploadFiles.fields([
-    {name: 'coverPhoto', maxCount: 1},
-    {name: 'pdfs'},
-  ]), essayController.createEssay);
+router.post('/', 
+  ensureLoggedIn, 
+  adminOnly, 
+  essayController.getDate, 
+  uploadFiles.any(),
+  essayController.createEssay
+);
 
 //Admin only
-// PUT /api/essays/mainEssay
-router.put('/', ensureLoggedIn, adminOnly, essayController.preUpdateMainEssay, uploadFiles.fields([
+// PUT /api/essays
+router.put('/', ensureLoggedIn, adminOnly, essayController.getDate, uploadFiles.fields([
   {name: 'coverPhoto', maxCount: 1},
-  {name: 'pdfs', maxCount: 1},
-  {name: 'folderFiles'}
-]), essayController.postUpdateMainEssay);
+  {name: 'pdfs'},
+]), essayController.updateMainEssay);
 
 //Anonymous
 // SIDE ESSAYS: 

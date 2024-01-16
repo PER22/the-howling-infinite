@@ -14,7 +14,7 @@ function EssayForm({ essayExists, initialTitle, initialSections, onSubmit}) {
                 newSection.data = {
                     ...newSection.data,
                     title: '',
-                    number: sections.filter(s => s.type === 'Chapter').length,
+                    number: sections.filter(s => s.type === 'Chapter').length + 1,
                     pdf: null,
                     pdfS3Key: ''
 
@@ -23,7 +23,7 @@ function EssayForm({ essayExists, initialTitle, initialSections, onSubmit}) {
                 newSection.data = {
                     ...newSection.data,
                     title: '',
-                    number: sections.filter(s => s.type === 'Chapter').length,
+                    number: sections.filter(s => s.type === 'Chapter').length + 1,
                     youtubeLink: ''
                 };
             }
