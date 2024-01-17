@@ -16,8 +16,9 @@ function EssayForm({ essayExists, initialTitle, initialSections, onSubmit}) {
                     title: '',
                     number: sections.filter(s => s.type === 'Chapter').length + 1,
                     pdf: null,
-                    pdfS3Key: ''
-
+                    pdfS3Key: '',
+                    newUpload: true,
+                    newSection:true
                 };
             } else if (type === 'Interlude') {
                 newSection.data = {
@@ -32,15 +33,17 @@ function EssayForm({ essayExists, initialTitle, initialSections, onSubmit}) {
     };
 
     const removeSection = (index) => {
-        setSections(sections.filter((_, i) => i !== index));
+        setSections(sections =>sections.filter((_, i) => i !== index));
     };
 
     const updateSectionData = (index, key, value) => {
+        console.log("UpdateSectionDataCalled");
         const updatedSections = sections.map((section, i) => {
             if (i === index) {
                 const updatedData = { ...section.data };
                 if (key === 'pdf' && value) {
                     updatedData[key] = { name: value.name, file: value };
+                    updatedData["newUpload"] = true;
                 } else {
                     updatedData[key] = value;
                 }

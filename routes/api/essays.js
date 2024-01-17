@@ -21,7 +21,10 @@ router.post('/',
   ensureLoggedIn, 
   adminOnly, 
   essayController.getDate, 
-  uploadFiles.any(),
+  uploadFiles.fields([
+    {name: 'coverPhoto', maxCount: 1},
+    {name: 'pdfs'},
+  ]),
   essayController.createEssay
 );
 

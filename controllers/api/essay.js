@@ -34,6 +34,9 @@ async function getDate(req, res, next) {
 async function createEssay(req, res) {
     try {
         let coverPhotoS3Key = null;
+        //TODO: cover photo update - unused by form for now, 
+        //and not 'required' in Essay model currently
+
         if (req.files.coverPhoto && req.files.coverPhoto[0]) {
             coverPhotoS3Key = req.files.coverPhoto[0].key;
         }
@@ -46,13 +49,13 @@ async function createEssay(req, res) {
                 section = await InterludeModel.create({ ...sectionData, index });
             } else if (sectionData.type === 'Chapter') {
                 // Retrieve the corresponding file for this chapter
-                const pdfFile = req.files['pdfs'] ? req.files['pdfs'][index] : "oooof"; //TODO
-                const pdfS3Key = pdfFile ? pdfFile.key : null;
+                const pdfFile = req.files['pdfs'][index]; 
+                const pdfS3Key = pdfFile?.key;
 
                 // Create chapter with text data and pdfS3Key
                 section = await ChapterModel.create({
                     ...sectionData,
-                    pdfS3Key: pdfS3Key || "uploadFailed?",  //TODO 
+                    pdfS3Key: pdfS3Key,
                     index
                 });
             } else {
@@ -85,7 +88,7 @@ async function getMainEssay(req, res) {
         if (!essay) {
             return res.status(404).json({ error: 'Essay not found.' });
         }
-        console.log("Essay being returned by backend:", essay, "\n\n");
+        // console.log("Essay being returned by backend:", essay, "\n\n");
         return res.status(200).json(essay);
     } catch (error) {
         console.error('Error fetching main essay:', error);
@@ -164,7 +167,7 @@ async function updateMainEssay(req, res) {
         console.log("formSections:", formSections);
         //for each section that exists in the database currently:
         //see if it is in the form's list of sections. 
-        
+
         const existingSectionIds = mainEssay.sections.map(section => section._id.toString());
         const sectionsToRemove = existingSectionIds.filter(id => !formSections.some(fs => fs._id === id));
         for (const sectionId of sectionsToRemove) {
@@ -178,25 +181,45 @@ async function updateMainEssay(req, res) {
             mainEssay.sections.pull(sectionId); // Remove the section from the mainEssay
         }
 
-        //any deleted sections are now gone.
+  
+        // Update existing sections
 
-        //update already extant sections:
-            // Update existing sections
-            for (const formSection of formSections) {
-                const existingSection = mainEssay.sections.find(sec => sec._id.toString() === formSection._id);
-                if (existingSection) {
-                    existingSection.title = formSection.title;
-                    existingSection.number = formSection.number;
-                    existingSection.index = formSection.index;
-                    //Here we need to check req.files to see if there is a submitted pdf associated with this existing essay
-                    await existingSection.save();
+
+        let uploadsAppendedCounter = 0;
+        for (const formSection of formSections) {
+            const existingSection = mainEssay.sections.find(sec => sec._id.toString() === formSection._id);
+            if (existingSection) {
+                existingSection.title = formSection.title;
+                existingSection.number = formSection.number;
+                existingSection.index = formSection.index;
+                if (existingSection.type === 'Chapter' && formSection.newUpload) {
+                    const pdfFile = req.files['pdfs'][uploadsAppendedCounter];
+                    uploadsAppendedCounter += 1;
+                    const pdfS3Key = pdfFile.key;
+                    existingSection.pdfS3Key = pdfS3Key;
+                }
+
+
+                await existingSection.save();
+            }
+            else {
+                let newSection;
+                if (formSection.type === 'Interlude') {
+                    newSection = await InterludeModel.create({ ...formSection });
+                } else if (formSection.type === 'Chapter') {
+                    const pdfFile = req.files['pdfs'][uploadsAppendedCounter];
+                    uploadsAppendedCounter += 1;
+                    const pdfS3Key = pdfFile.key;
+                    newSection = await ChapterModel.create({
+                        ...formSection,
+                        pdfS3Key: pdfS3Key
+                    });
+                    mainEssay.sections.push(newSection);
                 }
             }
-            
+        }
 
-        //now, lets worry about any added sections:
-
-            mainEssay.sections.sort((sectionA, sectionB) => sectionA.index - sectionB.index);
+        mainEssay.sections.sort((sectionA, sectionB) => sectionA.index - sectionB.index);
         const savedEssay = await mainEssay.save();
         return res.status(200).json(savedEssay);
     } catch (error) {

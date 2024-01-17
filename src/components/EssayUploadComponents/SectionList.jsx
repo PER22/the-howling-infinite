@@ -23,7 +23,7 @@ function SectionList({ sections, setSections, updateSectionData, removeSection, 
         if (active.id !== over.id) {
             const oldIndex = sections.findIndex(section => section.id === active.id);
             const newIndex = sections.findIndex(section => section.id === over.id);
-            setSections(arrayMove(sections, oldIndex, newIndex));
+            setSections(sections => arrayMove(sections, oldIndex, newIndex));
         }
 
         setActiveId(null);

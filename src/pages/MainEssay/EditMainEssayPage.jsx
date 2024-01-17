@@ -25,7 +25,7 @@ export default function EditMainEssayPage() {
         setTitle('Editing Main Essay');
     }, [setTitle]);
 
-    
+
 
     useEffect(() => {
 
@@ -56,8 +56,8 @@ export default function EditMainEssayPage() {
         };
 
         const fetchMainEssayToEdit = async () => {
+            setLoading(true);
             try {
-                setSections(oldSections => []);
                 const response = await getMainEssay();
                 if (response.error) {
                     setError(response.error);
@@ -65,7 +65,7 @@ export default function EditMainEssayPage() {
                 } else {
                     setEssayTitle(response.data.title);
                     setEssayExists(true);
-    
+                    setSections(oldSections => []);
                     response.data.sections.forEach(section => {
                         addSection(section.type, section);
                     });
@@ -79,9 +79,9 @@ export default function EditMainEssayPage() {
         };
         fetchMainEssayToEdit();
     }, []);
-    
 
-    
+
+
 
     const handleEssaySubmit = async (title, sections) => {
         setError(null);
@@ -109,6 +109,7 @@ export default function EditMainEssayPage() {
                     type: section.type,
                     index: index,
                     youtubeLink: section.type === 'Interlude' ? section.data.youtubeLink : undefined,
+                    newUpload: section.data.newUpload || undefined
                 }
             ));
 
@@ -119,16 +120,16 @@ export default function EditMainEssayPage() {
                 setError(response.error);
             } else {
                 setMessage(essayExists ? 'Essay successfully updated!' : 'Essay successfully created!');
-                // setTimeout(() => navigate('/read'), 2000); // Navigate after a delay
+                setTimeout(() => {
+                    setLoading(false);
+                    window.location.reload()
+                }
+                    , 2000);
             }
         } catch (err) {
             setError('Error creating/updating main essay: ' + err.message);
-        } finally {
-            setLoading(false);
-        }
+        } 
     };
-
-
 
 
     if (!loggedInUser || !loggedInUser.isAdmin) {
@@ -149,8 +150,9 @@ export default function EditMainEssayPage() {
             )}
             <Button onClick={() => {
                 console.log(sections);
-                }}>Log Form Contents</Button>
+            }}>Log Form Contents</Button>
             <FeedbackMessage error={error} message={message} />
         </div>
     );
 }
+
