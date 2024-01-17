@@ -5,8 +5,8 @@ const ChapterModel = require('../../models/chapter');
 
 const { downloadFromS3, deleteFromS3, updateInS3 } = require('../../utilities/aws');
 
-async function formatDate(now){
-    let month = now.getMonth() + 1; 
+async function formatDate(now) {
+    let month = now.getMonth() + 1;
     let day = now.getDate();
     let year = now.getFullYear().toString().substr(-2);
 
@@ -16,7 +16,6 @@ async function formatDate(now){
     month = month < 10 ? '0' + month : month;
     day = day < 10 ? '0' + day : day;
     minutes = minutes < 10 ? '0' + minutes : minutes;
-    console.log(`${month}-${day}-${year}--${hours}:${minutes}`);
     return `${month}-${day}-${year}--${hours}:${minutes}`;
 }
 
@@ -32,9 +31,12 @@ async function getDate(req, res, next) {
     }
 }
 
-async function createEssay(req, res) {    
+async function createEssay(req, res) {
     try {
         let coverPhotoS3Key = null;
+        //TODO: cover photo update - unused by form for now, 
+        //and not 'required' in Essay model currently
+
         if (req.files.coverPhoto && req.files.coverPhoto[0]) {
             coverPhotoS3Key = req.files.coverPhoto[0].key;
         }
@@ -42,20 +44,19 @@ async function createEssay(req, res) {
         const sections = [];
 
         for (const [index, sectionData] of sectionsData.entries()) {
-            console.log(`sectionsData[${index}]:`, sectionData)
             let section;
             if (sectionData.type === 'Interlude') {
-                section = await InterludeModel.create({...sectionData, index});
+                section = await InterludeModel.create({ ...sectionData, index });
             } else if (sectionData.type === 'Chapter') {
                 // Retrieve the corresponding file for this chapter
-                const pdfFile = req.files['pdfs'] ? req.files['pdfs'][index] : "oooof"; //TODO
-                const pdfS3Key = pdfFile ? pdfFile.key : null;
+                const pdfFile = req.files['pdfs'][index]; 
+                const pdfS3Key = pdfFile?.key;
 
                 // Create chapter with text data and pdfS3Key
-                section = await ChapterModel.create({ 
-                    ...sectionData, 
-                    pdfS3Key : pdfS3Key || "uploadFailed?",  //TODO 
-                    index 
+                section = await ChapterModel.create({
+                    ...sectionData,
+                    pdfS3Key: pdfS3Key,
+                    index
                 });
             } else {
                 throw new Error(`Invalid section type: ${sectionData.type}`);
@@ -87,8 +88,7 @@ async function getMainEssay(req, res) {
         if (!essay) {
             return res.status(404).json({ error: 'Essay not found.' });
         }
-        console.log('found a main essay');
-        console.log(essay);
+        // console.log("Essay being returned by backend:", essay, "\n\n");
         return res.status(200).json(essay);
     } catch (error) {
         console.error('Error fetching main essay:', error);
@@ -114,6 +114,7 @@ async function getEssayById(req, res) {
 }
 
 //Anonymous
+
 async function getMainEssayPreview(req, res) {
     try {
         const essay = await EssayModel.findOne({ isMain: true }).populate('author');
@@ -128,6 +129,7 @@ async function getMainEssayPreview(req, res) {
 }
 
 //Anonymous
+//TODO: needs reworking for new essay structure
 async function getAllSideEssayPreviews(req, res) {
     try {
         const essays = await EssayModel.find({ isMain: false }).populate('author');
@@ -147,75 +149,79 @@ async function getAllSideEssayPreviews(req, res) {
     }
 }
 
+
+
 //Admin only
-async function preUpdateMainEssay(req, res, next) {
+async function updateMainEssay(req, res) {
     try {
-        const mainEssay = await EssayModel.findOne({ isMain: true });
+        const mainEssay = await EssayModel.findOne({ isMain: true }).populate('sections');
         if (!mainEssay) { res.status(400).json({ error: "Failed to find main essay." }); }
-        //delete inline images
-        for (const img of mainEssay.inlineImagesS3Keys) {
-            await deleteFromS3(img);
-        }
-        mainEssay.inlineImagesS3Keys = [];
-        //delete cover image
-        if (mainEssay.coverPhotoS3Key) {
-            await deleteFromS3(mainEssay.coverPhotoS3Key);
-        }
-        mainEssay.coverPhotoS3Key = "null";
-        //delete html
-        if (mainEssay.htmlS3Key) {
-            await deleteFromS3(mainEssay.htmlS3Key);
-        }
-        mainEssay.htmlS3Key = "null";
-
-        await mainEssay.save();
-        req.entity = mainEssay;
-        next();
-    } catch (err) {
-        console.log(err.message);
-        return res.status(400).json({ error: "preUpdateMainEssay failed." });
-    }
-}
-
-//Admin only
-async function postUpdateMainEssay(req, res) {
-    try {
-        // Grab essay document
-        const mainEssay = req.entity;
-        mainEssay.coverPhotoS3Key = req.files.coverPhoto[0].key;
-
-        // Process HTML file if uploaded
-        let preview = mainEssay.preview;
-        if (req.files.html && req.files.html[0]) {
-            const oldHtmlS3Key = mainEssay.htmlS3Key;
-            if (oldHtmlS3Key) {
-                await deleteFromS3(oldHtmlS3Key);
-            }
-
-            const newHtmlS3Key = req.files.html[0].key;
-            mainEssay.htmlS3Key = newHtmlS3Key;
-            const oldHTML = await downloadFromS3(newHtmlS3Key);
-
-            const imagesKeysAndHTML = await formatEssay(oldHTML, mainEssay._id.toString());
-            // Update essay's inline image keys
-            imagesKeysAndHTML.newImageKeys.forEach(imgKey => mainEssay.inlineImagesS3Keys.push(imgKey));
-
-            // Update the HTML content in S3
-            const modifiedHtmlContent = imagesKeysAndHTML.html;
-            await updateInS3(newHtmlS3Key, modifiedHtmlContent);
-
-            // Update the preview
-            preview = downsize(modifiedHtmlContent, { words: 20});
-        }
-
         // Update the main essay's title if provided
         mainEssay.title = req.body.title || mainEssay.title;
-        mainEssay.preview = preview;
+        // Update the main essay's cover photo if provided
+        if (req.files.coverPhoto && req.files.coverPhoto[0]) {
+            mainEssay.coverPhotoS3Key = req.files.coverPhoto[0].key;
+        }
+        //Update Sections: Delete sections that were removed from the form
+        let formSections = JSON.parse(req.body.sections)
+        console.log("formSections:", formSections);
+        //for each section that exists in the database currently:
+        //see if it is in the form's list of sections. 
 
-        // Save the changes to the database
-        await mainEssay.save();
+        const existingSectionIds = mainEssay.sections.map(section => section._id.toString());
+        const sectionsToRemove = existingSectionIds.filter(id => !formSections.some(fs => fs._id === id));
+        for (const sectionId of sectionsToRemove) {
+            const sectionToRemove = mainEssay.sections.id(sectionId);
+            if (sectionToRemove.type === "Chapter") {
+                await deleteFromS3(sectionToRemove.pdfS3Key);
+                await ChapterModel.findByIdAndDelete(sectionToRemove._id);
+            } else {
+                await InterludeModel.findByIdAndDelete(sectionToRemove._id);
+            }
+            mainEssay.sections.pull(sectionId); // Remove the section from the mainEssay
+        }
 
-        res.status(200).json(mainEssay);
+  
+        // Update existing sections
+
+
+        let uploadsAppendedCounter = 0;
+        for (const formSection of formSections) {
+            const existingSection = mainEssay.sections.find(sec => sec._id.toString() === formSection._id);
+            if (existingSection) {
+                existingSection.title = formSection.title;
+                existingSection.number = formSection.number;
+                existingSection.index = formSection.index;
+                if (existingSection.type === 'Chapter' && formSection.newUpload) {
+                    const pdfFile = req.files['pdfs'][uploadsAppendedCounter];
+                    uploadsAppendedCounter += 1;
+                    const pdfS3Key = pdfFile.key;
+                    existingSection.pdfS3Key = pdfS3Key;
+                }
+
+
+                await existingSection.save();
+            }
+            else {
+                let newSection;
+                if (formSection.type === 'Interlude') {
+                    newSection = await InterludeModel.create({ ...formSection });
+                } else if (formSection.type === 'Chapter') {
+                    const pdfFile = req.files['pdfs'][uploadsAppendedCounter];
+                    uploadsAppendedCounter += 1;
+                    const pdfS3Key = pdfFile.key;
+                    newSection = await ChapterModel.create({
+                        ...formSection,
+                        pdfS3Key: pdfS3Key
+                    });
+                    mainEssay.sections.push(newSection);
+                }
+            }
+        }
+
+        mainEssay.sections.sort((sectionA, sectionB) => sectionA.index - sectionB.index);
+        const savedEssay = await mainEssay.save();
+        return res.status(200).json(savedEssay);
     } catch (error) {
         console.error('Failed to update essay:', error);
         res.status(400).json({ error: 'Failed to update essay' });
@@ -281,7 +287,7 @@ async function postUpdateSideEssay(req, res) {
             await updateInS3(newHtmlS3Key, modifiedHtmlContent);
 
             // Update the preview
-            preview = downsize(modifiedHtmlContent, { words: 20});
+            preview = downsize(modifiedHtmlContent, { words: 20 });
         }
 
         // Update the main essay's title if provided
@@ -388,8 +394,7 @@ module.exports = {
     getMainEssayPreview,
     getAllSideEssayPreviews,
     //Update
-    preUpdateMainEssay,
-    postUpdateMainEssay,
+    updateMainEssay,
     preUpdateSideEssay,
     postUpdateSideEssay,
     starEssayById,

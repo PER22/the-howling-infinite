@@ -7,7 +7,7 @@ import { useLoggedInUser } from '../../components/LoggedInUserContext/LoggedInUs
 import { getMainEssay, updateMainEssay, createEssay } from '../../utilities/essays-service';
 import UnauthorizedBanner from '../../components/UnauthorizedBanner/UnauthorizedBanner';
 import FeedbackMessage from '../../components/FeedbackMessage/FeedbackMessage';
-import { getSignedURLForImage } from '../../utilities/images-service'
+import { Button } from '@mui/material';
 
 export default function EditMainEssayPage() {
     const [loading, setLoading] = useState(true);
@@ -25,7 +25,7 @@ export default function EditMainEssayPage() {
         setTitle('Editing Main Essay');
     }, [setTitle]);
 
-    
+
 
     useEffect(() => {
 
@@ -37,17 +37,18 @@ export default function EditMainEssayPage() {
                     newSection.data = {
                         ...newSection.data,
                         title: '',
-                        number: sections.filter(s => s.type === 'Chapter').length,
+                        number: sections.filter(s => s.type === 'Chapter').length + 1,
                         pdf: null,
-                        pdfS3Key: ''
-    
+                        pdfS3Key: '',
+                        _id: null,
                     };
                 } else if (type === 'Interlude') {
                     newSection.data = {
                         ...newSection.data,
                         title: '',
-                        number: sections.filter(s => s.type === 'Chapter').length,
-                        youtubeLink: ''
+                        number: sections.filter(s => s.type === 'Chapter').length + 1 || 1,
+                        youtubeLink: '',
+                        _id: null,
                     };
                 }
             }
@@ -55,6 +56,7 @@ export default function EditMainEssayPage() {
         };
 
         const fetchMainEssayToEdit = async () => {
+            setLoading(true);
             try {
                 const response = await getMainEssay();
                 if (response.error) {
@@ -63,12 +65,10 @@ export default function EditMainEssayPage() {
                 } else {
                     setEssayTitle(response.data.title);
                     setEssayExists(true);
-    
+                    setSections(oldSections => []);
                     response.data.sections.forEach(section => {
                         addSection(section.type, section);
                     });
-    
-                    
                 }
             } catch (err) {
                 setError(err.message);
@@ -77,12 +77,11 @@ export default function EditMainEssayPage() {
                 setLoading(false);
             }
         };
-    
         fetchMainEssayToEdit();
     }, []);
-    
 
-    
+
+
 
     const handleEssaySubmit = async (title, sections) => {
         setError(null);
@@ -96,20 +95,23 @@ export default function EditMainEssayPage() {
 
             // Add files for each chapter
             sections.forEach((section, index) => {
-                if (section.type === 'Chapter' && section.data.pdf) {
+                if (section.type === 'Chapter' && section.data.pdf?.file) {
                     formData.append(`pdfs`, section.data.pdf.file);
                 }
             });
 
             // Stringify the entire array of sections and add it to formData
-            const sectionsData = sections.map(section => ({
-                title: section.data.title,
-                number: section.data.number,
-                type: section.type,
-                index: section.index,
-                youtubeLink: section.type === 'Interlude' ? section.data.youtubeLink : undefined,
-                pdfS3Key: section.type === 'Chapter' ? section.data.pdfS3Key : undefined
-            }));
+            const sectionsData = sections.map((section, index) => (
+                {
+                    _id: section.data._id,
+                    title: section.data.title,
+                    number: section.data.number,
+                    type: section.type,
+                    index: index,
+                    youtubeLink: section.type === 'Interlude' ? section.data.youtubeLink : undefined,
+                    newUpload: section.data.newUpload || undefined
+                }
+            ));
 
             formData.append('sections', JSON.stringify(sectionsData));
 
@@ -118,16 +120,16 @@ export default function EditMainEssayPage() {
                 setError(response.error);
             } else {
                 setMessage(essayExists ? 'Essay successfully updated!' : 'Essay successfully created!');
-                // setTimeout(() => navigate('/read'), 2000); // Navigate after a delay
+                setTimeout(() => {
+                    setLoading(false);
+                    window.location.reload()
+                }
+                    , 2000);
             }
         } catch (err) {
             setError('Error creating/updating main essay: ' + err.message);
-        } finally {
-            setLoading(false);
-        }
+        } 
     };
-
-
 
 
     if (!loggedInUser || !loggedInUser.isAdmin) {
@@ -146,7 +148,11 @@ export default function EditMainEssayPage() {
                     onSubmit={handleEssaySubmit}
                 />
             )}
+            <Button onClick={() => {
+                console.log(sections);
+            }}>Log Form Contents</Button>
             <FeedbackMessage error={error} message={message} />
         </div>
     );
 }
+
