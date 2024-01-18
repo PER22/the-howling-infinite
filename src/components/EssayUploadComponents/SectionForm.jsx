@@ -63,14 +63,14 @@ function SectionForm({ id, section, index, updateSectionData, removeSection }) {
                 <>
                     <TextField
                         label="Interlude Title"
-                        value={section.title || ''}
+                        value={section.data.title || ''}
                         onChange={(e) => updateSectionData(index, 'title', e.target.value)}
                         style={{ marginRight: 8 }}
                     />
                     <TextField
                         fullWidth
                         label="YouTube Link"
-                        value={section.youtubeLink || ''}
+                        value={section.data.youtubeLink || ''}
                         onChange={(e) => updateSectionData(index, 'youtubeLink', e.target.value)}
                         style={{ marginRight: 8 }}
                     />
