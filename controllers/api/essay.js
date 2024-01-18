@@ -49,7 +49,7 @@ async function createEssay(req, res) {
                 section = await InterludeModel.create({ ...sectionData, index });
             } else if (sectionData.type === 'Chapter') {
                 // Retrieve the corresponding file for this chapter
-                const pdfFile = req.files['pdfs'][index]; 
+                const pdfFile = req.files['pdfs'][index];
                 const pdfS3Key = pdfFile?.key;
 
                 // Create chapter with text data and pdfS3Key
@@ -155,35 +155,28 @@ async function getAllSideEssayPreviews(req, res) {
 async function updateMainEssay(req, res) {
     try {
         const mainEssay = await EssayModel.findOne({ isMain: true }).populate('sections');
-        if (!mainEssay) { res.status(400).json({ error: "Failed to find main essay." }); }
-        // Update the main essay's title if provided
+        if (!mainEssay) { return res.status(400).json({ error: "Failed to find main essay." }); }
         mainEssay.title = req.body.title || mainEssay.title;
-        // Update the main essay's cover photo if provided
         if (req.files.coverPhoto && req.files.coverPhoto[0]) {
             mainEssay.coverPhotoS3Key = req.files.coverPhoto[0].key;
         }
-        //Update Sections: Delete sections that were removed from the form
-        let formSections = JSON.parse(req.body.sections)
+        let formSections = JSON.parse(req.body.sections);
         console.log("formSections:", formSections);
-        //for each section that exists in the database currently:
-        //see if it is in the form's list of sections. 
-
-        const existingSectionIds = mainEssay.sections.map(section => section._id.toString());
-        const sectionsToRemove = existingSectionIds.filter(id => !formSections.some(fs => fs._id === id));
-        for (const sectionId of sectionsToRemove) {
-            const sectionToRemove = mainEssay.sections.id(sectionId);
-            if (sectionToRemove.type === "Chapter") {
-                await deleteFromS3(sectionToRemove.pdfS3Key);
-                await ChapterModel.findByIdAndDelete(sectionToRemove._id);
-            } else {
-                await InterludeModel.findByIdAndDelete(sectionToRemove._id);
+        const formSectionIds = new Set(formSections.map(fs => fs._id));
+        for (const section of mainEssay.sections) {
+            // Check if the current section ID is not in formSections
+            if (!formSectionIds.has(section._id.toString())) {
+                // Perform deletion based on section type
+                if (section.type === "Chapter") {
+                    await deleteFromS3(section.pdfS3Key);
+                    await ChapterModel.findByIdAndDelete(section._id);
+                } else {
+                    await InterludeModel.findByIdAndDelete(section._id);
+                }
+                // Remove the section from the mainEssay
+                mainEssay.sections.pull(section._id);
             }
-            mainEssay.sections.pull(sectionId); // Remove the section from the mainEssay
         }
-
-  
-        // Update existing sections
-
 
         let uploadsAppendedCounter = 0;
         for (const formSection of formSections) {
@@ -203,9 +196,12 @@ async function updateMainEssay(req, res) {
                 await existingSection.save();
             }
             else {
+                console.log("New section detected.");
                 let newSection;
                 if (formSection.type === 'Interlude') {
                     newSection = await InterludeModel.create({ ...formSection });
+                    console.log(newSection);
+                    mainEssay.sections.push(newSection);
                 } else if (formSection.type === 'Chapter') {
                     const pdfFile = req.files['pdfs'][uploadsAppendedCounter];
                     uploadsAppendedCounter += 1;
