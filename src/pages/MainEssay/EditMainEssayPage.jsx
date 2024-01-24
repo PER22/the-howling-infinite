@@ -148,9 +148,6 @@ export default function EditMainEssayPage() {
                     onSubmit={handleEssaySubmit}
                 />
             )}
-            <Button onClick={() => {
-                console.log(sections);
-            }}>Log Form Contents</Button>
             <FeedbackMessage error={error} message={message} />
         </div>
     );

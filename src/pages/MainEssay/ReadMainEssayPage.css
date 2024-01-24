@@ -1,8 +1,24 @@
-.centered-text *, .centered-text{
-    text-align: center;
+iframe {
+  margin: 0 auto;
+  display: block;
 }
 
-iframe {
-    margin: 0 auto;
-    display: block;
+.page-controls {
+  position: fixed;
+  top: 50%; 
+  left: 1rem; 
+  transform: translateY(-50%); 
+  z-index: 2; 
+  background-color: rgba(0,0,0,0.7);
+  border-radius: 1rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem; 
 }
+
+
+
+
+

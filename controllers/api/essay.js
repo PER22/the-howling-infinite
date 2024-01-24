@@ -88,7 +88,7 @@ async function getMainEssay(req, res) {
         if (!essay) {
             return res.status(404).json({ error: 'Essay not found.' });
         }
-        // console.log("Essay being returned by backend:", essay, "\n\n");
+        console.log("Essay being returned by backend:", essay, "\n\n");
         return res.status(200).json(essay);
     } catch (error) {
         console.error('Error fetching main essay:', error);
@@ -191,8 +191,9 @@ async function updateMainEssay(req, res) {
                     const pdfS3Key = pdfFile.key;
                     existingSection.pdfS3Key = pdfS3Key;
                 }
-
-
+                if(existingSection.type === 'Interlude'){
+                    existingSection.youtubeLink = formSection.youtubeLink;
+                }
                 await existingSection.save();
             }
             else {

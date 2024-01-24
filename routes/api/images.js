@@ -1,12 +1,15 @@
 const express = require('express');
 const router = express.Router();
+
 const ensureLoggedIn = require('../../config/ensureLoggedIn');
 const imageController = require('../../controllers/api/images');
+const { uploadFiles } = require('../../utilities/aws');
 
 //Anonymous 
 // GET /api/images/:imageTitle
 router.get('/:imageTitle', imageController.fetchPublicImageURL);
-const { uploadFiles } = require('../../utilities/aws');
+
+
 
 //Logged in users
 // POST api/images/upload
