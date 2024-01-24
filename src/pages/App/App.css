@@ -1,85 +1,91 @@
-
-a, a:visited {
-    text-decoration: none !important;
+a,
+a:visited {
+  text-decoration: none !important;
 }
-.success-message{
-    color: green;
-}
-
-.error-message{
-    color: red;
+.success-message {
+  color: green;
 }
 
-p{margin-bottom: .6rem;}
+.error-message {
+  color: red;
+}
 
-
+p {
+  margin-bottom: 0.6rem;
+}
 
 .App {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    min-width: 100vw;
-  }
-  
-  .content {
-    flex-grow: 1;
-    margin: 0 auto;
-  }
-  
-  .footer-bar {
-    background-color: #344E41;
-    padding: .5rem;
-    color: white;
-  }
-  
-
-body {
-    background-color: #DAD7CD;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-width: 100vw;
 }
 
+.content {
+  flex-grow: 1;
+  margin: 0 auto;
+}
 
-.article-container{
-    margin: 0 auto;
+.footer-bar {
+  background-color: #344e41;
+  padding: 0.5rem;
+  color: white;
+}
+
+body {
+  background: 
+    
+    
+    linear-gradient(to bottom, #dad7cdaa 0%, #999690aa 100%),
+    radial-gradient(ellipse at center, #dad7cd, black)
+    ;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.article-container {
+  margin: 0 auto;
 }
 
 #card-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.about-info, .contact-info{
-    text-align: center;
+.about-info,
+.contact-info {
+  text-align: center;
 }
 
-
- .navigation-container{
-    margin-bottom: 2rem;
- }
-
- .delete-comment-button{
-    background-color: red;
-    color: white;
-    padding: 1rem;
-    border-radius: 50%
- }
-
- .no-select {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+.navigation-container {
+  margin-bottom: 2rem;
 }
 
-.centered-text *, .centered-text{
-    text-align: center;
+.delete-comment-button {
+  background-color: red;
+  color: white;
+  padding: 1rem;
+  border-radius: 50%;
 }
 
-* {transition: all .25s ease-out;}
+.no-select {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.centered-text *,
+.centered-text {
+  text-align: center;
+}
+
+* {
+  transition: all 0.25s ease-out;
+}

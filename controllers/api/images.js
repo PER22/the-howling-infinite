@@ -1,11 +1,11 @@
-const { generatePresignedS3DownloadURL: generateSignedURL } = require('../../utilities/aws');
+const { generatePresignedS3DownloadURL} = require('../../utilities/aws');
 
 async function fetchPublicImageURL(req, res) {
     try {
-        const imageTitle = req.params.imageTitle;
-        const signedURL = await generateSignedURL(imageTitle);
+        const imageTitle = decodeURIComponent(req.params.imageTitle);
+        const signedURL = await generatePresignedS3DownloadURL(imageTitle);
         if (signedURL) {
-            res.redirect(signedURL);
+            res.status(200).json({ url: signedURL }); // Send as JSON object
         } else {
             res.status(500).send("Error generating signed URL");
         }
@@ -14,5 +14,6 @@ async function fetchPublicImageURL(req, res) {
         res.status(500).send("Internal server error");
     }
 }
+
 
 module.exports = { fetchPublicImageURL };

@@ -6,7 +6,8 @@ export function uploadInlineImage(formData){
 
 export async function getSignedURLForImage(s3Key){
         try{
-            const signedURL = await imageAPI.getSignedURLForImage(s3Key);
+            const encodedKey = encodeURIComponent(s3Key);
+            const signedURL = await imageAPI.getSignedURLForImage(encodedKey);
             if(!signedURL.error) {
                 return {data: signedURL, error: null};
             }
