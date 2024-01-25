@@ -1,13 +1,11 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { useNavigate } from 'react-router-dom';
 import EssayForm from '../../components/EssayUploadComponents/EssayForm';
 import { TitleContext } from '../../components/TitleBar/TitleContext';
 import { useLoggedInUser } from '../../components/LoggedInUserContext/LoggedInUserContext';
 import { getMainEssay, updateMainEssay, createEssay } from '../../utilities/essays-service';
 import UnauthorizedBanner from '../../components/UnauthorizedBanner/UnauthorizedBanner';
 import FeedbackMessage from '../../components/FeedbackMessage/FeedbackMessage';
-import { Button } from '@mui/material';
 
 export default function EditMainEssayPage() {
     const [loading, setLoading] = useState(true);
@@ -15,11 +13,11 @@ export default function EditMainEssayPage() {
     const [message, setMessage] = useState('');
     const [essayTitle, setEssayTitle] = useState('');
     const [sections, setSections] = useState([]);
+    const [coverPhotoS3Key, setCoverPhotoS3Key] = useState('');
     const [essayExists, setEssayExists] = useState(false);
 
     const { setTitle } = useContext(TitleContext);
     const { loggedInUser } = useLoggedInUser();
-    const navigate = useNavigate();
 
     useEffect(() => {
         setTitle('Editing Main Essay');
@@ -64,6 +62,7 @@ export default function EditMainEssayPage() {
                     setEssayExists(false);
                 } else {
                     setEssayTitle(response.data.title);
+                    setCoverPhotoS3Key(response.data.coverPhotoS3Key);
                     setEssayExists(true);
                     setSections(oldSections => []);
                     response.data.sections.forEach(section => {
@@ -83,14 +82,16 @@ export default function EditMainEssayPage() {
 
 
 
-    const handleEssaySubmit = async (title, sections) => {
+    const handleEssaySubmit = async (title, sections, essayCoverImageFile) => {
         setError(null);
         setMessage(null);
         setLoading(true);
-
         try {
             const formData = new FormData();
             formData.append('title', title);
+            if (essayCoverImageFile) {
+                formData.append('coverPhoto', essayCoverImageFile);
+            }
             formData.append('isMain', true);
 
             // Add files for each chapter
@@ -128,7 +129,7 @@ export default function EditMainEssayPage() {
             }
         } catch (err) {
             setError('Error creating/updating main essay: ' + err.message);
-        } 
+        }
     };
 
 
@@ -145,6 +146,7 @@ export default function EditMainEssayPage() {
                 <EssayForm
                     initialTitle={essayTitle}
                     initialSections={sections}
+                    initialCoverPhoto={coverPhotoS3Key}
                     onSubmit={handleEssaySubmit}
                 />
             )}

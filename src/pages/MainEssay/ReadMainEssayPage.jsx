@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import moment from 'moment';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Star from '@mui/icons-material/Star';
@@ -19,7 +20,8 @@ import { getMainEssay, starEssayById, unstarEssayById } from '../../utilities/es
 import { Document, Page } from 'react-pdf';
 import { getSignedURLForImage } from '../../utilities/images-service';
 import { pdfjs } from 'react-pdf';
-import { TextField } from '@mui/material';
+import { TextField, Tooltip } from '@mui/material';
+import { hover } from '@testing-library/user-event/dist/hover';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.js',
@@ -32,6 +34,7 @@ const starIcon = require('../../assets/star.png');
 
 export default function ReadMainEssayPage() {
     const { setTitle } = useContext(TitleContext);
+    const navigator = useNavigate();
 
 
     const { loggedInUser, setLoggedInUser } = useLoggedInUser();
@@ -144,13 +147,16 @@ export default function ReadMainEssayPage() {
     };
 
 
-
     const handleDownscalePage = () => {
         setScale(currentScale => Math.max(currentScale - 0.1 || 1, 1))
     }
 
     const handleUpscalePage = () => {
         setScale(currentScale => Math.min(currentScale + 0.1 || 3, 3))
+    }
+
+    function useNavigateToLogin() {
+
     }
 
     useEffect(() => {
@@ -242,19 +248,32 @@ export default function ReadMainEssayPage() {
             </div>
 
             <div>
-                <Box className="star-info" display="flex" alignItems="center">
-                    {loggedInUser &&
-                        <IconButton onClick={!essayIsStarred ? () => handleStarEssay(mainEssay._id) : () => handleUnstarEssay(mainEssay._id)}>
-                            {!essayIsStarred ?
-                                <StarBorder color="action" /> :
-                                <Star color="primary" />
-                            }
-                        </IconButton>
-                    }
-                    <Typography variant="body1" className="num-stars">
-                        {numStars} star{numStars === 1 ? "" : "s"}
-                    </Typography>
-                </Box>
+                <div style={{ display: 'flex' }}>
+                    <h1> {sections[currentSectionIndex]?.title}</h1>
+                    <Box className="star-info" display="flex" alignItems={'center'}>
+                        {loggedInUser &&
+                            <IconButton onClick={!essayIsStarred ? () => handleStarEssay(mainEssay._id) : () => handleUnstarEssay(mainEssay._id)}>
+                                {!essayIsStarred ?
+                                    <StarBorder color="action" /> :
+                                    <Star color="primary" />
+                                }
+                            </IconButton>
+                        }
+                        {!loggedInUser &&
+                            <Tooltip title="Log in to star content">
+                                <IconButton onClick={() => navigator('/auth')} >
+                                    <Star color="primary" />
+                                </IconButton>
+                            </Tooltip>}
+                        <Typography variant="body1" className="num-stars">
+                            {numStars}
+                        </Typography>
+                    </Box>
+
+                </div>
+                <h3>By Dr. Gene Lohser</h3>
+                <h4>Last updated at {moment(sections[currentSectionIndex]?.updatedAt).format('MM/DD/YYYY hh:mm a')}</h4>
+
 
                 <FeedbackMessage error={error} message={message} />
             </div>
