@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { TextField, Box, Button } from '@mui/material';
+import { TextField, Box, Button, Typography } from '@mui/material';
 import SectionList from './SectionList';
 import { v4 as uuidv4 } from 'uuid';
+import { CloudUpload } from '@mui/icons-material';
 
-function EssayForm({ essayExists, initialTitle, initialSections, onSubmit}) {
+function EssayForm({ essayExists, initialTitle, initialSections, initialCoverPhoto, onSubmit }) {
     const [title, setTitle] = useState(initialTitle || '');
+    const [essayCoverImageFile, setEssayCoverImageFile] = useState(null);
     const [sections, setSections] = useState(initialSections || []);
 
     const addSection = (type, initData) => {
@@ -18,7 +20,7 @@ function EssayForm({ essayExists, initialTitle, initialSections, onSubmit}) {
                     pdf: null,
                     pdfS3Key: '',
                     newUpload: true,
-                    newSection:true
+                    newSection: true
                 };
             } else if (type === 'Interlude') {
                 newSection.data = {
@@ -33,11 +35,10 @@ function EssayForm({ essayExists, initialTitle, initialSections, onSubmit}) {
     };
 
     const removeSection = (index) => {
-        setSections(sections =>sections.filter((_, i) => i !== index));
+        setSections(sections => sections.filter((_, i) => i !== index));
     };
 
     const updateSectionData = (index, key, value) => {
-        console.log("UpdateSectionDataCalled");
         const updatedSections = sections.map((section, i) => {
             if (i === index) {
                 const updatedData = { ...section.data };
@@ -56,9 +57,15 @@ function EssayForm({ essayExists, initialTitle, initialSections, onSubmit}) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSubmit(title, sections);
+        onSubmit(title, sections, essayCoverImageFile);
     };
 
+    const handleCoverImageChange = (event) => {
+        const file = event.target.files[0]; 
+        if (file) {
+            setEssayCoverImageFile(file);
+        }
+    };
 
     return (
         <form onSubmit={handleSubmit} noValidate autoComplete="off">
@@ -71,6 +78,21 @@ function EssayForm({ essayExists, initialTitle, initialSections, onSubmit}) {
                     onChange={(e) => setTitle(e.target.value)}
                     required
                 />
+                <input
+                    accept="image/*" //todo: common image types
+                    style={{ display: 'none' }}
+                    id={`input-essay-cover-photo-file`}
+                    type="file"
+                    onChange={handleCoverImageChange} //todo: handle new file
+                />
+                <label htmlFor={`input-essay-cover-photo-file`}>
+                    <Button variant="contained" component="span" startIcon={<CloudUpload />}>
+                        Cover Photo
+                    </Button>
+                </label>
+                <Typography variant="subtitle1" style={{ marginLeft: 8 }}>
+                    {essayCoverImageFile ? essayCoverImageFile.name : initialCoverPhoto || 'No file selected.'}
+                </Typography>
             </Box>
             <SectionList
                 sections={sections}
