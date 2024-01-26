@@ -1,6 +1,6 @@
 import { Card, CardContent, Typography, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
+import ReplyIcon from '@mui/icons-material/Reply';
 import { deleteCommentById } from "../../utilities/comments-service";
 import { useLoggedInUser } from "../LoggedInUserContext/LoggedInUserContext";
 
@@ -11,7 +11,6 @@ export default function CommentCard({ comment, deleteInUI, setParentCommentId })
     try {
       const response = await deleteCommentById(comment._id);
       if(!response.error){
-        console.log("in theory no errors?");
         deleteInUI(comment._id);
       }
     } catch (err) {
@@ -37,7 +36,7 @@ export default function CommentCard({ comment, deleteInUI, setParentCommentId })
         </Typography>
         {loggedInUser &&
           <IconButton size="small" onClick={handleReplyClick}sx={{ alignSelf: 'flex-end' }}>
-            <AddIcon fontSize="inherit"/>
+            <ReplyIcon/>
           </IconButton>
         }
         {((loggedInUser?._id === (comment.author._id || comment.author)) || (loggedInUser?.isAdmin)) &&
