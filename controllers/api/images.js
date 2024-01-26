@@ -5,7 +5,7 @@ async function fetchPublicImageURL(req, res) {
         const imageTitle = decodeURIComponent(req.params.imageTitle);
         const signedURL = await generatePresignedS3DownloadURL(imageTitle);
         if (signedURL) {
-            res.status(200).json({ url: signedURL }); // Send as JSON object
+            res.status(200).json({ url: signedURL }); 
         } else {
             res.status(500).send("Error generating signed URL");
         }
