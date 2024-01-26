@@ -8,6 +8,7 @@ const { uploadFiles } = require('../../utilities/aws');
 
 //Anonymous
 // MAIN ESSAYS:
+router.get('/mainEssayPreview', essayController.getMainEssayPreview);
 
 
 //Anonymous

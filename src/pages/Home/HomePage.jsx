@@ -1,8 +1,8 @@
 import { useEffect, useState, useContext } from "react";
 import { TitleContext } from "../../components/TitleBar/TitleContext";
-import { getBlogPostPreviews } from "../../utilities/blog-service";
+// import { getBlogPostPreviews } from "../../utilities/blog-service";
 import { getMainEssayPreview } from "../../utilities/essays-service";
-import { getSideEssayPreviews } from "../../utilities/essays-service";
+// import { getSideEssayPreviews } from "../../utilities/essays-service";
 import ContentPreviewCard from "../../components/ContentPreviewCard/ContentPreviewCard";
 import FeedbackMessage from '../../components/FeedbackMessage/FeedbackMessage';
 
@@ -22,8 +22,8 @@ export default function HomePage() {
     async function fetchMainEssay() {
       try {
         const response = await getMainEssayPreview();
-        console.log("recievedMainEssay: ", response);
-        if (!response.error) { 
+        // console.log("recievedMainEssay: ", response);
+        if (response && !response.error) { 
           setMainEssay(response.data); 
         }else{
           setError(response.error);
