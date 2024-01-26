@@ -4,7 +4,7 @@ export default function RecursiveComment({ comment, removeCardFromUI, setParentC
     return (
       <div>
         <ListItem disablePadding={true}>
-          <CommentCard comment={comment} deleteInUI={removeCardFromUI} setParentCommentId={setParentCommentId}/>
+          <CommentCard comment={comment} removeCardFromUI={removeCardFromUI} setParentCommentId={setParentCommentId}/>
         </ListItem>
   
         {comment.replies.length > 0 && comment.replies.map(reply => (
@@ -15,4 +15,3 @@ export default function RecursiveComment({ comment, removeCardFromUI, setParentC
       </div>
     );
   }
-  
