@@ -43,17 +43,30 @@ async function getCommentById(req, res) {
 
 async function getComments(req, res){
   try {
-    const requestedComments = await commentModel.find({isApproved: true}).populate("author"); //TODO: Only show approved comments
+    let requestedComments;
+    if(req.user){
+      // Fetch all approved comments and unapproved comments by the logged-in user
+      requestedComments = await commentModel.find({
+        $or: [
+          { isApproved: true },
+          { author: req.user._id, isApproved: false }
+        ]
+      }).populate("author");
+    } else {
+      // Fetch only approved comments for users not logged in
+      requestedComments = await commentModel.find({isApproved: true}).populate("author");
+    }
+    
     if (requestedComments) { 
       return res.status(200).json(requestedComments); 
-    }
-    else{
-      return [];
+    } else {
+      return res.status(404).json({error: "No comments found."});
     }
   } catch (err) {
-    res.status(404).json({error: "Failed to get comments by entity."});
+    res.status(500).json({error: "Failed to get comments."});
   }
 }
+
 
 async function updateCommentById(req, res) {
   try {
@@ -99,11 +112,11 @@ async function deleteCommentById(req, res) {
           commentToDelete.text = "[deleted]";
           await commentToDelete.save();
 
-          return res.status(200).json({ message: "Comment marked as [deleted]." });
+          return res.status(200).json({ message: "Comment marked as [deleted].", softDelete: true });
         } else {
           // If the comment has no children, delete it
           await commentToDelete.deleteOne();
-          return res.status(200).json({ message: "Comment deleted!" });
+          return res.status(200).json({ message: "Comment deleted!", hardDelete: true });
         }
 
       } else {

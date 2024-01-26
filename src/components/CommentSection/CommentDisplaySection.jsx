@@ -13,7 +13,6 @@ export default function CommentDisplaySection({ comments, setComments, setParent
       const commentMap = {};
       const commentTree = [];
 
-      // Create a mapping of id -> comment.
       comments.forEach(comment => {
         comment.replies = [];  // Initialize an empty replies array for each comment.
         commentMap[comment._id] = comment;
