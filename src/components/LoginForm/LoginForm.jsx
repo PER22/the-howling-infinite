@@ -5,35 +5,40 @@ import { TextField, Button, Card, CardContent, Typography } from '@mui/material'
 import { useLoggedInUser } from '../LoggedInUserContext/LoggedInUserContext';
 import * as usersService from '../../utilities/users-service';
 import FeedbackMessage from '../FeedbackMessage/FeedbackMessage';
+import IndeterminateLoadingSpinner from '../Loading/IndeterminateLoadingSpinner';
 
 export default function LoginForm() {
   const navigate = useNavigate();
-
+  const { loggedInUser, setLoggedInUser } = useLoggedInUser();
+  
 
   const [credentials, setCredentials] = useState({
     email: '',
     password: ''
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   function handleChange(evt) {
     setCredentials({ ...credentials, [evt.target.name]: evt.target.value });
     setError('');
   }
 
-  const { loggedInUser, setLoggedInUser } = useLoggedInUser();
   async function handleSubmit(evt) {
-    // Prevent form from being submitted to the server
     evt.preventDefault();
     try {
+      setLoading(true);
       const user = await usersService.login(credentials);
       if (!user.error) {
         setLoggedInUser(user);
-        navigate('/');
+        setTimeout( () => {setLoading(false); navigate('/');}, 400);
+        
       } else {
         console.log("user.error: ", user.error)
         setError(user.error);
+        setLoading(false);
       }
+      
     } catch (err) {
       // Check for the specific error messages and set the error state accordingly
       setError('Log In Failed - Try Again');
@@ -79,6 +84,7 @@ export default function LoginForm() {
           >
             Log In
           </Button>
+          {loading && <IndeterminateLoadingSpinner/>}
         </form>
       </CardContent>
       <FeedbackMessage error={error} message={null} />

@@ -157,6 +157,12 @@ async function sendPasswordResetEmail(req, res){
   console.log("Entering sendPasswordResetEmail()");
   try{
     console.log("req.body", req.body);
+    await body('email').isEmail().normalizeEmail().run(req);
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: "Email address is incorrectly formatted." });
+    }
+    console.log(req.body.email);
     const user = await User.findOne({email : req.body.email});
     if(!user){
       console.log("User not found.");
@@ -175,7 +181,7 @@ async function sendPasswordResetEmail(req, res){
       "From": "patrick@blackcatweb.dev",
       "To": `${req.body.email}`,
       "Subject": "Password Reset from The-Howling-Infinite.com",
-      "HtmlBody": `Here is your password reset link: <a href="http://www.the-howling-infinite.com/reset-password?token=${resetToken}">Reset Password</a>`,
+      "HtmlBody": `Here is your password reset link: <a href="${process.env.BASE_URL}/reset-password?token=${resetToken}">Reset Password</a>`,
       "TextBody": `Copy and paste this link into your URL bar to reset your password: http://www.the-howling-infinite.com/reset-password?token=${resetToken}`,
       "MessageStream": "outbound"
     });
@@ -187,39 +193,35 @@ async function sendPasswordResetEmail(req, res){
 }
 
 async function performPasswordReset(req, res){
-  console.log("Entering performPasswordReset()");
   const { token, newPassword } = req.body;
-  console.log("req.body:", req.body);
-
   try {
-    // Find the user by reset token
     const user = await User.findOne({ passwordResetToken: token });
-
     if (!user) {
-      console.log("Failed to find user");
+      // console.log("Failed to find user");
       return res.status(400).json({error:'Invalid token.'});
     } 
-    console.log("Found the requested user!");
-
-    // Check if token is expired
+    // console.log("Found the requested user!");
     const now = new Date();
     if (user.passwordResetExpires < now) {
-      console.log("Token is expired");
+      // console.log("Token is expired");
       return res.status(400).send({error:'Token has expired.'});
+    } 
+    await body('newPassword').isLength({ min: 8 }).trim().escape().run(req);
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: "Password does not meet minimum length requirements." });
     }
 
-    // Hash the new password
-    console.log("New password! :", newPassword);
-    console.log("Old password hash:", user.password);
+    // console.log("New password! :", newPassword);
+    // console.log("Old password hash:", user.password);
     user.password = newPassword;
-    console.log("New password hash:", user.password);
     // Clear the reset token and expiration date
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
-    console.log("Cleared reset token from user document!")
+    // console.log("Cleared reset token from user document!")
     // Save the updated user back to the database
     await user.save();
-    console.log("Saved user document!");
+    // console.log("Saved user document!");
 
     // Send a success response
     res.status(200).send({message:'Password has been reset successfully.'});
