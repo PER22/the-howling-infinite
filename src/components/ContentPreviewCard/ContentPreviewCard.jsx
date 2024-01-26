@@ -6,7 +6,7 @@ import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import moment from 'moment';
 import { getSignedURLForImage } from '../../utilities/images-service';
-
+import './ContentPreviewCard.css'
 
 export default function ContentPreviewCard({ content , type}) { 
     let essayPath;
@@ -31,7 +31,7 @@ export default function ContentPreviewCard({ content , type}) {
     const [dateUpdated, ...timeUpdated] = moment(content.updatedAt).format('MM/DD/YYYY hh:mm a').split(' ');
 
     return (
-        <Card sx={{ backgroundColor: '#A3B18A', marginTop: '1rem', marginBottom: '1rem', width: '80%' }}>
+        <Card sx={{ backgroundColor: '#A3B18A', marginTop: '1rem', marginBottom: '1rem' }}>
             <CardActionArea href={essayPath}
                 sx={{
                     display: 'flex',
