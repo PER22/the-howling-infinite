@@ -34,8 +34,6 @@ async function getDate(req, res, next) {
 async function createEssay(req, res) {
     try {
         let coverPhotoS3Key = null;
-        //TODO: cover photo update - unused by form for now, 
-        //and not 'required' in Essay model currently
 
         if (req.files.coverPhoto && req.files.coverPhoto[0]) {
             coverPhotoS3Key = req.files.coverPhoto[0].key;
