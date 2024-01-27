@@ -21,15 +21,11 @@ import { Document, Page } from 'react-pdf';
 import { getSignedURLForImage } from '../../utilities/images-service';
 import { pdfjs } from 'react-pdf';
 import { TextField, Tooltip } from '@mui/material';
-import { hover } from '@testing-library/user-event/dist/hover';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.js',
     import.meta.url,
 ).toString();
-
-const greyStarIcon = require("../../assets/greystar.png");
-const starIcon = require('../../assets/star.png');
 
 
 export default function ReadMainEssayPage() {

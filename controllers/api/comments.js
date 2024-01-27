@@ -52,6 +52,10 @@ async function getComments(req, res){
           { author: req.user._id, isApproved: false }
         ]
       }).populate("author");
+      requestedComments = requestedComments.map(eachComment => {
+        if (eachComment.isDeleted){eachComment.text = "[deleted]";}
+        return eachComment;
+      });
     } else {
       // Fetch only approved comments for users not logged in
       requestedComments = await commentModel.find({isApproved: true}).populate("author");
@@ -108,8 +112,8 @@ async function deleteCommentById(req, res) {
         const childrenCount = await commentModel.countDocuments({ parent: commentToDelete._id });
 
         if (childrenCount > 0) {
-          // If the comment has children, mark it as [deleted]
-          commentToDelete.text = "[deleted]";
+          // If the comment has children, mark it using .isDeleted
+          commentToDelete.isDeleted = true;
           await commentToDelete.save();
 
           return res.status(200).json({ message: "Comment marked as [deleted].", softDelete: true });
@@ -136,7 +140,7 @@ async function deleteCommentById(req, res) {
 // Fetch all unapproved comments
 async function getAllUnapprovedComments(req, res) {
   try {
-    const unapprovedComments = await commentModel.find({ isApproved: false });
+    const unapprovedComments = await commentModel.find({ isApproved: false }).populate('author');
     return res.status(200).json(unapprovedComments);
   } catch (err) {
     console.log("Error finding unapproved comments: ", err)
