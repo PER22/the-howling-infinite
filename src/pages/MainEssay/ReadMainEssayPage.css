@@ -18,6 +18,8 @@ iframe {
   gap: 0.5rem; 
 }
 
+.content{overflow-anchor: none;}
+
 
 
 

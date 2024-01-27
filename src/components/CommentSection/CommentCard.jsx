@@ -6,12 +6,12 @@ import Chip from '@mui/material/Chip';
 import PendingIcon from '@mui/icons-material/Pending';
 import { deleteCommentById } from "../../utilities/comments-service";
 import { useLoggedInUser } from "../LoggedInUserContext/LoggedInUserContext";
-import DeleteCommentConfirmationModal from './DeleteCommentConfirmationModal';
+import ConfirmationDialog from './ConfirmationDialog';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 
 export default function CommentCard({ comment, removeCardFromUI, setParentCommentId }) {
   const { loggedInUser, setLoggedInUser } = useLoggedInUser();
-  const [openDialog, setOpenDialog] = useState(false);
-  console.log("Comment: ", comment);
+  const [openConfirmationDialog, setOpenConfirmationDialog] = useState(false);
 
   const handleDelete = async () => {
     try {
@@ -30,11 +30,13 @@ export default function CommentCard({ comment, removeCardFromUI, setParentCommen
   };
 
   const handleConfirmationModalOpen = () => {
-    setOpenDialog(true);
+    setOpenConfirmationDialog
+(true);
   };
 
   const handleConfirmationModalClose = () => {
-    setOpenDialog(false);
+    setOpenConfirmationDialog
+(false);
   };
 
 
@@ -47,7 +49,7 @@ export default function CommentCard({ comment, removeCardFromUI, setParentCommen
       <CardContent sx={{ display: "flex", flexDirection: "column", gap: '0.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="subtitle1" className="comment-author">
-            {comment.author.name}
+            {comment.author.isAdmin && <AssignmentIndIcon/>}{comment.author.name}
           </Typography>
           {!comment.isApproved && loggedInUser?._id === comment.author._id && (
             <Chip
@@ -78,10 +80,11 @@ export default function CommentCard({ comment, removeCardFromUI, setParentCommen
       </CardContent>
     </Card>
 
-    {openDialog && 
-    <DeleteCommentConfirmationModal
-      open={openDialog}
-      onClose={() => setOpenDialog(false)}
+    {openConfirmationDialog && 
+    <ConfirmationDialog
+      open={openConfirmationDialog}
+      onClose={() => setOpenConfirmationDialog
+    (false)}
       onConfirm={handleDelete}
       title="Confirm Delete"
       message="Are you sure you want to delete this comment?"

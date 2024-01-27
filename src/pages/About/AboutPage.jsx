@@ -1,6 +1,6 @@
 import { useContext, useEffect } from 'react';
 import { TitleContext } from '../../components/TitleBar/TitleContext';
-
+import './AboutPage.css'
 export default function AboutPage() {
     const { setTitle } = useContext(TitleContext);
     useEffect(() => {
