@@ -14,7 +14,7 @@ export default function DiscussionPage() {
 
 
     const {loggedInUser, setLoggedInUser} = useLoggedInUser();
-    const [parentCommentId, setParentCommentId] = useState(null);
+    const [parentComment, setParentComment] = useState(null);
 
     const [comments, setComments] = useState([]);
     
@@ -39,9 +39,8 @@ export default function DiscussionPage() {
     
     return (
         <>
-            <CommentDisplaySection comments={comments} setComments={setComments} setParentCommentId={setParentCommentId}/>
-
-            {loggedInUser ? <AddCommentForm parentCommentId={parentCommentId} addCommentToList={addCommentToList}/> : <p>Log in to leave a comment.</p>}
+            <CommentDisplaySection comments={comments} setComments={setComments} setParentComment={setParentComment}/>
+            {loggedInUser ? <AddCommentForm parentComment={parentComment} setParentComment={setParentComment} addCommentToList={addCommentToList}/> : <p>Log in to leave a comment.</p>}
         </>
     );
 }                
