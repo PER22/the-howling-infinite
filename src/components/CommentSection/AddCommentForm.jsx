@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { postComment } from '../../utilities/comments-api';
-import { Button, TextField, Typography, Box, FormControl } from '@mui/material';
+import { Button, TextField, Typography, Box, FormControl, IconButton } from '@mui/material';
+import { Cancel } from '@mui/icons-material';
 
-function AddCommentForm({parentCommentId, addCommentToList}) {
+function AddCommentForm({ parentComment, addCommentToList, setParentComment }) {
   const [text, setText] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const parentCommentId = parentComment._id;
       const response = await postComment({
         text,
         parentCommentId
@@ -24,11 +26,14 @@ function AddCommentForm({parentCommentId, addCommentToList}) {
   };
 
   return (
-    <Box component="div" sx={{ width: '100%', mb:3}}>
+    <Box component="div" sx={{ width: '100%', mb: 3 }}>
       <Typography variant="body1">
         Note: All comments must be approved before being displayed.
       </Typography>
-
+      <div>
+        {parentComment && <p>Replying to: '{parentComment.text}'</p>}
+        {parentComment && <IconButton  onClick={()=>setParentComment(null)}><Cancel/></IconButton>}
+      </div>
       <FormControl component="form" onSubmit={handleSubmit} sx={{ mt: 2, width: '100%' }}>
         <TextField
           value={text}
@@ -38,7 +43,7 @@ function AddCommentForm({parentCommentId, addCommentToList}) {
           rows={5}
           variant="outlined"
           fullWidth
-          sx={{backgroundColor: "white", borderRadius:'4px'}}
+          sx={{ backgroundColor: "white", borderRadius: '4px' }}
         />
         <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
           Submit Comment

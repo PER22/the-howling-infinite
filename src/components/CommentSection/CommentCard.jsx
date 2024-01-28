@@ -9,7 +9,7 @@ import { useLoggedInUser } from "../LoggedInUserContext/LoggedInUserContext";
 import ConfirmationDialog from './ConfirmationDialog';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 
-export default function CommentCard({ comment, removeCardFromUI, setParentCommentId }) {
+export default function CommentCard({ comment, removeCardFromUI, setParentComment }) {
   const { loggedInUser, setLoggedInUser } = useLoggedInUser();
   const [openConfirmationDialog, setOpenConfirmationDialog] = useState(false);
 
@@ -41,7 +41,7 @@ export default function CommentCard({ comment, removeCardFromUI, setParentCommen
 
 
   const handleReplyClick = () => {
-    setParentCommentId(comment._id);
+    setParentComment(comment);
   }
 
   return (<>
