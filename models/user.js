@@ -35,6 +35,14 @@ const userSchema = new Schema({
   passwordResetExpires: {type: Date},
   verificationToken: {type: String},
   verificationExpires: {type: Date},
+  failedLoginAttempts: {
+    type: Number,
+    required: true,
+    default: 0
+  },
+  lastFailedLoginAttempt: {
+    type: Date
+  },
 }, {
   timestamps: true,
   toJSON: {

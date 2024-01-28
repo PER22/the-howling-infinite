@@ -4,7 +4,7 @@ import { Card, CardContent, Typography, IconButton, Icon } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { approveCommentById, deleteCommentById } from '../../utilities/comments-service';
-import ConfirmationDialog from '../CommentSection/ConfirmationDialog';
+import ConfirmationDialog from '../Discussion/ConfirmationDialog';
 
 export default function CommentModerationCard({ comment, onCommentRemoved }) {
     const [displayConfirmationModal, setDisplayConfirmationModal] = useState(false);

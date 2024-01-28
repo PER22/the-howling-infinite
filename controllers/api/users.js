@@ -120,7 +120,6 @@ async function login(req, res) {
     // Check for validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      console.log("Users controller: login(): Error in validation");
       return res.status(400).json({ error: "Email address is incorrectly formatted." });
     }
 
@@ -133,12 +132,23 @@ async function login(req, res) {
     if(!user.isVerified){
       return res.status(402).json({error: "Email address not verified."});
     }
-    // Check if the password matches
+    if (user.failedLoginAttempts >= 5) {
+      user.failedLoginAttempts+=1;
+      await user.save();
+      return res.status(429).json({error: "Account locked. Please reset your password."});
+    }
+
     const match = await bcrypt.compare(req.body.password, user.password);
-    console.log("req.body.password: ", req.body.password);
+
     if (!match) {
+      user.failedLoginAttempts+=1;
+      await user.save();
       return res.status(403).json({error: "Password doesn't match."});
     }
+
+    // Reset failed login attempts on successful login
+    user.failedLoginAttempts = 0;
+    await user.save();
     return res.json( createJWT(user) );
   } catch (err){
     return res.status(404).send({error: err.message});
@@ -218,6 +228,8 @@ async function performPasswordReset(req, res){
     // Clear the reset token and expiration date
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
+    // Clear the .failedLoginAttempts
+    user.failedLoginAttempts = 0;
     // console.log("Cleared reset token from user document!")
     // Save the updated user back to the database
     await user.save();

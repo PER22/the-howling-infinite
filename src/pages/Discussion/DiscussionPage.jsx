@@ -1,8 +1,8 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
 import { TitleContext } from '../../components/TitleBar/TitleContext'
 import { getComments } from '../../utilities/comments-service'
-import CommentDisplaySection from "../../components/CommentSection/CommentDisplaySection";
-import AddCommentForm from "../../components/CommentSection/AddCommentForm";
+import CommentDisplaySection from "../../components/Discussion/CommentDisplaySection";
+import AddCommentForm from "../../components/Discussion/AddCommentForm";
 import { useLoggedInUser } from "../../components/LoggedInUserContext/LoggedInUserContext";
 
 export default function DiscussionPage() {
@@ -12,6 +12,12 @@ export default function DiscussionPage() {
         setTitle("Discussion");
     }, [setTitle]);
 
+    const textInputRef = useRef(null);
+
+    const focusOnTextInput = () => {
+        textInputRef.current?.scrollIntoView({ behavior: 'smooth' });
+        textInputRef.current?.focus();
+      };
 
     const {loggedInUser, setLoggedInUser} = useLoggedInUser();
     const [parentComment, setParentComment] = useState(null);
