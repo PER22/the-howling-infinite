@@ -3,7 +3,7 @@ import { postComment } from '../../utilities/comments-api';
 import { Button, TextField, Typography, Box, FormControl, IconButton } from '@mui/material';
 import { Cancel } from '@mui/icons-material';
 
-function AddCommentForm({ parentComment, addCommentToList, setParentComment }) {
+function AddCommentForm({ parentComment, addCommentToList, setParentComment, textInputRef }) {
   const [text, setText] = useState('');
 
   const handleSubmit = async (e) => {
@@ -49,6 +49,7 @@ return (
         variant="outlined"
         fullWidth
         sx={{ backgroundColor: "white", borderRadius: '4px' }}
+        inputRef={textInputRef}
       />
       <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
         Submit Comment

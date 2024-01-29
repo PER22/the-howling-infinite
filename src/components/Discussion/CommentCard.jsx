@@ -9,7 +9,8 @@ import { useLoggedInUser } from "../LoggedInUserContext/LoggedInUserContext";
 import ConfirmationDialog from './ConfirmationDialog';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import './CommentCard.css'
-export default function CommentCard({ comment, removeCardFromUI, setParentComment }) {
+
+export default function CommentCard({ comment, removeCardFromUI, setParentComment, focusOnTextInput}) {
   const { loggedInUser, setLoggedInUser } = useLoggedInUser();
   const [openConfirmationDialog, setOpenConfirmationDialog] = useState(false);
 
@@ -42,6 +43,7 @@ export default function CommentCard({ comment, removeCardFromUI, setParentCommen
 
   const handleReplyClick = () => {
     setParentComment(comment);
+    focusOnTextInput();
   }
 
   return (<>
@@ -69,7 +71,7 @@ export default function CommentCard({ comment, removeCardFromUI, setParentCommen
           <Typography variant="body2" className="comment-text">
             {comment.text}
           </Typography>
-          
+
         </div>
         <div className="comment-action-buttons">
           {loggedInUser &&
@@ -77,6 +79,11 @@ export default function CommentCard({ comment, removeCardFromUI, setParentCommen
               <ReplyIcon />
             </IconButton>
           }
+          {/* {(loggedInUser?._id === (comment.author._id || comment.author)) &&
+            <IconButton size="small" onClick={handleEditClick}>
+              <EditIcon />
+            </IconButton>
+          } */}
           {((loggedInUser?._id === (comment.author._id || comment.author)) || (loggedInUser?.isAdmin)) &&
             <IconButton size="small" onClick={handleConfirmationModalOpen} sx={{ alignSelf: 'flex-end' }}>
               <DeleteIcon />

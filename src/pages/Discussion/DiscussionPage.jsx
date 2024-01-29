@@ -13,18 +13,19 @@ export default function DiscussionPage() {
     }, [setTitle]);
 
     const textInputRef = useRef(null);
-
     const focusOnTextInput = () => {
         textInputRef.current?.scrollIntoView({ behavior: 'smooth' });
         textInputRef.current?.focus();
-      };
+    };
 
-    const {loggedInUser, setLoggedInUser} = useLoggedInUser();
+
+
+    const { loggedInUser, setLoggedInUser } = useLoggedInUser();
     const [parentComment, setParentComment] = useState(null);
 
     const [comments, setComments] = useState([]);
-    
-      
+
+
     useEffect(() => {
         async function fetchComments() {
             const response = await getComments();
@@ -35,18 +36,18 @@ export default function DiscussionPage() {
         fetchComments();
     }, []);
 
-    function addCommentToList(comment){
+    function addCommentToList(comment) {
         const updatedComments = [...comments, comment];
         setComments(updatedComments);
     }
 
 
 
-    
+
     return (
         <>
-            <CommentDisplaySection comments={comments} setComments={setComments} setParentComment={setParentComment}/>
-            {loggedInUser ? <AddCommentForm parentComment={parentComment} setParentComment={setParentComment} addCommentToList={addCommentToList}/> : <p>Log in to leave a comment.</p>}
+            <CommentDisplaySection comments={comments} setComments={setComments} setParentComment={setParentComment} focusOnTextInput={focusOnTextInput} x />
+            {loggedInUser ? <AddCommentForm parentComment={parentComment} setParentComment={setParentComment} addCommentToList={addCommentToList} textInputRef={textInputRef} /> : <p>Log in to leave a comment.</p>}
         </>
     );
 }                
