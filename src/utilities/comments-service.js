@@ -28,6 +28,16 @@ export async function postComment(contentType, contentId){
     }
 }
 
+export async function editCommentById(commentId, editedText){
+    try{
+        const editedComment = await commentAPI.editCommentById(commentId, editedText);
+        if(editedComment && !editedComment.error) {
+            return {data: editedComment, message: "Comment edit successfully"};
+        }
+        else{return {error: editedComment.error}}
+    }catch(err){}
+}
+
 export async function getCommentsAwaitingApproval(){
     try{
         const comments = await commentAPI.getCommentsAwaitingApproval();

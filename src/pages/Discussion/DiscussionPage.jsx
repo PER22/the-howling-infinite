@@ -4,7 +4,7 @@ import { getComments } from '../../utilities/comments-service'
 import CommentDisplaySection from "../../components/Discussion/CommentDisplaySection";
 import AddCommentForm from "../../components/Discussion/AddCommentForm";
 import { useLoggedInUser } from "../../components/LoggedInUserContext/LoggedInUserContext";
-
+import './DiscussionPage.css'
 export default function DiscussionPage() {
 
     const { setTitle } = useContext(TitleContext);
@@ -18,12 +18,32 @@ export default function DiscussionPage() {
         textInputRef.current?.focus();
     };
 
-
-
     const { loggedInUser, setLoggedInUser } = useLoggedInUser();
     const [parentComment, setParentComment] = useState(null);
-
+    const [commentToBeEdited, setCommentToBeEdited] = useState(null);
     const [comments, setComments] = useState([]);
+
+    const switchToReplying = (comment) => {
+        cancelEdit();
+        focusOnTextInput();
+        setParentComment(comment)
+    };
+
+    const switchToEditing = (comment) => {
+        cancelReply();
+        focusOnTextInput();
+        setCommentToBeEdited(comment)
+    }
+
+    const cancelReply = () => {
+        setParentComment(null);
+    }
+
+    const cancelEdit = () => {
+        setCommentToBeEdited(null);
+    };
+
+
 
 
     useEffect(() => {
@@ -44,10 +64,19 @@ export default function DiscussionPage() {
 
 
 
+
     return (
         <>
-            <CommentDisplaySection comments={comments} setComments={setComments} setParentComment={setParentComment} focusOnTextInput={focusOnTextInput} x />
-            {loggedInUser ? <AddCommentForm parentComment={parentComment} setParentComment={setParentComment} addCommentToList={addCommentToList} textInputRef={textInputRef} /> : <p>Log in to leave a comment.</p>}
+            <CommentDisplaySection comments={comments} setComments={setComments} switchToEditing={switchToEditing} switchToReplying={switchToReplying} />
+            {loggedInUser ?
+                <AddCommentForm
+                    textInputRef={textInputRef} //used for scrolling/focusing on the text input.
+                    addCommentToList={addCommentToList}
+                    parentComment={parentComment}
+                    commentToBeEdited={commentToBeEdited}
+                />
+                :
+                <p>Log in to leave a comment.</p>}
         </>
     );
 }                
