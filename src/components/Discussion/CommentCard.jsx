@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, Typography, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ReplyIcon from '@mui/icons-material/Reply';
+import EditIcon from '@mui/icons-material/Edit'
 import Chip from '@mui/material/Chip';
 import PendingIcon from '@mui/icons-material/Pending';
 import { deleteCommentById } from "../../utilities/comments-service";
@@ -10,7 +11,7 @@ import ConfirmationDialog from './ConfirmationDialog';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import './CommentCard.css'
 
-export default function CommentCard({ comment, removeCardFromUI, setParentComment, focusOnTextInput}) {
+export default function CommentCard({ comment, removeCardFromUI, switchToReplying, switchToEditing }) {
   const { loggedInUser, setLoggedInUser } = useLoggedInUser();
   const [openConfirmationDialog, setOpenConfirmationDialog] = useState(false);
 
@@ -41,9 +42,12 @@ export default function CommentCard({ comment, removeCardFromUI, setParentCommen
   };
 
 
-  const handleReplyClick = () => {
-    setParentComment(comment);
-    focusOnTextInput();
+  const handleReplyButtonClick = () => {
+    switchToReplying(comment);
+  }
+
+  const handleEditButtonClick = () => {
+    switchToEditing(comment);
   }
 
   return (<>
@@ -75,15 +79,15 @@ export default function CommentCard({ comment, removeCardFromUI, setParentCommen
         </div>
         <div className="comment-action-buttons">
           {loggedInUser &&
-            <IconButton size="small" onClick={handleReplyClick} sx={{ alignSelf: 'flex-end' }}>
+            <IconButton size="small" onClick={handleReplyButtonClick} sx={{ alignSelf: 'flex-end' }}>
               <ReplyIcon />
             </IconButton>
           }
-          {/* {(loggedInUser?._id === (comment.author._id || comment.author)) &&
-            <IconButton size="small" onClick={handleEditClick}>
+          {(loggedInUser?._id === (comment.author._id || comment.author)) &&
+            <IconButton size="small" onClick={handleEditButtonClick} sx={{ alignSelf: 'flex-end' }}>
               <EditIcon />
             </IconButton>
-          } */}
+          }
           {((loggedInUser?._id === (comment.author._id || comment.author)) || (loggedInUser?.isAdmin)) &&
             <IconButton size="small" onClick={handleConfirmationModalOpen} sx={{ alignSelf: 'flex-end' }}>
               <DeleteIcon />

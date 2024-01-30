@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import RecursiveComment from "./RecursiveComment";
 import { List, Card, CardContent, Typography } from "@mui/material";
-export default function CommentDisplaySection({ comments, setComments, setParentComment, focusOnTextInput }) {
+export default function CommentDisplaySection({ comments, setComments,  switchToReplying, switchToEditing}) {
 
   const removeCardFromUI = (commentId) => {
     setComments((prevComments) => prevComments.filter((comment) => comment._id !== commentId));
@@ -33,12 +33,11 @@ export default function CommentDisplaySection({ comments, setComments, setParent
   }, [comments]);
 
 
-
   return (
     <List className="comment-section" disablePadding={true} sx={{ marginTop: 2 }}>
       {commentTree?.length > 0 ? (
         commentTree.map(comment => (
-          <RecursiveComment key={comment._id} comment={comment} removeCardFromUI={removeCardFromUI} setParentComment={setParentComment} focusOnTextInput={focusOnTextInput}/>
+          <RecursiveComment key={comment._id} comment={comment} removeCardFromUI={removeCardFromUI} switchToReplying={switchToReplying} switchToEditing={switchToEditing}/>
         ))
       ) : (
         <Card sx={{ marginTop: '1rem' }}>
