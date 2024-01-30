@@ -32,7 +32,8 @@ export default function DiscussionPage() {
     const switchToEditing = (comment) => {
         cancelReply();
         focusOnTextInput();
-        setCommentToBeEdited(comment)
+        setCommentToBeEdited(comment);
+        //setTextFieldContent(comment.text);
     }
 
     const cancelReply = () => {
@@ -74,6 +75,7 @@ export default function DiscussionPage() {
                     addCommentToList={addCommentToList}
                     parentComment={parentComment}
                     commentToBeEdited={commentToBeEdited}
+                    setCommentToBeEdited={setCommentToBeEdited}
                 />
                 :
                 <p>Log in to leave a comment.</p>}

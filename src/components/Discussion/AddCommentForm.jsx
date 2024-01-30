@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { postComment } from '../../utilities/comments-api';
 import { Button, TextField, Typography, Box, FormControl, IconButton } from '@mui/material';
 import { Cancel } from '@mui/icons-material';
 
 function AddCommentForm({ parentComment, addCommentToList, setParentComment, textInputRef, commentToBeEdited, setCommentToBeEdited }) {
   const [text, setText] = useState('');
+  
+  useEffect(() => {
+    if (commentToBeEdited) {
+      setText(commentToBeEdited.text);
+    }
+  }, [commentToBeEdited]);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -56,8 +63,8 @@ function AddCommentForm({ parentComment, addCommentToList, setParentComment, tex
       </>
       }
       <FormControl component="form" onSubmit={handleSubmit} sx={{ mt: 2, width: '100%' }}>
-        <TextField
-          value={commentToBeEdited ? commentToBeEdited.text : text}
+      <TextField
+          value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Add a comment..."
           multiline
