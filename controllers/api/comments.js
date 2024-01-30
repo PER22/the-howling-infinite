@@ -72,11 +72,10 @@ async function getComments(req, res){
 }
 
 
-async function updateCommentById(req, res) {
+async function editCommentById(req, res) {
   try {
     const newText = req.body.newText;
     if (!newText) {
-      console.log("updateCommentById(): request.body did not contain newText");
       return res.status(400).json({ error: "request.body did not contain newText" });
     }
     const requestedComment = await commentModel.findById(req.params.commentId);
@@ -88,15 +87,12 @@ async function updateCommentById(req, res) {
         return res.status(200).json(requestedComment);
       }
       else {
-        console.log("updateCommentById(): request.user._id does not match comment.author._id");
-        return res.status(400).json({ error: "updateCommentById(): request.user._id does not match comment.author._id" });
+        return res.status(400).json({ error: "request.user._id does not match comment.author._id" });
       }
     } else {
-      console.log("updateCommentById(): Requested comment not found.");
-      return res.status(404).json({ error: "updateCommentById(): Requested comment not found." });
+      return res.status(404).json({ error: "Requested comment not found." });
     }
   } catch (err) {
-    console.log("updateCommentById(): ", err);
     return res.status(400).json({ error: 'Error updating comment by ID.' });
   }
 };
@@ -167,7 +163,7 @@ async function approveCommentById(req, res) {
 module.exports = {
   createComment,
   getCommentById,
-  updateCommentById,
+  editCommentById,
   deleteCommentById,
   getAllUnapprovedComments,
   approveCommentById, 

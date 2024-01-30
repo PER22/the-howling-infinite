@@ -6,8 +6,8 @@ export function postComment(comment){
     return sendRequest(BASE_URL, 'POST', comment)
 }
 
-export function editCommentById(commentId, editedText){
-    return sendRequest(`${BASE_URL}/${commentId}`, 'PUT', editedText);
+export function editCommentById(commentId, newText){
+    return sendRequest(`${BASE_URL}/${commentId}`, 'PUT', newText);
 }
 
 export function getComments(){

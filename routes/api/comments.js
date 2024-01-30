@@ -27,7 +27,7 @@ router.get('/:commentId', commentController.getCommentById);
 
 //Signed-in users
 // PUT route to update a comment by ID
-router.put('/:commentId', ensureLoggedIn, commentController.updateCommentById);
+router.put('/:commentId', ensureLoggedIn, commentController.editCommentById);
 
 //Comment's Authors and Admins only
 // DELETE route to delete a comment by ID
