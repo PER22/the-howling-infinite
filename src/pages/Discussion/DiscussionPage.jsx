@@ -18,7 +18,7 @@ export default function DiscussionPage() {
         textInputRef.current?.focus();
     };
 
-    const { loggedInUser, setLoggedInUser } = useLoggedInUser();
+    const { loggedInUser} = useLoggedInUser();
     const [parentComment, setParentComment] = useState(null);
     const [commentToBeEdited, setCommentToBeEdited] = useState(null);
     const [comments, setComments] = useState([]);
@@ -33,7 +33,6 @@ export default function DiscussionPage() {
         cancelReply();
         focusOnTextInput();
         setCommentToBeEdited(comment);
-        //setTextFieldContent(comment.text);
     }
 
     const cancelReply = () => {
@@ -62,20 +61,17 @@ export default function DiscussionPage() {
         setComments(updatedComments);
     }
 
-
-
-
-
     return (
         <>
             <CommentDisplaySection comments={comments} setComments={setComments} switchToEditing={switchToEditing} switchToReplying={switchToReplying} />
             {loggedInUser ?
                 <AddCommentForm
-                    textInputRef={textInputRef} //used for scrolling/focusing on the text input.
+                    textInputRef={textInputRef}
                     addCommentToList={addCommentToList}
                     parentComment={parentComment}
                     commentToBeEdited={commentToBeEdited}
-                    setCommentToBeEdited={setCommentToBeEdited}
+                    cancelEdit={cancelEdit}
+                    cancelReply={cancelReply}
                 />
                 :
                 <p>Log in to leave a comment.</p>}

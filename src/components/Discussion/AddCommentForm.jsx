@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { postComment } from '../../utilities/comments-api';
+import { postComment } from '../../utilities/comments-service';
 import { Button, TextField, Typography, Box, FormControl, IconButton } from '@mui/material';
 import { Cancel } from '@mui/icons-material';
+import { editCommentById } from '../../utilities/comments-service';
 
-function AddCommentForm({ parentComment, addCommentToList, setParentComment, textInputRef, commentToBeEdited, setCommentToBeEdited }) {
+function AddCommentForm({ parentComment, addCommentToList, textInputRef, commentToBeEdited, cancelReply, cancelEdit }) {
   const [text, setText] = useState('');
-  
+
   useEffect(() => {
     if (commentToBeEdited) {
       setText(commentToBeEdited.text);
@@ -16,22 +17,35 @@ function AddCommentForm({ parentComment, addCommentToList, setParentComment, tex
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      let parentCommentId = null;
-      if (parentComment) {
-        parentCommentId = parentComment._id;
-
-      }
-      const response = await postComment({
-        text,
-        parentCommentId
-      });
-
-      if (response && !response.error) {
-        setText('');
-        addCommentToList(response.data)
+      if (commentToBeEdited) {
+        const response = await editCommentById(commentToBeEdited._id, {newText: text});
+        if (response && !response.error) {
+          setText('');
+          // updateCommentInList(response.data) TODO: I am currently ok with reloading the page but in the near future this needs to be responsive
+        } else {
+          // Handle any errors, maybe show an error message to the user.
+        }
       } else {
-        // Handle any errors, maybe show an error message to the user.
+        let parentCommentId = null;
+        //handles the cases where it's a reply
+        if (parentComment) {
+          parentCommentId = parentComment._id;
+        }
+        //handles the case where it's a parent comment
+        const response = await postComment({ //TODO, was accidentally using comments-api not comments-service
+          text,
+          parentCommentId
+        });
+        if (response && !response.error) {
+          setText('');
+          addCommentToList(response.data)
+        } else {
+          // Handle any errors, maybe show an error message to the user.
+        }
       }
+
+
+
     } catch (error) {
       console.log("Failed to submit comment because: ", error);
     }
@@ -44,26 +58,26 @@ function AddCommentForm({ parentComment, addCommentToList, setParentComment, tex
       </Typography>
       {parentComment && <>
         <p>Replying to: '{parentComment.text}'</p>
-        <IconButton onClick={() => { 
-          setParentComment(null); 
-          setText(""); 
-          }}>
+        <IconButton onClick={() => {
+          cancelReply();
+          setText("");
+        }}>
           <Cancel />
         </IconButton>
       </>
       }
       {commentToBeEdited && <>
         <p>Editing: '{commentToBeEdited.text}'</p>
-        <IconButton onClick={() =>{ 
-          setCommentToBeEdited(null);
+        <IconButton onClick={() => {
+          cancelEdit();
           setText("");
-          }}>
+        }}>
           <Cancel />
         </IconButton>
       </>
       }
       <FormControl component="form" onSubmit={handleSubmit} sx={{ mt: 2, width: '100%' }}>
-      <TextField
+        <TextField
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Add a comment..."
