@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Button, TextField, Typography, Box, FormControl, IconButton } from '@mui/material';
+import React, { useState } from 'react';
+import { Button, TextField, Box, FormControl } from '@mui/material';
 import FeedbackMessage from '../FeedbackMessage/FeedbackMessage';
 import { postMessage } from '../../utilities/contact-service';
 
@@ -13,9 +13,11 @@ function ContactForm() {
         e.preventDefault();
         try {
             const response = await postMessage({text});
+            if(response && !response.error);
                 setMessage("Email sent successfully! Thanks for reaching out.");
         } catch (error) {
             setError(error.message);
+            console.log("testing");
         }
     };
 

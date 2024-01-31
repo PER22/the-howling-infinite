@@ -9,7 +9,7 @@ import IndeterminateLoadingSpinner from '../Loading/IndeterminateLoadingSpinner'
 
 export default function LoginForm() {
   const navigate = useNavigate();
-  const { loggedInUser, setLoggedInUser } = useLoggedInUser();
+  const { setLoggedInUser } = useLoggedInUser();
   
 
   const [credentials, setCredentials] = useState({

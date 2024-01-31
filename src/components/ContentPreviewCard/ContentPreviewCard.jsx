@@ -26,7 +26,7 @@ export default function ContentPreviewCard({ content , type}) {
             }
         }
         getMainEssayCoverPhotoSignedUrl(content.coverPhotoS3Key);
-    }, []);
+    }, [content.coverPhotoS3Key]);
 
     const [dateUpdated, ...timeUpdated] = moment(content.updatedAt).format('MM/DD/YYYY hh:mm a').split(' ');
 

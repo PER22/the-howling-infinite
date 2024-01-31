@@ -12,7 +12,7 @@ import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import './CommentCard.css'
 
 export default function CommentCard({ comment, removeCardFromUI, switchToReplying, switchToEditing }) {
-  const { loggedInUser, setLoggedInUser } = useLoggedInUser();
+  const { loggedInUser} = useLoggedInUser();
   const [openConfirmationDialog, setOpenConfirmationDialog] = useState(false);
 
   const handleDelete = async () => {

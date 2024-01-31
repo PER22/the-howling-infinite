@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import moment from 'moment';
-import { Card, CardContent, Typography, IconButton, Icon } from '@mui/material';
+import { Card, CardContent, Typography, IconButton} from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { approveCommentById, deleteCommentById } from '../../utilities/comments-service';
