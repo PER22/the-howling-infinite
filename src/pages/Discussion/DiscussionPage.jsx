@@ -20,6 +20,7 @@ export default function DiscussionPage() {
 
     
 
+    const { loggedInUser } = useLoggedInUser();
     const [parentComment, setParentComment] = useState(null);
     const [commentToBeEdited, setCommentToBeEdited] = useState(null);
     const [comments, setComments] = useState([]);
