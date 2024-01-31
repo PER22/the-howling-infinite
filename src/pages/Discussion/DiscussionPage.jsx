@@ -18,7 +18,9 @@ export default function DiscussionPage() {
         textInputRef.current?.focus();
     };
 
-    const { loggedInUser} = useLoggedInUser();
+    
+
+    const { loggedInUser } = useLoggedInUser();
     const [parentComment, setParentComment] = useState(null);
     const [commentToBeEdited, setCommentToBeEdited] = useState(null);
     const [comments, setComments] = useState([]);
@@ -44,8 +46,6 @@ export default function DiscussionPage() {
     };
 
 
-
-
     useEffect(() => {
         async function fetchComments() {
             const response = await getComments();
@@ -63,7 +63,11 @@ export default function DiscussionPage() {
 
     return (
         <>
-            <CommentDisplaySection comments={comments} setComments={setComments} switchToEditing={switchToEditing} switchToReplying={switchToReplying} />
+            <CommentDisplaySection
+                comments={comments}
+                setComments={setComments}
+                switchToEditing={switchToEditing}
+                switchToReplying={switchToReplying} />
             {loggedInUser ?
                 <AddCommentForm
                     textInputRef={textInputRef}

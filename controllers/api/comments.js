@@ -82,7 +82,7 @@ async function editCommentById(req, res) {
     if (requestedComment) {
       if (req.user._id.toString() === requestedComment.author._id.toString()) {
         requestedComment.text = newText;
-        requestedComment.isApproved = false;
+        requestedComment.isApproved = requestedComment.author.isAdmin;
         await requestedComment.save();
         return res.status(200).json(requestedComment);
       }
