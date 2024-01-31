@@ -1,3 +1,4 @@
+import './AwaitingVerificationPage.css'
 export default function AwaitingVerificationPage(){
     return (<>
         <p>You will need to verify your account before you can log in.</p>

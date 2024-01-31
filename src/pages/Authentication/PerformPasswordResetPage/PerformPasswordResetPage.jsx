@@ -29,7 +29,7 @@ export default function PerformPasswordResetPage() {
     const handlePasswordReset = async (e) => {
         e.preventDefault();
         if (password !== confirmPassword) {
-          setMessage('Passwords do not match.');
+          setError('Passwords do not match.');
           return;
         }
         try{
@@ -38,7 +38,7 @@ export default function PerformPasswordResetPage() {
                 setMessage("Password reset successfully.");
             }
         }catch(err){
-            setMessage(err.message);
+            setError(err.message);
         }
     }
 
