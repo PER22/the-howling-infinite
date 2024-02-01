@@ -1,11 +1,13 @@
 //LoginForm.jsx:
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TextField, Button, Card, CardContent, Typography } from '@mui/material';
+import { TextField, IconButton, Button, Card, CardContent, Typography } from '@mui/material';
 import { useLoggedInUser } from '../LoggedInUserContext/LoggedInUserContext';
 import * as usersService from '../../utilities/users-service';
 import FeedbackMessage from '../FeedbackMessage/FeedbackMessage';
 import IndeterminateLoadingSpinner from '../Loading/IndeterminateLoadingSpinner';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 export default function LoginForm() {
   const navigate = useNavigate();
@@ -18,11 +20,16 @@ export default function LoginForm() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   function handleChange(evt) {
     setCredentials({ ...credentials, [evt.target.name]: evt.target.value });
     setError('');
   }
+
+  const handleTogglePasswordVisibility = () => { // Step 3: Add a handler for the toggle
+    setShowPassword(!showPassword);
+  };
 
   async function handleSubmit(evt) {
     evt.preventDefault();
@@ -67,20 +74,26 @@ export default function LoginForm() {
           <TextField
             fullWidth
             margin="normal"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             name="password"
             value={credentials.password}
             onChange={handleChange}
             required
             variant="outlined"
+            InputProps={{ 
+              endAdornment: (
+                <IconButton onClick={handleTogglePasswordVisibility}>
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              ),
+            }}
           />
 
           <Button
             className="auth-submit-button"
             type="submit"
             variant="contained"
-            color="primary"
-            style={{ marginTop: '1rem' }}
+            style={{ marginTop: '1rem',backgroundColor: 'green', color: 'white' }}
           >
             Log In
           </Button>
