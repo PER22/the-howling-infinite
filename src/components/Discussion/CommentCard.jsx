@@ -51,7 +51,7 @@ export default function CommentCard({ comment, removeCardFromUI, switchToReplyin
   }
 
   return (<>
-    <Card elevation={5} className="comment-card" sx={{ marginBottom: '1rem', width: '100%' }}>
+    <Card elevation={5} className="comment-card" sx={{ marginBottom: '1rem', width: '35rem' }}>
 
       <CardContent sx={{ display: "flex", flexDirection: "row", alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
         <div className={"comment-info"} style={{ display: 'flex', flexDirection: 'column', }}>
