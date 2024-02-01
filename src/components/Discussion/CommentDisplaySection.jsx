@@ -10,6 +10,7 @@ export default function CommentDisplaySection({ comments, setComments, switchToR
   const [commentTree, setCommentTree] = useState([]);
 
   useEffect(() => {
+    console.log(comments);
     function createCommentTree(comments) {
       const commentMap = {};
       const commentTree = [];

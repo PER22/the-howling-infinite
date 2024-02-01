@@ -61,6 +61,16 @@ export default function DiscussionPage() {
         setComments(updatedComments);
     }
 
+    function replaceCommentInList(updatedComment, id){
+        let updatedComments = comments.map(comment => {
+            if (comment._id === id) {
+                return updatedComment;
+            }
+            return comment;
+        });
+        setComments(updatedComments);
+    }    
+
     return (
         <>
             <CommentDisplaySection
@@ -72,6 +82,7 @@ export default function DiscussionPage() {
                 <AddCommentForm
                     textInputRef={textInputRef}
                     addCommentToList={addCommentToList}
+                    replaceCommentInList={replaceCommentInList}
                     parentComment={parentComment}
                     commentToBeEdited={commentToBeEdited}
                     cancelEdit={cancelEdit}

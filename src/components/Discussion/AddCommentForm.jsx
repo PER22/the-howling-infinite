@@ -3,9 +3,12 @@ import { postComment } from '../../utilities/comments-service';
 import { Button, TextField, Typography, Box, FormControl, IconButton } from '@mui/material';
 import { Cancel } from '@mui/icons-material';
 import { editCommentById } from '../../utilities/comments-service';
+import FeedbackMessage from '../../components/FeedbackMessage/FeedbackMessage'
 
-function AddCommentForm({ parentComment, addCommentToList, textInputRef, commentToBeEdited, cancelReply, cancelEdit }) {
+function AddCommentForm({ parentComment, addCommentToList,replaceCommentInList, textInputRef, commentToBeEdited, cancelReply, cancelEdit }) {
   const [text, setText] = useState('');
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     if (commentToBeEdited) {
@@ -18,12 +21,12 @@ function AddCommentForm({ parentComment, addCommentToList, textInputRef, comment
     e.preventDefault();
     try {
       if (commentToBeEdited) {
-        const response = await editCommentById(commentToBeEdited._id, {newText: text});
+        const response = await editCommentById(commentToBeEdited._id, { newText: text });
         if (response && !response.error) {
           setText('');
-          // updateCommentInList(response.data) TODO: I am currently ok with reloading the page but in the near future this needs to be responsive
+          replaceCommentInList(response.data, commentToBeEdited._id);
+          cancelEdit();
         } else {
-          // Handle any errors, maybe show an error message to the user.
         }
       } else {
         let parentCommentId = null;
@@ -32,13 +35,14 @@ function AddCommentForm({ parentComment, addCommentToList, textInputRef, comment
           parentCommentId = parentComment._id;
         }
         //handles the case where it's a parent comment
-        const response = await postComment({ //TODO, was accidentally using comments-api not comments-service
+        const response = await postComment({
           text,
           parentCommentId
         });
         if (response && !response.error) {
           setText('');
           addCommentToList(response.data)
+          cancelReply();
         } else {
           // Handle any errors, maybe show an error message to the user.
         }
@@ -47,11 +51,12 @@ function AddCommentForm({ parentComment, addCommentToList, textInputRef, comment
 
 
     } catch (error) {
+      setError(error.message);
       console.log("Failed to submit comment because: ", error);
     }
   };
 
-  return (
+  return (<>
     <Box component="div" sx={{ width: '100%', mb: 3 }}>
       <Typography variant="body1">
         Note: All comments must be approved before being displayed.
@@ -93,6 +98,8 @@ function AddCommentForm({ parentComment, addCommentToList, textInputRef, comment
         </Button>
       </FormControl>
     </Box>
+    <FeedbackMessage error={error} message={message} />
+  </>
   );
 }
 
