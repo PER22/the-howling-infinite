@@ -22,13 +22,13 @@ export default function AuthPage() {
         {showLogin ? <LoginForm /> : <SignUpForm />}
         
         <Typography align="center" style={{ margin: '1rem 0' }}>
-          <Button color="primary" variant='contained' onClick={() => setShowLogin(!showLogin)}>
+          <Button color="primary" variant='contained' onClick={() => setShowLogin(!showLogin)} sx={{ marginTop: '1rem',backgroundColor: 'dark-yellow', color: 'white' }}>
             {showLogin ? 'Sign Up Instead?' : 'Log In Instead?'}
           </Button>
         </Typography>
 {showLogin && (
         <Typography align="center" style={{ margin: '1rem 0' }}>
-          <Button color="primary" variant='contained' onClick={()=>{navigate("/request-password-reset");}}>
+          <Button variant='contained' onClick={()=>{navigate("/request-password-reset");}} sx={{marginTop: '1rem',backgroundColor: '#FF5733', color: 'white' }}>
             Reset Password
           </Button>
         </Typography>)
