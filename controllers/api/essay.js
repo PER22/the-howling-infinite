@@ -82,7 +82,8 @@ async function createEssay(req, res) {
 //Anonymous
 async function getMainEssay(req, res) {
     try {
-        const essay = await EssayModel.findOne({ isMain: true }).populate('author').populate('sections');
+        const essay = await EssayModel.findOne({ isMain: true }).populate({path: 'author',
+        select: '-password -createdAt -updatedAt'}).populate('sections');
         if (!essay) {
             return res.status(404).json({ error: 'Essay not found.' });
         }
@@ -97,7 +98,8 @@ async function getMainEssay(req, res) {
 //Anonymous
 async function getEssayById(req, res) {
     try {
-        const essay = await EssayModel.findById(req.params.essayId).populate('author');
+        const essay = await EssayModel.findById(req.params.essayId).populate({path: 'author',
+        select: '-password -createdAt -updatedAt'});
         if (!essay) {
             return res.status(404).json({ error: 'Essay not found.' });
         }
@@ -115,7 +117,8 @@ async function getEssayById(req, res) {
 
 async function getMainEssayPreview(req, res) {
     try {
-        const essay = await EssayModel.findOne({ isMain: true }).populate('author');
+        const essay = await EssayModel.findOne({ isMain: true }).populate({path: 'author',
+        select: '-password -createdAt -updatedAt'});
         if (!essay) {
             return res.status(404).json({ error: 'Main essay preview not found.' });
         }
@@ -130,7 +133,8 @@ async function getMainEssayPreview(req, res) {
 //TODO: needs reworking for new essay structure
 async function getAllSideEssayPreviews(req, res) {
     try {
-        const essays = await EssayModel.find({ isMain: false }).populate('author');
+        const essays = await EssayModel.find({ isMain: false }).populate({path: 'author',
+        select: '-password -createdAt -updatedAt'});
         if (!essays || essays.length === 0) {
             return res.status(404).json({ error: 'Essays not found.' });
         }
