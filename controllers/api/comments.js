@@ -22,7 +22,8 @@ async function createComment(req, res) {
       isApproved: req.user.isAdmin,
       parent: parentCommentId || null
     });
-    const populatedComment = await commentModel.findById(newComment._id).populate('author');
+    const populatedComment = await commentModel.findById(newComment._id).populate({path: 'author',
+    select: '-password -createdAt -updatedAt'});
 
 
     return res.status(201).json(populatedComment);
@@ -35,7 +36,8 @@ async function createComment(req, res) {
 
 async function getCommentById(req, res) {
   try {
-    const requestedComment = await commentModel.findById(req.params.commentId).populate("author");
+    const requestedComment = await commentModel.findById(req.params.commentId).populate({path: 'author',
+    select: '-password -createdAt -updatedAt'});
     if (requestedComment) { return res.status(200).json(requestedComment); }
   } catch (err) {
     return res.status(200).json({ error: "Comment could not be located." });
@@ -60,7 +62,8 @@ async function getComments(req, res) {
       });
     } else {
       // Fetch only approved comments for users not logged in
-      requestedComments = await commentModel.find({ isApproved: true }).populate("author");
+      requestedComments = await commentModel.find({ isApproved: true }).populate({path: 'author',
+      select: '-password -createdAt -updatedAt'});
     }
 
     if (requestedComments) {
@@ -83,7 +86,8 @@ async function editCommentById(req, res) {
     if (!newText) {
       return res.status(400).json({ error: "request.body did not contain newText" });
     }
-    const requestedComment = await commentModel.findById(req.params.commentId).populate('author');
+    const requestedComment = await commentModel.findById(req.params.commentId).populate({path: 'author',
+    select: '-password -createdAt -updatedAt'});
 
     if (requestedComment) {
       console.log("found comment!");
@@ -95,7 +99,8 @@ async function editCommentById(req, res) {
         let response = await requestedComment.save();
         console.log(response);
         console.log("comment updated in database.");
-        const populatedComment = await commentModel.findById(requestedComment._id).populate('author');
+        const populatedComment = await commentModel.findById(requestedComment._id).populate({path: 'author',
+        select: '-password -createdAt -updatedAt'});
         return res.status(200).json(populatedComment);
       }
       else {
@@ -112,7 +117,8 @@ async function editCommentById(req, res) {
 
 async function deleteCommentById(req, res) {
   try {
-    const commentToDelete = await commentModel.findById(req.params.commentId).populate('author');
+    const commentToDelete = await commentModel.findById(req.params.commentId).populate({path: 'author',
+    select: '-password -createdAt -updatedAt'});
 
     if (commentToDelete) {
       if (req.user._id.toString() === commentToDelete.author._id.toString() || req.user.isAdmin) {
@@ -149,7 +155,8 @@ async function deleteCommentById(req, res) {
 // Fetch all unapproved comments
 async function getAllUnapprovedComments(req, res) {
   try {
-    const unapprovedComments = await commentModel.find({ isApproved: false }).populate('author');
+    const unapprovedComments = await commentModel.find({ isApproved: false }).populate({path: 'author',
+    select: '-password -createdAt -updatedAt'});
     return res.status(200).json(unapprovedComments);
   } catch (err) {
     console.log("Error finding unapproved comments: ", err)

@@ -60,7 +60,8 @@ async function postCreateBlogPost(req, res) {
 //Anonymous
 async function getBlogPostById(req, res) {
     try {
-        const content = await BlogModel.findById(req.params.postId).populate('author');
+        const content = await BlogModel.findById(req.params.postId).populate({path: 'author',
+        select: '-password -createdAt -updatedAt'});
         if (!content) {
             return res.status(404).json({ error: 'Blog post not found.' });
         }
@@ -75,7 +76,8 @@ async function getBlogPostById(req, res) {
 //Anonymous
 async function getAllBlogPostPreviews(req, res) {
     try {
-        const posts = await BlogModel.find().populate('author');
+        const posts = await BlogModel.find().populate({path: 'author',
+        select: '-password -createdAt -updatedAt'});
         if (!posts || posts.length === 0) {
             return res.status(404).json({ error: 'Posts not found.' });
         }
