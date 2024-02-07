@@ -17,13 +17,13 @@ import "./ReadMainEssayPage.css"
 import FeedbackMessage from '../../components/FeedbackMessage/FeedbackMessage';
 import { getMainEssay, starEssayById, unstarEssayById } from '../../utilities/essays-service';
 
-import { Document, Page } from 'react-pdf/dist/esm/entry.webpack'
+import { Document, Page, pdfjs } from 'react-pdf/dist/esm/entry.webpack'
 
 
 import { getSignedURLForImage } from '../../utilities/images-service';
 import { TextField, Tooltip } from '@mui/material';
 
-pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.js`;
 
 
 export default function ReadMainEssayPage() {
