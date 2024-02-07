@@ -87,7 +87,7 @@ async function getMainEssay(req, res) {
         if (!essay) {
             return res.status(404).json({ error: 'Essay not found.' });
         }
-        // console.log("Essay being returned by backend:", essay, "\n\n");
+        console.log("Essay being returned by backend:", essay, "\n\n");
         return res.status(200).json(essay);
     } catch (error) {
         console.error('Error fetching main essay:', error);
