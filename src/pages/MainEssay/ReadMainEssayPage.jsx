@@ -24,7 +24,7 @@ import * as pdfjsLib from 'pdfjs-dist/webpack.mjs';
 import { getSignedURLForImage } from '../../utilities/images-service';
 import { TextField, Tooltip } from '@mui/material';
 
-pdfjs.GlobalWorkerOptions.workerSrc = '/assets/pdf.worker.min.js';
+pdfjs.GlobalWorkerOptions.workerSrc = '/src/pdf.worker.min.js';
 
 
 export default function ReadMainEssayPage() {
