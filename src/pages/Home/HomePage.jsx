@@ -78,9 +78,6 @@ export default function HomePage() {
       It's not a recounting of those events, but rather a journey into the complexities of Oswald's life, behavior, and motivations.
     </p>
 
-    {/* <p className="intro-paragraph">If you're new here, begin with the main piece, titled “Lee Oswald’s Quest for a Howling Infinite”, to immerse yourself in the central narrative.
-      For deeper insights into specific facets of the subject matter, the side essays provide further exploration.
-      And for ongoing reflections and discussions, the blog offers a space for continued engagement. </p> */}
 
     <p className="intro-paragraph">Feel free to leave comments, and "star" content you enjoyed.
       Thank you for joining us in this immersive experience, and for choosing to see history through a psychological lens.
