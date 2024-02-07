@@ -23,7 +23,7 @@ import { Document, Page, pdfjs } from 'react-pdf/dist/esm/entry.webpack'
 import { getSignedURLForImage } from '../../utilities/images-service';
 import { TextField, Tooltip } from '@mui/material';
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.js`;
+pdfjs.GlobalWorkerOptions.workerSrc = `/pdf.worker.min.js`;
 
 
 export default function ReadMainEssayPage() {
