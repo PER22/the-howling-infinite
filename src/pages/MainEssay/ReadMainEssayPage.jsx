@@ -19,6 +19,7 @@ import { getMainEssay, starEssayById, unstarEssayById } from '../../utilities/es
 
 import { Document, Page, pdfjs } from "react-pdf";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
+import * as pdfjsLib from 'pdfjs-dist/webpack.mjs';
 
 
 import { getSignedURLForImage } from '../../utilities/images-service';
